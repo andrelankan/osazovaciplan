@@ -1,7 +1,7 @@
 'use client';
 import React, { useRef, useState } from 'react';
 import Katalog from '@/components/Katalog';
-import { KATEGORIE_KROKU, Rostlina, UROVNE, Uroven, Zahon, vykaz } from '@/lib/model';
+import { KATEGORIE_KROKU, Rostlina, UROVNE, Uroven, Zahon, autoSkupin, vykaz } from '@/lib/model';
 import { KROKY, Krok, useStore } from '@/lib/store';
 import { useRozvrhy } from '@/lib/useRozvrhy';
 import { nactiPodklad } from '@/lib/podklad';
@@ -11,11 +11,11 @@ import { smaz } from '@/lib/idb';
 const POKYN: Record<Krok, string> = {
   1: 'Nahraj plánek zahrady a řekni, v jakém je měřítku.',
   2: 'Obkresli po plánku okraj záhonu. Klikáním, Enter uzavře.',
-  3: 'Načrtni tahem, kudy mají jít nízké a kudy vysoké rostliny. Zbytek se dopočítá.',
+  3: 'Zvýrazňovačem přejeď zhruba tam, kde chceš nízké a kde vysoké rostliny. Je to jen pomůcka pro rozmístění — do výkresu se nekreslí a klidně může přesahovat.',
   4: 'Vyber rostliny do záhonu. Plochy si rozvrhne sám.',
   5: 'Vyber keř a naklikej řadu. Enter dokončí.',
   6: 'Vyber strom a klikni, kam ho zasadit.',
-  7: 'Hotovo. Vytiskni plán nebo si stáhni výkaz rostlin.',
+  7: 'Hotovo. Přepínači si zapni, co má být na výkrese vidět, a vytiskni.',
 };
 
 export default function Pruvodce() {
@@ -69,7 +69,7 @@ function Navigace() {
 
 /** Akce, ktere davaji smysl jen v danem kroku. */
 function KrokAkce() {
-  const { pr, aktivniZahon, urovenStetec, upravovat, kotuje, koncept } = useStore();
+  const { pr, aktivniZahon, urovenStetec, upravovat, prichytavat, koncept } = useStore();
   const st = useStore;
   const krok = pr.krok as Krok;
   const podkladInput = useRef<HTMLInputElement>(null);
@@ -126,6 +126,9 @@ function KrokAkce() {
         <Prepinac zapnuto={upravovat} onClick={() => { st.getState().set('upravovat', true); st.getState().set('koncept', []); }}>
           Upravit tvar
         </Prepinac>
+        <Prepinac zapnuto={prichytavat} onClick={() => st.getState().set('prichytavat', !prichytavat)}>
+          Přichytávat
+        </Prepinac>
         {!upravovat && koncept.length >= 3 && (
           <button onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }))}
             className="rounded-lg bg-emerald-600 px-3 py-1.5 text-sm text-white">Uzavřít záhon</button>
@@ -161,8 +164,14 @@ function KrokAkce() {
   if (krok === 7) {
     return (
       <div className="flex items-center gap-2 border-l border-gray-200 pl-2">
-        <Prepinac zapnuto={kotuje} onClick={() => { st.getState().set('kotuje', !kotuje); st.getState().set('koncept', []); }}>
-          Přidat kóty
+        <Prepinac zapnuto={pr.ukazDelky} onClick={() => st.getState().zmen((d) => { d.ukazDelky = !d.ukazDelky; })}>
+          Délky stran
+        </Prepinac>
+        <Prepinac zapnuto={pr.ukazPlochy} onClick={() => st.getState().zmen((d) => { d.ukazPlochy = !d.ukazPlochy; })}>
+          Výměry m²
+        </Prepinac>
+        <Prepinac zapnuto={pr.ukazVysky} onClick={() => st.getState().zmen((d) => { d.ukazVysky = !d.ukazVysky; })}>
+          Zvýraznění výšek
         </Prepinac>
         <button onClick={() => window.open('/tisk', '_blank')}
           className="rounded-lg bg-emerald-600 px-3 py-1.5 text-sm text-white">Tisk / PDF</button>
@@ -297,6 +306,19 @@ function PanelZahonu() {
                       <span className="w-10 text-right text-[11px] text-gray-500">
                         {Math.round((Math.max(0.01, o.podil) / soucet) * 100)} %
                       </span>
+                    </div>
+                    <div className="mt-1 flex items-center gap-1 text-[11px] text-gray-500">
+                      <span>skupin v záhonu:</span>
+                      {([undefined, 1, 2, 3, 4, 5] as (number | undefined)[]).map((n) => (
+                        <button key={n ?? 'auto'} onClick={() => uprav((z) => {
+                          const x = z.osazeni.find((y) => y.kod === o.kod && y.uroven === uroven);
+                          if (x) x.skupin = n;
+                        })}
+                          className={`rounded px-1.5 py-0.5 ${o.skupin === n ? 'bg-gray-900 text-white' : 'hover:bg-gray-100'}`}>
+                          {n ?? 'auto'}
+                        </button>
+                      ))}
+                      {o.skupin == null && <span className="text-gray-400">({autoSkupin(Math.max(0.01, o.podil) / soucet)})</span>}
                     </div>
                   </div>
                 );

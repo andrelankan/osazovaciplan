@@ -37,7 +37,7 @@ export default function Lista() {
   const otevriSoubor = async (f: File) => {
     try {
       const p = JSON.parse(await f.text()) as Projekt;
-      if (p?.verze !== 4) throw new Error('soubor je z jiné verze aplikace');
+      if (p?.verze !== 5) throw new Error('soubor je z jiné verze aplikace');
       st.getState().nastavProjekt(p);
       st.getState().set('podkladUrl', null);
       setTimeout(naObrazovku, 50);

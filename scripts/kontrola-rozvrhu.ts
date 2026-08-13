@@ -4,7 +4,7 @@
  * Overuje to, co jde zmerit - ze plochy vyplni cely zahon, nepresahnou ven
  * a ze pomer ploch odpovida zadanym podilum.
  */
-import { P, plochaBodu, bodVPolygonu, naBody, vzdalUsecka } from '../lib/geom';
+import { P, bodVPolygonu, bulgeZBodu, naBody, vzdalUsecka } from '../lib/geom';
 import { Rostlina, Zahon } from '../lib/model';
 import { rozvrhni } from '../lib/rozvrh';
 
@@ -93,15 +93,12 @@ const maxPresah = (body: P[], polygon: P[]) => body.reduce((a, p) => Math.max(a,
   const r = rozvrhni(z, db);
   const soucet = r.casti.reduce((a, c) => a + c.plocha, 0);
   console.log(`\nZáhon 10×6 m, dva tahy (nízké dole, vysoké nahoře)`);
-  console.log(`  oblastí: ${r.oblasti.length}, ploch: ${r.casti.length}, součet ${soucet.toFixed(2)} m² z ${r.plocha.toFixed(2)} m²`);
-  for (const ob of r.oblasti) {
-    const plochaOblasti = ob.polygony.reduce((a, pg) => a + plochaBodu(pg), 0);
-    const plochaCasti = r.casti.filter((c) => c.uroven === ob.uroven).reduce((a, c) => a + c.plocha, 0);
-    console.log(`    ${ob.uroven}: oblast ${plochaOblasti.toFixed(2)} m², rostliny v ní ${plochaCasti.toFixed(2)} m²`);
-    zkontroluj(Math.abs(plochaOblasti - plochaCasti) < 0.5, `oblast ${ob.uroven} je osázená celá`);
+  console.log(`  ploch: ${r.casti.length}, součet ${soucet.toFixed(2)} m² z ${r.plocha.toFixed(2)} m²`);
+  for (const u of ['nizke', 'vysoke'] as const) {
+    const p = r.casti.filter((c) => c.uroven === u).reduce((a, c) => a + c.plocha, 0);
+    console.log(`    ${u}: ${p.toFixed(2)} m²`);
+    zkontroluj(p > 20, `oblast ${u} je osázená`);
   }
-
-  zkontroluj(r.oblasti.length === 2, 'vznikly dvě výškové oblasti');
   zkontroluj(soucet > r.plocha * 0.93, 'osazení vyplní celý záhon', `${((soucet / r.plocha) * 100).toFixed(1)} %`);
 
   // nizke musi byt dole (vetsi y), vysoke nahore
@@ -134,6 +131,53 @@ const maxPresah = (body: P[], polygon: P[]) => body.reduce((a, p) => Math.max(a,
   zkontroluj(ven < 0.02, 'nic nepřeteklo do výřezu tvaru L', `max ${(ven * 1000).toFixed(0)} mm`);
 }
 
+// ------------------------------- 4. rucne nacmarane tahy pres cely zahon
+// Klikatice davaji rozeklane oblasti, ktere se dotykaji jen pres uhlopricku -
+// tam se drive trasovani obrysu rozpadlo a plochy zmizely uplne.
+{
+  const klikatice = (y0: number, uroven: 'nizke' | 'stredni' | 'vysoke') => ({
+    id: 'v' + y0, uroven,
+    body: Array.from({ length: 26 }, (_, i) => ({
+      x: 0.4 + i * 0.36,
+      y: y0 + Math.sin(i * 1.1) * 1.25 + Math.cos(i * 0.37) * 0.5,
+    })),
+  });
+  const z: Zahon = {
+    id: 'z4', nazev: 'čmáranice', obrys: obdelnik(10, 8), semeno: 99,
+    vysky: [klikatice(1.6, 'vysoke'), klikatice(4, 'stredni'), klikatice(6.4, 'nizke')],
+    osazeni: [
+      { kod: 'Ccc', uroven: 'vysoke', podil: 1 },
+      { kod: 'Bbb', uroven: 'stredni', podil: 1 },
+      { kod: 'Aaa', uroven: 'nizke', podil: 2 },
+      { kod: 'Bbb', uroven: 'nizke', podil: 1 },
+    ],
+  };
+  const r = rozvrhni(z, db);
+  const soucet = r.casti.reduce((a, c) => a + c.plocha, 0);
+  console.log(`\nZáhon 10×8 m, tři ručně načmárané klikatice`);
+  console.log(`  ploch: ${r.casti.length}, součet ${soucet.toFixed(2)} m² z ${r.plocha.toFixed(2)} m²`);
+  zkontroluj(r.casti.length >= 4, 'plochy vůbec vznikly', `${r.casti.length}`);
+  zkontroluj(soucet > r.plocha * 0.93, 'rozeklané oblasti vyplní záhon', `${((soucet / r.plocha) * 100).toFixed(1)} %`);
+  const obrys = naBody(z.obrys, 0.02);
+  zkontroluj(maxPresah(r.casti.flatMap((c) => c.polygon), obrys) < 0.02, 'nic nepřesahuje ven');
+  for (const u of ['nizke', 'stredni', 'vysoke'] as const) {
+    zkontroluj(r.casti.some((c) => c.uroven === u), `oblast ${u} má svoje plochy`);
+  }
+}
+
+// ------------------------------------- 5. oblouk musi projit tazenym bodem
+{
+  console.log('\nVyklenutí strany do oblouku');
+  const a = { x: 0, y: 0 }, b = { x: 6, y: 0 };
+  for (const cil of [{ x: 3, y: 0.2 }, { x: 3, y: 2 }, { x: 3, y: -3.5 }, { x: 2, y: 1.2 }]) {
+    const bulge = bulgeZBodu(a, b, cil);
+    const krivka = naBody([{ ...a, b: bulge }, b], 0.002, false);
+    // merit na usecky krivky, ne na jeji vrcholy - jinak by se merila jen hustota vzorkovani
+    let nej = Infinity;
+    for (let i = 1; i < krivka.length; i++) nej = Math.min(nej, vzdalUsecka(cil, krivka[i - 1], krivka[i]));
+    zkontroluj(nej < 0.03, `oblouk projde bodem ${cil.x};${cil.y}`, `odchylka ${(nej * 1000).toFixed(0)} mm`);
+  }
+}
+
 console.log(chyb ? `\n${chyb} chyb\n` : '\nvše v pořádku\n');
 process.exit(chyb ? 1 : 0);
-void plochaBodu;

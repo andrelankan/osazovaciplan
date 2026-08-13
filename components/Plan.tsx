@@ -1,8 +1,8 @@
 'use client';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  P, V, add, bodVPolygonu, bodyPoCare, bulgeZBodu, cesta, cestaBody, dist, lerp, mul, naBody,
-  norm, sub, vzdalUsecka,
+  P, V, add, bodVPolygonu, bodyPoCare, bulgeZBodu, cesta, cestaBody, delkaHrany, dist, lerp, mul,
+  naBody, obalka, sub, vzdalUsecka,
 } from '@/lib/geom';
 import { Rostlina, UROVNE, Zahon, id, prazdnyZahon } from '@/lib/model';
 import { useStore } from '@/lib/store';
@@ -15,13 +15,16 @@ export default function Plan() {
   const [rozmer, setRozmer] = useState({ w: 1200, h: 800 });
   const {
     pr, db, kategorie, kamera, koncept, podkladUrl, aktivniZahon, aktivniKod,
-    urovenStetec, upravovat, kotuje,
+    urovenStetec, upravovat, prichytavat,
   } = useStore();
   const st = useStore;
   const krok = pr.krok;
   const rozvrhy = useRozvrhy();
 
   const [mys, setMys] = useState<P | null>(null);
+  // tah zvyraznovacem se sbira do ref (aktualni hned), stav je jen pro prekresleni -
+       // pri rychlem tazeni React nestiha prerenderovat a body by se ztracely
+  const tahRef = useRef<P[] | null>(null);
   const [tah, setTah] = useState<P[] | null>(null);
   const [presna, setPresna] = useState<{ d: string; u: string } | null>(null);
   const uchopRef = useRef<{ zahon: string; typ: 'vrchol' | 'stred'; i: number } | null>(null);
@@ -58,7 +61,26 @@ export default function Plan() {
 
   const snap = useCallback((p: P, ortho: boolean): P => {
     const tol = 12 / z;
-    for (const zh of pr.zahony) for (const v of zh.obrys) if (dist(p, v) < tol) return { x: v.x, y: v.y };
+    if (prichytavat) {
+      // 1. rohy uz nakreslenych zahonu
+      for (const zh of pr.zahony) for (const v of zh.obrys) if (dist(p, v) < tol) return { x: v.x, y: v.y };
+      // 2. prvni bod rozkresleneho obrysu (uzavreni)
+      if (koncept.length > 2 && dist(p, koncept[0]) < tol) return { x: koncept[0].x, y: koncept[0].y };
+      // 3. nejblizsi misto na hrane jineho zahonu
+      let nej: P | null = null, nejD = tol;
+      for (const zh of pr.zahony) {
+        const body = obrysy.get(zh.id) ?? [];
+        for (let i = 0, j = body.length - 1; i < body.length; j = i++) {
+          const a = body[j], b = body[i];
+          const ab = sub(b, a), ap = sub(p, a);
+          const t = Math.max(0, Math.min(1, (ap.x * ab.x + ap.y * ab.y) / (ab.x * ab.x + ab.y * ab.y || 1)));
+          const q = add(a, mul(ab, t));
+          const d = dist(p, q);
+          if (d < nejD) { nejD = d; nej = q; }
+        }
+      }
+      if (nej) return nej;
+    }
     if (ortho && koncept.length) {
       const a = koncept[koncept.length - 1];
       const uh = Math.atan2(p.y - a.y, p.x - a.x);
@@ -67,7 +89,7 @@ export default function Plan() {
       return { x: a.x + Math.cos(zaokr) * d, y: a.y + Math.sin(zaokr) * d };
     }
     return p;
-  }, [pr.zahony, koncept, z]);
+  }, [pr.zahony, koncept, z, prichytavat, obrysy]);
 
   const onWheel = (e: React.WheelEvent) => {
     const r = box.current!.getBoundingClientRect();
@@ -82,7 +104,7 @@ export default function Plan() {
   };
 
   const onDown = (e: React.PointerEvent) => {
-    (e.currentTarget as Element).setPointerCapture?.(e.pointerId);
+    try { (e.currentTarget as Element).setPointerCapture?.(e.pointerId); } catch { /* pero/dotyk */ }
     const p = pozice(e);
 
     // posun plátna: prostrední/pravé tlačítko nebo Alt
@@ -108,15 +130,19 @@ export default function Plan() {
         if (zh) st.getState().set('aktivniZahon', zh.id);
         return;
       }
+      // stav se cte ze store, ne ze zavreni funkce - jinak by se pri rychlem
+      // klikani za sebou body prepisovaly misto pridavani
+      const akt = st.getState().koncept;
       const b = snap(p, e.shiftKey);
-      if (koncept.length > 2 && dist(b, koncept[0]) < 12 / z) { uzavriZahon(); return; }
-      st.getState().set('koncept', [...koncept, b]);
+      if (akt.length > 2 && dist(b, akt[0]) < 12 / z) { uzavriZahon(); return; }
+      st.getState().set('koncept', [...akt, b]);
       return;
     }
 
     if (krok === 3) {
       const zh = zahonPod(p);
       if (zh) st.getState().set('aktivniZahon', zh.id);
+      tahRef.current = [p];
       setTah([p]);
       return;
     }
@@ -129,7 +155,7 @@ export default function Plan() {
 
     if (krok === 5) {
       if (!aktivniKod) return;
-      st.getState().set('koncept', [...koncept, snap(p, e.shiftKey)]);
+      st.getState().set('koncept', [...st.getState().koncept, snap(p, e.shiftKey)]);
       return;
     }
 
@@ -137,14 +163,6 @@ export default function Plan() {
       if (!aktivniKod) return;
       const r = rostlina(aktivniKod);
       st.getState().zmen((d) => d.solitery.push({ id: id(), kod: aktivniKod, pos: p, koruna: r?.koruna ?? 4 }));
-      return;
-    }
-
-    if (krok === 7 && kotuje) {
-      const k = [...koncept, p];
-      if (k.length < 2) { st.getState().set('koncept', k); return; }
-      st.getState().zmen((d) => d.koty.push({ id: id(), a: k[0], b: k[1], odsazeni: 0.6 }));
-      st.getState().set('koncept', []);
     }
   };
 
@@ -157,9 +175,12 @@ export default function Plan() {
     const p = pozice(e);
     setMys(p);
 
-    if (tah && e.buttons === 1) {
-      const posledni = tah[tah.length - 1];
-      if (dist(posledni, p) > 0.12) setTah([...tah, p]);
+    if (tahRef.current && e.buttons === 1) {
+      const body = tahRef.current;
+      if (dist(body[body.length - 1], p) > 0.12) {
+        body.push(p);
+        setTah([...body]);
+      }
       return;
     }
 
@@ -179,15 +200,17 @@ export default function Plan() {
   const onUp = () => {
     panRef.current = null;
     uchopRef.current = null;
-    if (tah && tah.length >= 1 && krok === 3) {
+    const nakresleno = tahRef.current;
+    if (nakresleno && nakresleno.length >= 1 && krok === 3) {
       const cil = st.getState().aktivniZahon ?? pr.zahony[0]?.id;
       if (cil) {
         st.getState().zmen((d) => {
           const zh = d.zahony.find((x) => x.id === cil);
-          if (zh) zh.vysky.push({ id: id(), uroven: urovenStetec, body: tah.map((q) => ({ ...q })) });
+          if (zh) zh.vysky.push({ id: id(), uroven: st.getState().urovenStetec, body: nakresleno.map((q) => ({ ...q })) });
         });
       }
     }
+    tahRef.current = null;
     setTah(null);
   };
 
@@ -253,7 +276,7 @@ export default function Plan() {
 
   // -------------------------------------------------------------- vykresli
   const podklad = pr.podklad;
-  const ukazVysky = krok === 3;
+  const ukazVysky = krok === 3 || pr.ukazVysky;
   const kurzor = krok === 1 || krok === 4 ? 'default' : krok === 3 ? 'cell' : 'crosshair';
 
   return (
@@ -272,13 +295,10 @@ export default function Plan() {
             return (
               <g key={zh.id}>
                 <path d={cesta(zh.obrys)} fill={PRAZDNA} />
-                {!ukazVysky && r?.casti.map((c) => (
+                {r?.casti.map((c) => (
                   <path key={c.id} d={cestaBody(c.polygon)}
                     fill={kategorie[rostlina(c.kod)?.kat ?? 'T']?.fill ?? PRAZDNA} />
                 ))}
-                {ukazVysky && r?.oblasti.map((ob, i) => ob.polygony.map((pg, j) => (
-                  <path key={`${i}-${j}`} d={cestaBody(pg)} fill={UROVNE[ob.uroven].barva} fillOpacity={0.3} />
-                )))}
               </g>
             );
           })}
@@ -311,15 +331,10 @@ export default function Plan() {
             return (
               <g key={zh.id}>
                 {/* hranice plosek rostlin */}
-                {!ukazVysky && r?.casti.map((c) => (
+                {r?.casti.map((c) => (
                   <path key={c.id} d={cestaBody(c.polygon)} fill="none" stroke="#8a8a8a"
                     strokeWidth={0.7} vectorEffect="non-scaling-stroke" />
                 ))}
-                {/* vyskove oblasti - jen barevne ohraniceni */}
-                {r?.oblasti.map((ob, i) => ob.polygony.map((pg, j) => (
-                  <path key={`o${i}-${j}`} d={cestaBody(pg)} fill="none" stroke={UROVNE[ob.uroven].barva}
-                    strokeWidth={ukazVysky ? 2.5 : 1.6} vectorEffect="non-scaling-stroke" />
-                )))}
                 {/* obrys zahonu */}
                 <path d={cesta(zh.obrys)} fill="none" stroke={je && krok <= 4 ? '#0a7' : '#111'}
                   strokeWidth={je && krok <= 4 ? 3 : 2} vectorEffect="non-scaling-stroke" />
@@ -340,33 +355,28 @@ export default function Plan() {
             );
           })}
 
-          {/* nacrtnute tahy vysek */}
+          {/* zvyraznovac vyskovych oblasti - jen pomucka, do vykresu nepatri */}
           {ukazVysky && pr.zahony.flatMap((zh) => zh.vysky.map((t) => (
             <polyline key={t.id} points={t.body.map((q) => `${q.x},${q.y}`).join(' ')} fill="none"
-              stroke={UROVNE[t.uroven].barva} strokeWidth={3} strokeLinecap="round"
-              opacity={0.9} vectorEffect="non-scaling-stroke" />
+              stroke={UROVNE[t.uroven].barva} strokeWidth={0.9} strokeLinecap="round"
+              strokeLinejoin="round" opacity={0.28} />
           )))}
           {tah && (
             <polyline points={tah.map((q) => `${q.x},${q.y}`).join(' ')} fill="none"
-              stroke={UROVNE[urovenStetec].barva} strokeWidth={3} strokeLinecap="round"
-              vectorEffect="non-scaling-stroke" />
+              stroke={UROVNE[urovenStetec].barva} strokeWidth={0.9} strokeLinecap="round"
+              strokeLinejoin="round" opacity={0.4} />
           )}
 
-          {/* skupiny keru */}
+          {/* skupiny keru - jen spojene tecky, zadny prumer koruny */}
           {pr.skupiny.map((s) => {
             const r = rostlina(s.kod);
             const body = naBody(s.body, 0.02, false);
             const tecky = bodyPoCare(body, s.rozestup ?? r?.rozestup ?? 1.2);
             return (
               <g key={s.id}>
-                <polyline points={body.map((q) => `${q.x},${q.y}`).join(' ')} fill="none"
+                <polyline points={tecky.map((q) => `${q.x},${q.y}`).join(' ')} fill="none"
                   stroke="#111" strokeWidth={1} vectorEffect="non-scaling-stroke" />
-                {tecky.map((q, i) => (
-                  <circle key={i} cx={q.x} cy={q.y} r={Math.max(0.25, (r?.koruna ?? 1.2) / 2)}
-                    fill={kategorie[r?.kat ?? 'K']?.fill ?? '#d9edd1'} fillOpacity={0.4}
-                    stroke="#111" strokeWidth={0.9} vectorEffect="non-scaling-stroke" />
-                ))}
-                {tecky.map((q, i) => <circle key={'d' + i} cx={q.x} cy={q.y} r={0.13} fill="#111" />)}
+                {tecky.map((q, i) => <circle key={i} cx={q.x} cy={q.y} r={0.14} fill="#111" />)}
               </g>
             );
           })}
@@ -386,20 +396,6 @@ export default function Plan() {
             );
           })}
 
-          {/* koty */}
-          {pr.ukazKoty && pr.koty.map((k) => {
-            const smer = norm(sub(k.b, k.a));
-            const n = { x: -smer.y, y: smer.x };
-            const a2 = add(k.a, mul(n, k.odsazeni)), b2 = add(k.b, mul(n, k.odsazeni));
-            return (
-              <g key={k.id} stroke="#0a7" strokeWidth={1} vectorEffect="non-scaling-stroke">
-                <line x1={k.a.x} y1={k.a.y} x2={a2.x} y2={a2.y} />
-                <line x1={k.b.x} y1={k.b.y} x2={b2.x} y2={b2.y} />
-                <line x1={a2.x} y1={a2.y} x2={b2.x} y2={b2.y} />
-              </g>
-            );
-          })}
-
           {/* rozkreslene */}
           {koncept.length > 0 && (
             <>
@@ -412,15 +408,52 @@ export default function Plan() {
 
         {/* texty v obrazovych souradnicich */}
         <g>
-          {!ukazVysky && pr.zahony.flatMap((zh) => (rozvrhy.get(zh.id)?.casti ?? []).map((c) => {
+          {pr.zahony.flatMap((zh) => (rozvrhy.get(zh.id)?.casti ?? []).map((c) => {
             const p = naObraz(c.popisek);
             return (
-              <text key={c.id} x={p.x} y={p.y} textAnchor="middle" dominantBaseline="middle"
-                fontSize={11} fontWeight={600} fill="#111" stroke="#fff" strokeWidth={3} paintOrder="stroke">
-                {c.kod}{c.kusu}
+              <g key={c.id}>
+                <text x={p.x} y={p.y} textAnchor="middle" dominantBaseline="middle"
+                  fontSize={11} fontWeight={600} fill="#111" stroke="#fff" strokeWidth={3} paintOrder="stroke">
+                  {c.kod}{c.kusu}
+                </text>
+                {pr.ukazPlochy && (
+                  <text x={p.x} y={p.y + 11} textAnchor="middle" dominantBaseline="middle"
+                    fontSize={9} fill="#555" stroke="#fff" strokeWidth={2.5} paintOrder="stroke">
+                    {c.plocha.toFixed(1)} m²
+                  </text>
+                )}
+              </g>
+            );
+          }))}
+
+          {/* delky stran zahonu */}
+          {pr.ukazDelky && pr.zahony.flatMap((zh) => zh.obrys.map((v, i) => {
+            const b = zh.obrys[(i + 1) % zh.obrys.length];
+            const d = delkaHrany(v, b, v.b);
+            if (d < 0.3) return null;
+            const c = naObraz(lerp(v, b, 0.5));
+            return (
+              <text key={zh.id + i} x={c.x} y={c.y} textAnchor="middle" dominantBaseline="middle"
+                fontSize={10} fill="#0a7" stroke="#fff" strokeWidth={3} paintOrder="stroke">
+                {d.toFixed(2)}
               </text>
             );
           }))}
+
+          {/* celkova vymera zahonu */}
+          {pr.ukazPlochy && pr.zahony.map((zh) => {
+            const r = rozvrhy.get(zh.id);
+            const body = obrysy.get(zh.id) ?? [];
+            if (!r || !body.length) return null;
+            const o = obalka(body);
+            const c = naObraz({ x: (o.x0 + o.x1) / 2, y: o.y1 });
+            return (
+              <text key={zh.id} x={c.x} y={c.y + 14} textAnchor="middle"
+                fontSize={11} fontWeight={600} fill="#0a7" stroke="#fff" strokeWidth={3} paintOrder="stroke">
+                {zh.nazev} · {r.plocha.toFixed(1)} m²
+              </text>
+            );
+          })}
 
           {pr.skupiny.map((s) => {
             const r = rostlina(s.kod);
@@ -446,15 +479,6 @@ export default function Plan() {
                 <text x={c.x} y={c.y} textAnchor="middle" fontSize={11.5} fontStyle="italic" fontWeight={500}
                   fill="#111" stroke="#fff" strokeWidth={3} paintOrder="stroke">{r?.latin ?? s.kod}</text>
               </g>
-            );
-          })}
-
-          {pr.ukazKoty && pr.koty.map((k) => {
-            const smer = norm(sub(k.b, k.a));
-            const c = naObraz(add(lerp(k.a, k.b, 0.5), mul({ x: -smer.y, y: smer.x }, k.odsazeni)));
-            return (
-              <text key={k.id} x={c.x} y={c.y - 4} textAnchor="middle" fontSize={11} fill="#0a7"
-                stroke="#fff" strokeWidth={3} paintOrder="stroke">{dist(k.a, k.b).toFixed(2)} m</text>
             );
           })}
 

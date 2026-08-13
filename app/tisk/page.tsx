@@ -1,9 +1,9 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
 import {
-  P, add, bodyPoCare, cesta, cestaBody, dist, lerp, mul, naBody, norm, obalka, sub,
+  P, add, bodyPoCare, cesta, cestaBody, delkaHrany, lerp, naBody, obalka,
 } from '@/lib/geom';
-import { Databaze, KatInfo, Projekt, Rostlina, UROVNE, vykaz } from '@/lib/model';
+import { Databaze, KatInfo, Projekt, Rostlina, vykaz } from '@/lib/model';
 import { Rozvrh } from '@/lib/rozvrh';
 import { rozvrhyProjektu } from '@/lib/useRozvrhy';
 import { nactiUlozeny } from '@/lib/store';
@@ -106,10 +106,6 @@ export default function Tisk() {
               {(rozvrhy.get(zh.id)?.casti ?? []).map((c) => (
                 <path key={c.id} d={cestaBody(c.polygon)} fill="none" stroke="#777" strokeWidth={0.15 * tl} />
               ))}
-              {(rozvrhy.get(zh.id)?.oblasti ?? []).map((ob, i) => ob.polygony.map((pg, j) => (
-                <path key={`o${i}-${j}`} d={cestaBody(pg)} fill="none"
-                  stroke={UROVNE[ob.uroven].barva} strokeWidth={0.3 * tl} />
-              )))}
               <path d={cesta(zh.obrys)} fill="none" stroke="#111" strokeWidth={0.5 * tl} />
             </g>
           ))}
@@ -137,28 +133,25 @@ export default function Tisk() {
             );
           })}
 
-          {pr.ukazKoty && pr.koty.map((k) => {
-            const smer = norm(sub(k.b, k.a));
-            const n = { x: -smer.y, y: smer.x };
-            const a2 = add(k.a, mul(n, k.odsazeni)), b2 = add(k.b, mul(n, k.odsazeni));
-            const c = lerp(a2, b2, 0.5);
+          {/* delky stran zahonu */}
+          {pr.ukazDelky && pr.zahony.flatMap((zh) => zh.obrys.map((v, i) => {
+            const b = zh.obrys[(i + 1) % zh.obrys.length];
+            const d = delkaHrany(v, b, v.b);
+            if (d < 0.3) return null;
+            const c = lerp(v, b, 0.5);
             return (
-              <g key={k.id} stroke="#111" strokeWidth={0.15 * tl}>
-                <line x1={k.a.x} y1={k.a.y} x2={a2.x} y2={a2.y} />
-                <line x1={k.b.x} y1={k.b.y} x2={b2.x} y2={b2.y} />
-                <line x1={a2.x} y1={a2.y} x2={b2.x} y2={b2.y} />
-                <text x={c.x} y={c.y - 0.8 * tl} textAnchor="middle" fontSize={2.4 * tl} fill="#111" stroke="none">
-                  {dist(k.a, k.b).toFixed(2)}
-                </text>
-              </g>
+              <text key={zh.id + i} x={c.x} y={c.y} textAnchor="middle" dominantBaseline="middle"
+                fontSize={2.2 * tl} fill="#111" stroke="#fff" strokeWidth={0.7 * tl} paintOrder="stroke">
+                {d.toFixed(2)}
+              </text>
             );
-          })}
+          }))}
 
           {/* popisky nad vsim */}
           {pr.zahony.map((zh) => (rozvrhy.get(zh.id)?.casti ?? []).map((c) => (
             <text key={c.id} x={c.popisek.x} y={c.popisek.y} textAnchor="middle" dominantBaseline="middle"
               fontSize={2.6 * tl} fontWeight={600} fill="#111" stroke="#fff" strokeWidth={0.7 * tl} paintOrder="stroke">
-              {c.kod}{c.kusu}
+              {c.kod}{c.kusu}{pr.ukazPlochy ? `  (${c.plocha.toFixed(1)} m²)` : ''}
             </text>
           )))}
 

@@ -52,9 +52,14 @@ export type Osazeni = {
   uroven?: Uroven;
   /** Vzajemny pomer plochy mezi rostlinami teze oblasti. */
   podil: number;
-  /** Na kolik mist v zahonu se rostlina rozdeli. */
+  /** Na kolik mist v zahonu se rostlina rozdeli; prazdne = spocitat z podilu. */
   skupin?: number;
 };
+
+/** Kolik skupin dostane rostlina, kdyz to neni urcene rucne. */
+export function autoSkupin(podil: number): number {
+  return podil > 0.28 ? 3 : podil > 0.12 ? 2 : 1;
+}
 
 export type Zahon = {
   id: string;
@@ -86,8 +91,6 @@ export type Solitera = {
   popisek?: P;
 };
 
-export type Kota = { id: string; a: P; b: P; odsazeni: number };
-
 export type Podklad = {
   nazev: string;
   typ: 'pdf' | 'obraz';
@@ -105,23 +108,27 @@ export type Podklad = {
 };
 
 export type Projekt = {
-  verze: 4;
+  verze: 5;
   nazev: string;
   podklad?: Podklad;
   zahony: Zahon[];
   skupiny: Skupina[];
   solitery: Solitera[];
-  koty: Kota[];
   meritkoTisk: number;
-  ukazKoty: boolean;
+  /** Popsat u každé strany záhonu její délku. */
+  ukazDelky: boolean;
+  /** Popsat u každé plochy její výměru v m². */
+  ukazPlochy: boolean;
+  /** Ukázat zvýrazňovač výškových oblastí — jen pomůcka, do výkresu nepatří. */
+  ukazVysky: boolean;
   krok: number;
 };
 
 export function prazdnyProjekt(nazev = 'Nový osazovací plán'): Projekt {
   return {
-    verze: 4, nazev,
-    zahony: [], skupiny: [], solitery: [], koty: [],
-    meritkoTisk: 100, ukazKoty: true, krok: 1,
+    verze: 5, nazev,
+    zahony: [], skupiny: [], solitery: [],
+    meritkoTisk: 100, ukazDelky: false, ukazPlochy: false, ukazVysky: false, krok: 1,
   };
 }
 

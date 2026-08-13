@@ -28,8 +28,8 @@ type Stav = {
   urovenStetec: Uroven;
   /** V kroku 2: upravovat existujici obrys misto kresleni noveho. */
   upravovat: boolean;
-  /** V kroku 7: rezim pridavani kot. */
-  kotuje: boolean;
+  /** Prichytavat kresleni k jiz nakreslenym bodum a caram. */
+  prichytavat: boolean;
 
   kamera: { x: number; y: number; z: number };
   koncept: V[];
@@ -65,7 +65,7 @@ export function nactiUlozeny(): Projekt | null {
     const s = localStorage.getItem(KLIC);
     if (!s) return null;
     const p = JSON.parse(s);
-    return p?.verze === 4 ? (p as Projekt) : null;
+    return p?.verze === 5 ? (p as Projekt) : null;
   } catch { return null; }
 }
 
@@ -81,7 +81,7 @@ export const useStore = create<Stav>((set, get) => ({
   aktivniKod: null,
   urovenStetec: 'nizke',
   upravovat: false,
-  kotuje: false,
+  prichytavat: true,
 
   kamera: { x: 0, y: 0, z: 40 },
   koncept: [],
@@ -125,7 +125,7 @@ export const useStore = create<Stav>((set, get) => ({
     get().zmen((d) => { d.krok = k; });
     const s = get();
     set({
-      koncept: [], upravovat: false, kotuje: false,
+      koncept: [], upravovat: false,
       aktivniZahon: s.aktivniZahon ?? s.pr.zahony[0]?.id ?? null,
       aktivniKod: null,
     });

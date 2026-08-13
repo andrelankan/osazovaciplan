@@ -105,7 +105,7 @@ export function nactiRostliny() {
       // rozestup v rade (m) - pouziva se u skupin keru
       rozestup: +Math.sqrt(1 / hustota).toFixed(2),
       // prumer koruny (m) - vychozi hodnota pro stromy a solitery
-      koruna: +Math.min(14, Math.max(0.6, vyska * 0.7)).toFixed(1),
+      koruna: +Math.min(8, Math.max(0.5, vyska * 0.35)).toFixed(1),
       foto: '',
     });
   }

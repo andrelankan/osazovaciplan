@@ -15,7 +15,7 @@
 import {
   P, bodProPopisek, bodVPolygonu, naBody, obalka, plochaBodu, prunik, vzdalUsecka, zjednodus,
 } from './geom';
-import { Osazeni, Rostlina, Uroven, Zahon } from './model';
+import { Osazeni, Rostlina, Uroven, Zahon, autoSkupin } from './model';
 
 export type Cast = {
   id: string;
@@ -27,21 +27,15 @@ export type Cast = {
   popisek: P;
 };
 
-export type Oblast = {
-  uroven: Uroven;
-  polygony: P[][];
-};
-
 export type Rozvrh = {
   casti: Cast[];
-  oblasti: Oblast[];
   /** Plocha zahonu v m2. */
   plocha: number;
   /** Cast zahonu, na kterou zatim nikdo nevybral rostlinu. */
   nevyuzito: number;
 };
 
-const PRAZDNY: Rozvrh = { casti: [], oblasti: [], plocha: 0, nevyuzito: 0 };
+const PRAZDNY: Rozvrh = { casti: [], plocha: 0, nevyuzito: 0 };
 
 /** Deterministicky generator - stejne semeno da stejne rozvrzeni. */
 function nahoda(semeno: number) {
@@ -108,15 +102,6 @@ export function rozvrhni(z: Zahon, db: Map<string, Rostlina>): Rozvrh {
     skupinyOblasti.get(k)!.push(i);
   });
 
-  const oblasti: Oblast[] = [];
-  for (const [t, idx] of skupinyOblasti) {
-    if (t < 0) continue;
-    oblasti.push({
-      uroven: tahy[t].uroven,
-      polygony: naPolygony(idx, bunky, krok, o, obrys),
-    });
-  }
-
   // ------------------------------------------------------------ rostliny
   const casti: Cast[] = [];
   let obsazeno = 0;
@@ -147,7 +132,7 @@ export function rozvrhni(z: Zahon, db: Map<string, Rostlina>): Rozvrh {
   }
 
   return {
-    casti, oblasti, plocha: plochaZahonu,
+    casti, plocha: plochaZahonu,
     nevyuzito: plochaZahonu * (1 - obsazeno / bunky.length),
   };
 }
@@ -176,7 +161,7 @@ function rozdelBunky(idx: number[], bunky: Bunka[], osazeni: Osazeni[], semeno: 
   for (let i = 0; i < osazeni.length; i++) {
     const podil = Math.max(0.01, osazeni[i].podil) / soucet;
     kvota.push(podil * idx.length);
-    const pocetSkupin = Math.max(1, Math.min(4, osazeni[i].skupin ?? (podil > 0.28 ? 3 : podil > 0.12 ? 2 : 1)));
+    const pocetSkupin = Math.max(1, Math.min(6, osazeni[i].skupin ?? autoSkupin(podil)));
     for (let s = 0; s < pocetSkupin; s++) semena.push({ rostlina: i, bunka: -1 });
   }
 
@@ -239,27 +224,56 @@ function naPolygony(
   const klic = (ix: number, iy: number) => ix * 100000 + iy;
   for (const i of idx) je.add(klic(bunky[i].ix, bunky[i].iy));
 
-  // hranicni hrany mrizky, orientovane tak, aby na sebe navazovaly
-  const hrany = new Map<string, [number, number, number, number]>();
+  // Hranicni hrany mrizky, orientovane tak, aby na sebe navazovaly.
+  // Z jednoho rohu jich muze vychazet vic (kdyz se plocha dotyka sama sebe
+  // pres uhlopricku), proto seznam - drivejsi verze hranu prepsala a obrys
+  // se rozpadl, coz zpusobilo, ze plocha zmizela.
+  type Hrana = [number, number, number, number];
+  const hrany = new Map<string, Hrana[]>();
   const bod = (i: number, j: number) => `${i}|${j}`;
+  let zbyvaHran = 0;
+  const pridej = (h: Hrana) => {
+    const k = bod(h[0], h[1]);
+    const s = hrany.get(k);
+    if (s) s.push(h); else hrany.set(k, [h]);
+    zbyvaHran++;
+  };
   for (const i of idx) {
     const { ix, iy } = bunky[i];
-    if (!je.has(klic(ix, iy - 1))) hrany.set(bod(ix, iy), [ix, iy, ix + 1, iy]);
-    if (!je.has(klic(ix + 1, iy))) hrany.set(bod(ix + 1, iy), [ix + 1, iy, ix + 1, iy + 1]);
-    if (!je.has(klic(ix, iy + 1))) hrany.set(bod(ix + 1, iy + 1), [ix + 1, iy + 1, ix, iy + 1]);
-    if (!je.has(klic(ix - 1, iy))) hrany.set(bod(ix, iy + 1), [ix, iy + 1, ix, iy]);
+    if (!je.has(klic(ix, iy - 1))) pridej([ix, iy, ix + 1, iy]);
+    if (!je.has(klic(ix + 1, iy))) pridej([ix + 1, iy, ix + 1, iy + 1]);
+    if (!je.has(klic(ix, iy + 1))) pridej([ix + 1, iy + 1, ix, iy + 1]);
+    if (!je.has(klic(ix - 1, iy))) pridej([ix, iy + 1, ix, iy]);
   }
 
   const polygony: P[][] = [];
-  while (hrany.size) {
-    const start = hrany.keys().next().value as string;
+  while (zbyvaHran > 0) {
+    let start = '';
+    for (const [k, s] of hrany) if (s.length) { start = k; break; }
+    if (!start) break;
+
     const kruh: P[] = [];
     let akt = start;
+    let smer: [number, number] | null = null;
     while (true) {
-      const h = hrany.get(akt);
-      if (!h) break;
-      hrany.delete(akt);
+      const seznam = hrany.get(akt);
+      if (!seznam || !seznam.length) break;
+      // v rozcesti pokracuj rovne, jinak doprava - obrys tak drzi jednu plochu
+      let vyber = 0;
+      if (seznam.length > 1 && smer) {
+        let nej = -Infinity;
+        seznam.forEach((h, i) => {
+          const d: [number, number] = [h[2] - h[0], h[3] - h[1]];
+          const vpred = smer![0] * d[0] + smer![1] * d[1];
+          const vpravo = smer![0] * d[1] - smer![1] * d[0];
+          const skore = vpred * 2 + vpravo;
+          if (skore > nej) { nej = skore; vyber = i; }
+        });
+      }
+      const h = seznam.splice(vyber, 1)[0];
+      zbyvaHran--;
       kruh.push({ x: o.x0 + h[0] * krok, y: o.y0 + h[1] * krok });
+      smer = [h[2] - h[0], h[3] - h[1]];
       akt = bod(h[2], h[3]);
       if (akt === start) break;
     }

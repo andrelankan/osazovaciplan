@@ -38,19 +38,33 @@ export function oblouk(p1: P, p2: P, b?: number): Oblouk | null {
     c, r,
     a1: Math.atan2(p1.y - c.y, p1.x - c.x),
     a2: Math.atan2(p2.y - c.y, p2.x - c.x),
-    ccw: b < 0,
+    // stred lezi na opacne strane nez vyduti, takze kladny bulge znamena
+    // obeh proti smeru rostouciho uhlu. Obracene znamenko tady delalo z kazdeho
+    // oblouku skoro celou kruznici - odtud ty falesne tvary pri upravach zahonu.
+    ccw: b > 0,
   };
 }
 
-/** Bulge z bodu na oblouku (pro tazeni hrany mysi). */
+/**
+ * Bulge takovy, aby oblouk prochazel **presne** tazenym bodem.
+ *
+ * Pouziva se obvodovy uhel: lezi-li `pt` na oblouku, je uhel p1–pt–p2 roven
+ * pi minus polovina stredoveho uhlu. Drivejsi verze jen promitala bod na kolmici
+ * ve stredu tetivy, takze oblouk utikal od kurzoru a tahani bylo krkolomne.
+ */
 export function bulgeZBodu(p1: P, p2: P, pt: P): number {
   const d = dist(p1, p2);
   if (d < 1e-9) return 0;
+  const v1 = sub(p1, pt), v2 = sub(p2, pt);
+  const l1 = len(v1), l2 = len(v2);
+  if (l1 < 1e-9 || l2 < 1e-9) return 0;
+  const cos = Math.max(-1, Math.min(1, (v1.x * v2.x + v1.y * v2.y) / (l1 * l2)));
+  const stredovy = 2 * (Math.PI - Math.acos(cos));
   const n = perp(norm(sub(p2, p1)));
-  const m = lerp(p1, p2, 0.5);
-  const s = (pt.x - m.x) * n.x + (pt.y - m.y) * n.y;   // prumet na kolmici
-  const b = (2 * s) / d;
-  return Math.max(-4, Math.min(4, b));
+  const strana = Math.sign((pt.x - p1.x) * n.x + (pt.y - p1.y) * n.y) || 1;
+  const b = strana * Math.tan(stredovy / 4);
+  if (!Number.isFinite(b)) return 0;
+  return Math.max(-6, Math.min(6, b));
 }
 
 /** Delka hrany vcetne oblouku. */
@@ -76,7 +90,7 @@ export function naBody(ring: Ring, tol = 0.01, uzavrit = true): P[] {
     if (!o) continue;
     const theta = Math.abs(4 * Math.atan(p1.b!));
     const krokUhlu = 2 * Math.acos(Math.max(-1, Math.min(1, 1 - tol / o.r)));
-    const kroku = Math.max(2, Math.min(180, Math.ceil(theta / (krokUhlu || 0.2))));
+    const kroku = Math.max(8, Math.min(360, Math.ceil(theta / (krokUhlu || 0.2))));
     for (let k = 1; k < kroku; k++) {
       const a = uhlyRozsah(o, k / kroku);
       out.push({ x: o.c.x + o.r * Math.cos(a), y: o.c.y + o.r * Math.sin(a) });
@@ -103,7 +117,7 @@ function uhlyRozsah(o: Oblouk, t: number) {
  */
 export function cesta(ring: Ring, uzavrit = true): string {
   if (!ring.length) return '';
-  return cestaBody(naBody(ring, 0.008, uzavrit), uzavrit);
+  return cestaBody(naBody(ring, 0.004, uzavrit), uzavrit);
 }
 
 /** SVG path z hotovych bodu. */
