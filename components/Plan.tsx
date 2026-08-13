@@ -15,7 +15,7 @@ export default function Plan() {
   const [rozmer, setRozmer] = useState({ w: 1200, h: 800 });
   const {
     pr, db, kategorie, kamera, koncept, podkladUrl, aktivniZahon, aktivniKod,
-    urovenStetec, upravovat, prichytavat, meri,
+    urovenStetec, upravovat, prichytavat, meri, vybranaSkupina,
   } = useStore();
   const st = useStore;
   const krok = pr.krok;
@@ -164,7 +164,18 @@ export default function Plan() {
     }
 
     if (krok === 5) {
+      // kdyz se prave nekresli, klik na hotovou radu ji vybere (kvuli rozestupu)
+      if (!st.getState().koncept.length) {
+        const tol = 10 / z;
+        const trefena = pr.skupiny.find((s) => {
+          const body = naBody(s.body, 0.05, false);
+          for (let i = 1; i < body.length; i++) if (vzdalUsecka(p, body[i - 1], body[i]) < tol) return true;
+          return false;
+        });
+        if (trefena) { st.getState().set('vybranaSkupina', trefena.id); return; }
+      }
       if (!aktivniKod) return;
+      st.getState().set('vybranaSkupina', null);
       st.getState().set('koncept', [...st.getState().koncept, snap(p, e.shiftKey)]);
       return;
     }
@@ -240,8 +251,9 @@ export default function Plan() {
     const kod = st.getState().aktivniKod;
     if (k.length < 2 || !kod) return;
     const r = st.getState().db.find((x) => x.kod === kod);
+    const rozestup = st.getState().rozestupNovy ?? r?.rozestup ?? 1.2;
     st.getState().zmen((d) => d.skupiny.push({
-      id: id(), kod, body: k.map((p) => ({ ...p })), rozestup: r?.rozestup ?? 1.2,
+      id: id(), kod, body: k.map((p) => ({ ...p })), rozestup,
     }));
     st.getState().set('koncept', []);
     setPresna(null);
@@ -409,11 +421,12 @@ export default function Plan() {
             const r = rostlina(s.kod);
             const body = naBody(s.body, 0.02, false);
             const tecky = bodyPoCare(body, s.rozestup ?? r?.rozestup ?? 1.2);
+            const je = s.id === vybranaSkupina;
             return (
               <g key={s.id}>
                 <polyline points={tecky.map((q) => `${q.x},${q.y}`).join(' ')} fill="none"
-                  stroke="#111" strokeWidth={1} vectorEffect="non-scaling-stroke" />
-                {tecky.map((q, i) => <circle key={i} cx={q.x} cy={q.y} r={0.14} fill="#111" />)}
+                  stroke={je ? '#0a7' : '#111'} strokeWidth={je ? 2.5 : 1} vectorEffect="non-scaling-stroke" />
+                {tecky.map((q, i) => <circle key={i} cx={q.x} cy={q.y} r={0.14} fill={je ? '#0a7' : '#111'} />)}
               </g>
             );
           })}
@@ -492,16 +505,20 @@ export default function Plan() {
             );
           })}
 
+          {/* nazev keře u kazde tecky */}
           {pr.skupiny.map((s) => {
             const r = rostlina(s.kod);
-            const stred = s.body[Math.floor(s.body.length / 2)];
-            const c = naObraz(add(stred, s.popisek ?? { x: 0, y: -1.4 }));
-            const k = naObraz(stred);
+            const body = naBody(s.body, 0.02, false);
+            const tecky = bodyPoCare(body, s.rozestup ?? r?.rozestup ?? 1.2);
             return (
               <g key={s.id}>
-                <line x1={c.x} y1={c.y + 4} x2={k.x} y2={k.y} stroke="#111" strokeWidth={0.6} opacity={0.6} />
-                <text x={c.x} y={c.y} textAnchor="middle" fontSize={11} fontStyle="italic" fill="#111"
-                  stroke="#fff" strokeWidth={3} paintOrder="stroke">{r?.latin ?? s.kod}</text>
+                {tecky.map((q, i) => {
+                  const c = naObraz(q);
+                  return (
+                    <text key={i} x={c.x + 5} y={c.y - 4} fontSize={9.5} fontStyle="italic" fill="#111"
+                      stroke="#fff" strokeWidth={2.5} paintOrder="stroke">{r?.latin ?? s.kod}</text>
+                  );
+                })}
               </g>
             );
           })}

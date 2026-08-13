@@ -116,9 +116,12 @@ export default function Tisk() {
             const tecky = bodyPoCare(b, s.rozestup ?? r?.rozestup ?? 1.2);
             return (
               <g key={s.id}>
-                <polyline points={b.map((q) => `${q.x},${q.y}`).join(' ')} fill="none" stroke="#111" strokeWidth={0.25 * tl} />
-                {tecky.map((q, i) => <circle key={i} cx={q.x} cy={q.y} r={(r?.koruna ?? 1.5) / 2} fill="none" stroke="#111" strokeWidth={0.2 * tl} />)}
+                <polyline points={tecky.map((q) => `${q.x},${q.y}`).join(' ')} fill="none" stroke="#111" strokeWidth={0.25 * tl} />
                 {tecky.map((q, i) => <circle key={'d' + i} cx={q.x} cy={q.y} r={0.6 * tl} fill="#111" />)}
+                {tecky.map((q, i) => (
+                  <text key={'t' + i} x={q.x + 1.2 * tl} y={q.y - 0.8 * tl} fontSize={2.1 * tl} fontStyle="italic"
+                    fill="#111" stroke="#fff" strokeWidth={0.6 * tl} paintOrder="stroke">{r?.latin ?? s.kod}</text>
+                ))}
               </g>
             );
           })}
@@ -154,17 +157,6 @@ export default function Tisk() {
               {c.kod}{c.kusu}{pr.ukazPlochy ? `  (${c.plocha.toFixed(1)} m²)` : ''}
             </text>
           )))}
-
-          {pr.skupiny.map((s) => {
-            const stred = s.body[Math.floor(s.body.length / 2)];
-            const c = add(stred, s.popisek ?? { x: 0, y: -1.2 });
-            return (
-              <text key={s.id} x={c.x} y={c.y} textAnchor="middle" fontSize={2.6 * tl} fontStyle="italic"
-                fill="#111" stroke="#fff" strokeWidth={0.7 * tl} paintOrder="stroke">
-                {rost(s.kod)?.latin ?? s.kod}
-              </text>
-            );
-          })}
 
           {pr.solitery.map((s) => {
             const c = add(s.pos, s.popisek ?? { x: 0, y: -1.2 });

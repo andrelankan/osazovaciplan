@@ -1,19 +1,18 @@
 /**
  * Rozvrh zahonu.
  *
- * Uzivatel neobkresluje plochu pro kazdou rostlinu. Jen:
- *   - obtahne obrys zahonu,
- *   - zhruba do nej nacrtne tahy pro vyskove oblasti,
- *   - vybere, ktere rostliny v ktere oblasti maji byt.
+ * Uzivatel neobkresluje plochu pro kazdou rostlinu. Jen obtahne obrys zahonu,
+ * zhruba do nej nacrtne tahy pro vyskove oblasti a vybere, ktere rostliny tam
+ * maji byt. Zbytek dela tenhle soubor.
  *
- * Zbytek dela tenhle soubor: zahon se rozrastruje na bunky, kazda bunka pripadne
- * nejblizsimu tahu (= vyskova oblast) a uvnitr oblasti nejblizsimu semenu rostliny,
- * pricemz kazda rostlina ma kapacitu podle sveho podilu. Z bunek se pak vytrasuje
- * obrys, vyhladi se a orizne obrysem zahonu - takze plochy vyplni cely zahon,
- * nikde nezustane mezera a nic nepresahne ven.
+ * Plochy vznikaji jako **mocninny (vazeny) Voronoiuv diagram**: kazda rostlina
+ * ma v zahonu jedno nebo vic semen a plocha pripadne tomu nejblizsimu. Hranice
+ * mezi dvema semeny je primka, takze plosky vychazeji hranate a na sebe presne
+ * navazuji - jako na rucne kreslenych planech. Vahy semen se pak iterativne
+ * dolaďuji, dokud plochy neodpovidaji zadanym podilum.
  */
 import {
-  P, bodProPopisek, bodVPolygonu, naBody, obalka, plochaBodu, prunik, vzdalUsecka, zjednodus,
+  P, bodProPopisek, bodVPolygonu, naBody, obalka, plochaBodu, vzdalUsecka, zjednodus,
 } from './geom';
 import { Osazeni, PORADI_UROVNI, Rostlina, Uroven, Zahon, autoSkupin, urovenRostliny } from './model';
 
@@ -31,7 +30,6 @@ export type Rozvrh = {
   casti: Cast[];
   /** Plocha zahonu v m2. */
   plocha: number;
-  /** Cast zahonu, na kterou zatim nikdo nevybral rostlinu. */
   nevyuzito: number;
 };
 
@@ -48,98 +46,115 @@ function nahoda(semeno: number) {
   };
 }
 
-/** `vaha` = jaka cast bunky opravdu lezi v zahonu (okrajove bunky se orizavaji). */
-type Bunka = { x: number; y: number; ix: number; iy: number; vaha: number };
+type Semeno = { rostlina: number; x: number; y: number; vaha: number; cil: number };
 
 export function rozvrhni(z: Zahon, db: Map<string, Rostlina>): Rozvrh {
-  const obrys = naBody(z.obrys, 0.03);
+  const obrys = zjednodus(naBody(z.obrys, 0.02), 0.01);
   if (obrys.length < 3) return PRAZDNY;
-  const o = obalka(obrys);
   const plochaZahonu = plochaBodu(obrys);
   if (plochaZahonu < 0.05) return PRAZDNY;
-  // dokud nejsou nacrtnute vysky ani vybrane rostliny, neni co rastrovat
-  if (!z.vysky.length && !z.osazeni.length) return { ...PRAZDNY, plocha: plochaZahonu, nevyuzito: plochaZahonu };
 
-  // velikost bunky - kompromis mezi jemnosti tvaru a rychlosti
-  const krok = Math.min(0.5, Math.max(0.06, Math.sqrt(plochaZahonu / 2600)));
-
-  // Bunka se bere i tehdy, kdyz do zahonu zasahuje jen rohem - jinak by po obvodu
-  // zustal nevyplneny prouzek az pul bunky siroky. Prebytek se na konci orizne obrysem.
-  const bunky: Bunka[] = [];
-  const nx = Math.ceil(o.w / krok) + 1;
-  const ny = Math.ceil(o.h / krok) + 1;
-  for (let iy = 0; iy < ny; iy++) {
-    for (let ix = 0; ix < nx; ix++) {
-      const x = o.x0 + (ix + 0.5) * krok;
-      const y = o.y0 + (iy + 0.5) * krok;
-      const h = krok / 2;
-      let uvnitr = 0;
-      for (const q of [{ x, y }, { x: x - h, y: y - h }, { x: x + h, y: y - h },
-      { x: x + h, y: y + h }, { x: x - h, y: y + h }]) {
-        if (bodVPolygonu(q, obrys)) uvnitr++;
-      }
-      if (uvnitr) bunky.push({ x, y, ix, iy, vaha: uvnitr / 5 });
-    }
-  }
-  if (!bunky.length) return PRAZDNY;
-
-  // ---------------------------------------------------- vyskove oblasti
-  // kazda bunka pripadne nejblizsimu nacrtnutemu tahu
-  const tahy = z.vysky.filter((t) => t.body.length >= 1);
-  const urovenBunky = new Int16Array(bunky.length).fill(-1);
-  if (tahy.length) {
-    for (let i = 0; i < bunky.length; i++) {
-      let nej = Infinity, kdo = -1;
-      for (let t = 0; t < tahy.length; t++) {
-        const d = vzdalOdTahu(bunky[i], tahy[t].body);
-        if (d < nej) { nej = d; kdo = t; }
-      }
-      urovenBunky[i] = kdo;
-    }
-  }
-
-  const skupinyOblasti = new Map<number, number[]>();
-  bunky.forEach((_, i) => {
-    const k = urovenBunky[i];
-    if (!skupinyOblasti.has(k)) skupinyOblasti.set(k, []);
-    skupinyOblasti.get(k)!.push(i);
-  });
-
-  // ------------------------------------------------------------ rostliny
-  // Rostliny se vybiraji na cely zahon. Vyskove oblasti nerozhoduji o tom,
-  // ktera rostlina kam smi, jen k sobe pritahuji rostliny odpovidajici vysky.
-  const casti: Cast[] = [];
   const osazeni = z.osazeni.filter((x) => db.has(x.kod));
-  if (!osazeni.length) return { casti, plocha: plochaZahonu, nevyuzito: plochaZahonu };
+  if (!osazeni.length) return { casti: [], plocha: plochaZahonu, nevyuzito: plochaZahonu };
 
-  const vsechny = bunky.map((_, i) => i);
-  const urovenCile = osazeni.map((x) => urovenRostliny(db.get(x.kod)!.vyska));
-  const prirazeni = rozdelBunky(
-    vsechny, bunky, osazeni, z.semeno,
-    tahy.length ? (i) => (urovenBunky[i] >= 0 ? tahy[urovenBunky[i]].uroven : null) : null,
-    urovenCile,
-  );
+  const semena = rozsejSemena(z, obrys, plochaZahonu, osazeni, db);
+  if (!semena.length) return { casti: [], plocha: plochaZahonu, nevyuzito: plochaZahonu };
 
-  prirazeni.forEach((skupina, si) => {
-    if (!skupina.bunky.length) return;
-    const { kod } = osazeni[skupina.rostlina];
+  doladVahy(obrys, semena);
+
+  const casti: Cast[] = [];
+  const polygony = mocninneBunky(obrys, semena);
+  polygony.forEach((polygon, i) => {
+    if (polygon.length < 3) return;
+    const plocha = plochaBodu(polygon);
+    if (plocha < 0.05) return;
+    const { kod } = osazeni[semena[i].rostlina];
     const r = db.get(kod);
-    for (const polygon of naPolygony(skupina.bunky, bunky, krok, o, obrys)) {
-      const plocha = plochaBodu(polygon);
-      if (plocha < 0.08) continue;
-      casti.push({
-        id: `${z.id}-${kod}-${si}-${casti.length}`,
-        kod, uroven: urovenCile[skupina.rostlina], polygon, plocha,
-        kusu: Math.max(1, Math.round(plocha * (r?.hustota ?? 5))),
-        popisek: bodProPopisek(polygon),
-      });
-    }
+    casti.push({
+      id: `${z.id}-${kod}-${i}`,
+      kod,
+      uroven: r ? urovenRostliny(r.vyska) : undefined,
+      polygon,
+      plocha,
+      kusu: Math.max(1, Math.round(plocha * (r?.hustota ?? 5))),
+      popisek: bodProPopisek(polygon),
+    });
   });
 
   return { casti, plocha: plochaZahonu, nevyuzito: 0 };
 }
 
-/** Vzdalenost bodu od nacrtnuteho tahu (bod, usecka nebo lomena cara). */
+// ------------------------------------------------------------- rozseti semen
+
+/**
+ * Semena se rozhazuji co nejdal od sebe, ale prednostne do te vyskove oblasti,
+ * ktera odpovida vysce jejich rostliny. Oblasti tim rostliny jen pritahuji -
+ * hranice zustava mekka, jak ma byt.
+ */
+function rozsejSemena(
+  z: Zahon, obrys: P[], plochaZahonu: number, osazeni: Osazeni[], db: Map<string, Rostlina>,
+): Semeno[] {
+  const rnd = nahoda(z.semeno);
+
+  // hruby rastr kandidatu na umisteni semen
+  const o = obalka(obrys);
+  const krok = Math.max(0.15, Math.sqrt(plochaZahonu / 900));
+  const kandidati: { x: number; y: number; uroven: Uroven | null }[] = [];
+  const tahy = z.vysky.filter((t) => t.body.length >= 1);
+  for (let y = o.y0 + krok / 2; y < o.y1; y += krok) {
+    for (let x = o.x0 + krok / 2; x < o.x1; x += krok) {
+      if (!bodVPolygonu({ x, y }, obrys)) continue;
+      let uroven: Uroven | null = null;
+      if (tahy.length) {
+        let nej = Infinity;
+        for (const t of tahy) {
+          const d = vzdalOdTahu({ x, y }, t.body);
+          if (d < nej) { nej = d; uroven = t.uroven; }
+        }
+      }
+      kandidati.push({ x, y, uroven });
+    }
+  }
+  if (!kandidati.length) return [];
+
+  const soucet = osazeni.reduce((a, x) => a + Math.max(0.01, x.podil), 0);
+  const semena: Semeno[] = [];
+  for (let i = 0; i < osazeni.length; i++) {
+    const podil = Math.max(0.01, osazeni[i].podil) / soucet;
+    const pocet = Math.max(1, Math.min(8, osazeni[i].skupin ?? autoSkupin(podil, plochaZahonu)));
+    const cil = (podil * plochaZahonu) / pocet;
+    for (let s = 0; s < pocet; s++) semena.push({ rostlina: i, x: 0, y: 0, vaha: 0, cil });
+  }
+
+  const urovenCile = osazeni.map((x) => urovenRostliny(db.get(x.kod)!.vyska));
+  /** Cim dal je bunka od "sve" oblasti, tim mene je pro semeno vhodna. */
+  const vhodnost = (k: number, s: number) => {
+    const u = kandidati[k].uroven;
+    if (!u) return 1;
+    const rozdil = Math.abs(PORADI_UROVNI.indexOf(u) - PORADI_UROVNI.indexOf(urovenCile[semena[s].rostlina]));
+    return 1 / (1 + rozdil * 2.5);
+  };
+
+  const vzdal = new Float64Array(kandidati.length).fill(Infinity);
+  for (let s = 0; s < semena.length; s++) {
+    let nejI = 0, nejS = -1;
+    for (let k = 0; k < kandidati.length; k++) {
+      if (s > 0) {
+        const p = kandidati[k], q = semena[s - 1];
+        const d = (p.x - q.x) ** 2 + (p.y - q.y) ** 2;
+        if (d < vzdal[k]) vzdal[k] = d;
+      }
+      const zaklad = s === 0 ? 1 : vzdal[k];
+      const skore = zaklad * vhodnost(k, s) * (0.85 + rnd() * 0.3);
+      if (skore > nejS) { nejS = skore; nejI = k; }
+    }
+    semena[s].x = kandidati[nejI].x;
+    semena[s].y = kandidati[nejI].y;
+    vzdal[nejI] = 0;
+  }
+  return semena;
+}
+
 function vzdalOdTahu(p: P, body: P[]): number {
   if (body.length === 1) return Math.hypot(p.x - body[0].x, p.y - body[0].y);
   let nej = Infinity;
@@ -147,199 +162,84 @@ function vzdalOdTahu(p: P, body: P[]): number {
   return nej;
 }
 
-/**
- * Rozdeli bunky mezi jednotlive skupiny rostlin tak, aby kazda dostala plochu
- * odpovidajici svemu podilu. Jedna rostlina muze mit vic skupin, takze se
- * v zahonu opakuje na vic mistech - jako na rucne kreslenych planech.
- */
-function rozdelBunky(
-  idx: number[],
-  bunky: Bunka[],
-  osazeni: Osazeni[],
-  semeno: number,
-  /** Vyskova oblast bunky, nebo null kdyz zadne tahy nejsou. */
-  urovenBunky: ((i: number) => Uroven | null) | null,
-  /** Do jake vyskove oblasti patri jednotlive rostliny. */
-  urovenCile: Uroven[],
-): { rostlina: number; bunky: number[] }[] {
-  const rnd = nahoda(semeno);
+// -------------------------------------------------------- mocninny diagram
 
-  /**
-   * Nesoulad vysky rostliny s oblasti bunky. Nasobi vzdalenost, takze rostlina
-   * do sve oblasti tihne, ale hranice zustane mekka - oblasti jsou orientacni.
-   */
-  const nesoulad = (bunka: number, rostlina: number): number => {
-    if (!urovenBunky) return 1;
-    const u = urovenBunky(bunka);
-    if (!u) return 1;
-    const rozdil = Math.abs(PORADI_UROVNI.indexOf(u) - PORADI_UROVNI.indexOf(urovenCile[rostlina]));
-    return 1 + rozdil * 1.6;
+/**
+ * Orez polygonu polorovinou bodu blizsich k `a` nez k `b` (v mocninne metrice).
+ * Hranice je primka, proto vychazeji rovne hrany.
+ */
+function orezPolorovinou(poly: P[], a: Semeno, b: Semeno): P[] {
+  const nx = 2 * (b.x - a.x);
+  const ny = 2 * (b.y - a.y);
+  const c = (b.x * b.x + b.y * b.y) - (a.x * a.x + a.y * a.y) - (b.vaha - a.vaha);
+  if (Math.abs(nx) < 1e-12 && Math.abs(ny) < 1e-12) return c >= 0 ? poly : [];
+
+  const uvnitr = (p: P) => nx * p.x + ny * p.y <= c;
+  const prusecik = (p: P, q: P): P => {
+    const dp = nx * p.x + ny * p.y - c;
+    const dq = nx * q.x + ny * q.y - c;
+    const t = dp / (dp - dq);
+    return { x: p.x + (q.x - p.x) * t, y: p.y + (q.y - p.y) * t };
   };
 
-  // kolik semen na rostlinu; kvota se hlida za rostlinu, ne za semeno, aby podily
-  // vysly presne a jednotlive skupiny mohly byt ruzne velke
-  const soucet = osazeni.reduce((a, x) => a + Math.max(0.01, x.podil), 0);
-  // kvota se pocita v plose, ne v poctu bunek - okrajove bunky se pri orezu
-  // zahonem zmensi a rostlina, ktera jich ma vic, by jinak dostala mensi plochu
-  const celkovaVaha = idx.reduce((a, i) => a + bunky[i].vaha, 0);
-  const semena: { rostlina: number; bunka: number }[] = [];
-  const kvota: number[] = [];
-  for (let i = 0; i < osazeni.length; i++) {
-    const podil = Math.max(0.01, osazeni[i].podil) / soucet;
-    kvota.push(podil * celkovaVaha);
-    const pocetSkupin = Math.max(1, Math.min(6, osazeni[i].skupin ?? autoSkupin(podil)));
-    for (let s = 0; s < pocetSkupin; s++) semena.push({ rostlina: i, bunka: -1 });
+  const out: P[] = [];
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const p = poly[j], q = poly[i];
+    const pIn = uvnitr(p), qIn = uvnitr(q);
+    if (pIn && qIn) out.push(q);
+    else if (pIn && !qIn) out.push(prusecik(p, q));
+    else if (!pIn && qIn) { out.push(prusecik(p, q)); out.push(q); }
   }
+  return out.length >= 3 ? out : [];
+}
 
-  // Rozeseti semen co nejdal od sebe, at skupiny nesplynou. Semeno se pritom
-  // radeji posadi do oblasti, ktera odpovida vysce jeho rostliny.
-  const vzdal = new Float64Array(idx.length).fill(Infinity);
-  const vhodnost = (i: number, s: number) => 1 / nesoulad(idx[i], semena[s].rostlina) ** 2;
-
-  {
-    let nejI = 0, nejS = -1;
-    for (let i = 0; i < idx.length; i++) {
-      const skore = vhodnost(i, 0) * (0.7 + rnd() * 0.6);
-      if (skore > nejS) { nejS = skore; nejI = i; }
+function mocninneBunky(obrys: P[], semena: Semeno[]): P[][] {
+  return semena.map((s, i) => {
+    let poly = obrys;
+    for (let j = 0; j < semena.length && poly.length >= 3; j++) {
+      if (i !== j) poly = orezPolorovinou(poly, s, semena[j]);
     }
-    semena[0].bunka = idx[nejI];
-    vzdal[nejI] = 0;
-  }
-  for (let s = 1; s < semena.length; s++) {
-    const posledni = bunky[semena[s - 1].bunka];
-    let nejI = 0, nejD = -1;
-    for (let i = 0; i < idx.length; i++) {
-      const b = bunky[idx[i]];
-      const d = (b.x - posledni.x) ** 2 + (b.y - posledni.y) ** 2;
-      if (d < vzdal[i]) vzdal[i] = d;
-      // trocha nahody, aby rozmisteni nebylo pokazde vizualne stejne
-      const skore = vzdal[i] * vhodnost(i, s) * (0.85 + rnd() * 0.3);
-      if (skore > nejD) { nejD = skore; nejI = i; }
-    }
-    semena[s].bunka = idx[nejI];
-    vzdal[nejI] = 0;
-  }
-
-  // kazda bunka k nejblizsimu semenu, ale jen dokud ma semeno volnou kapacitu
-  const dvojice: { b: number; s: number; d: number }[] = [];
-  for (const i of idx) {
-    for (let s = 0; s < semena.length; s++) {
-      const c = bunky[semena[s].bunka];
-      const d2 = (bunky[i].x - c.x) ** 2 + (bunky[i].y - c.y) ** 2;
-      dvojice.push({ b: i, s, d: d2 * nesoulad(i, semena[s].rostlina) ** 2 });
-    }
-  }
-  dvojice.sort((a, b) => a.d - b.d);
-
-  const vysledek = semena.map((s) => ({ rostlina: s.rostlina, bunky: [] as number[] }));
-  const zbyva = [...kvota];
-  const hotovo = new Set<number>();
-  for (const d of dvojice) {
-    if (hotovo.has(d.b)) continue;
-    const r = semena[d.s].rostlina;
-    if (zbyva[r] <= 0) continue;
-    vysledek[d.s].bunky.push(d.b);
-    zbyva[r] -= bunky[d.b].vaha;
-    hotovo.add(d.b);
-  }
-  // zbytek (kvoty vychazeji na desetiny bunky) k nejblizsimu semenu
-  for (const d of dvojice) {
-    if (hotovo.has(d.b)) continue;
-    vysledek[d.s].bunky.push(d.b);
-    hotovo.add(d.b);
-  }
-  return vysledek;
+    return poly.length >= 3 ? zjednodus(poly, 0.004) : [];
+  });
 }
 
 /**
- * Z mnoziny bunek udela vyhlazene polygony orizle obrysem zahonu.
+ * Doladi vahy semen tak, aby plochy odpovidaly zadanym podilum. Zvyseni vahy
+ * posune hranice od semene ven, takze jeho ploska roste na ukor sousedu.
  */
-function naPolygony(
-  idx: number[], bunky: Bunka[], krok: number, o: { x0: number; y0: number }, obrys: P[],
-): P[][] {
-  const je = new Set<number>();
-  const klic = (ix: number, iy: number) => ix * 100000 + iy;
-  for (const i of idx) je.add(klic(bunky[i].ix, bunky[i].iy));
+function doladVahy(obrys: P[], semena: Semeno[]) {
+  if (semena.length < 2) return;
 
-  // Hranicni hrany mrizky, orientovane tak, aby na sebe navazovaly.
-  // Z jednoho rohu jich muze vychazet vic (kdyz se plocha dotyka sama sebe
-  // pres uhlopricku), proto seznam - drivejsi verze hranu prepsala a obrys
-  // se rozpadl, coz zpusobilo, ze plocha zmizela.
-  type Hrana = [number, number, number, number];
-  const hrany = new Map<string, Hrana[]>();
-  const bod = (i: number, j: number) => `${i}|${j}`;
-  let zbyvaHran = 0;
-  const pridej = (h: Hrana) => {
-    const k = bod(h[0], h[1]);
-    const s = hrany.get(k);
-    if (s) s.push(h); else hrany.set(k, [h]);
-    zbyvaHran++;
+  const chybaVah = () => {
+    const bunky = mocninneBunky(obrys, semena);
+    const plochy = bunky.map((b) => (b.length >= 3 ? plochaBodu(b) : 0));
+    const nejhorsi = plochy.reduce((a, p, i) => Math.max(a, Math.abs(semena[i].cil - p) / semena[i].cil), 0);
+    return { plochy, nejhorsi };
   };
-  for (const i of idx) {
-    const { ix, iy } = bunky[i];
-    if (!je.has(klic(ix, iy - 1))) pridej([ix, iy, ix + 1, iy]);
-    if (!je.has(klic(ix + 1, iy))) pridej([ix + 1, iy, ix + 1, iy + 1]);
-    if (!je.has(klic(ix, iy + 1))) pridej([ix + 1, iy + 1, ix, iy + 1]);
-    if (!je.has(klic(ix - 1, iy))) pridej([ix, iy + 1, ix, iy]);
+
+  let krok = 0.5;
+  let { plochy, nejhorsi } = chybaVah();
+  let nejlepsi = { chyba: nejhorsi, vahy: semena.map((s) => s.vaha) };
+
+  for (let iter = 0; iter < 120 && nejhorsi > 0.02; iter++) {
+    const puvodni = semena.map((s) => s.vaha);
+    for (let i = 0; i < semena.length; i++) semena[i].vaha += krok * (semena[i].cil - plochy[i]);
+    // vahy jsou relativni, drz je kolem nuly, at cisla neutikaji
+    const prumer = semena.reduce((a, s) => a + s.vaha, 0) / semena.length;
+    for (const s of semena) s.vaha -= prumer;
+
+    const dalsi = chybaVah();
+    if (dalsi.nejhorsi > nejhorsi) {
+      // prestrelili jsme - vrat se a zkracuj krok
+      semena.forEach((s, i) => { s.vaha = puvodni[i]; });
+      krok *= 0.6;
+      if (krok < 1e-3) break;
+      continue;
+    }
+    plochy = dalsi.plochy;
+    nejhorsi = dalsi.nejhorsi;
+    if (nejhorsi < nejlepsi.chyba) nejlepsi = { chyba: nejhorsi, vahy: semena.map((s) => s.vaha) };
   }
 
-  const polygony: P[][] = [];
-  while (zbyvaHran > 0) {
-    let start = '';
-    for (const [k, s] of hrany) if (s.length) { start = k; break; }
-    if (!start) break;
-
-    const kruh: P[] = [];
-    let akt = start;
-    let smer: [number, number] | null = null;
-    while (true) {
-      const seznam = hrany.get(akt);
-      if (!seznam || !seznam.length) break;
-      // v rozcesti pokracuj rovne, jinak doprava - obrys tak drzi jednu plochu
-      let vyber = 0;
-      if (seznam.length > 1 && smer) {
-        let nej = -Infinity;
-        seznam.forEach((h, i) => {
-          const d: [number, number] = [h[2] - h[0], h[3] - h[1]];
-          const vpred = smer![0] * d[0] + smer![1] * d[1];
-          const vpravo = smer![0] * d[1] - smer![1] * d[0];
-          const skore = vpred * 2 + vpravo;
-          if (skore > nej) { nej = skore; vyber = i; }
-        });
-      }
-      const h = seznam.splice(vyber, 1)[0];
-      zbyvaHran--;
-      kruh.push({ x: o.x0 + h[0] * krok, y: o.y0 + h[1] * krok });
-      smer = [h[2] - h[0], h[3] - h[1]];
-      akt = bod(h[2], h[3]);
-      if (akt === start) break;
-    }
-    if (kruh.length < 4) continue;
-    // vyhlazuje se jeste na surovem "schodisti" z bunek, kde je kazdy usek dlouhy
-    // jednu bunku - zaobli se tim jen schody. Zjednoduseni az potom; obracene
-    // poradi by z dlouhych rovnych stran udelalo oblouky a plocha by se srazila.
-    const hladky = zjednodus(vyhlad(kruh, 2), krok * 0.12);
-    if (plochaBodu(hladky) < 0.05) continue;
-    // orez obrysem zahonu - vyhlazeni muze mirne vybocit ven
-    for (const cast of prunik(hladky, obrys)) {
-      if (plochaBodu(cast) > 0.05) polygony.push(cast);
-    }
-  }
-  return polygony;
-}
-
-/** Chaikinovo vyhlazeni - z hranatych bunek udela prirozeny tvar zahonu. */
-function vyhlad(body: P[], kroku: number): P[] {
-  let akt = body;
-  for (let k = 0; k < kroku; k++) {
-    if (akt.length < 4) break;
-    const dalsi: P[] = [];
-    for (let i = 0; i < akt.length; i++) {
-      const a = akt[i], b = akt[(i + 1) % akt.length];
-      dalsi.push({ x: a.x * 0.75 + b.x * 0.25, y: a.y * 0.75 + b.y * 0.25 });
-      dalsi.push({ x: a.x * 0.25 + b.x * 0.75, y: a.y * 0.25 + b.y * 0.75 });
-    }
-    akt = dalsi;
-  }
-  return akt;
+  semena.forEach((s, i) => { s.vaha = nejlepsi.vahy[i]; });
 }

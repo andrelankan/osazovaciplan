@@ -66,9 +66,14 @@ export function urovenRostliny(vyska: number): Uroven {
 
 export const PORADI_UROVNI: Uroven[] = ['nizke', 'stredni', 'vysoke'];
 
-/** Kolik skupin dostane rostlina, kdyz to neni urcene rucne. */
-export function autoSkupin(podil: number): number {
-  return podil > 0.28 ? 3 : podil > 0.12 ? 2 : 1;
+/**
+ * Kolik skupin dostane rostlina, kdyz to neni urcene rucne.
+ * Cilem je ploska kolem 3 m2 - vetsi zahon se tak rozpadne na vic mist,
+ * jako na rucne kreslenych planech.
+ */
+export function autoSkupin(podil: number, plochaZahonu: number): number {
+  const celkem = Math.max(3, Math.min(16, Math.round(plochaZahonu / 3)));
+  return Math.max(1, Math.min(6, Math.round(podil * celkem)));
 }
 
 export type Zahon = {

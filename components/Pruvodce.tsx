@@ -14,7 +14,7 @@ const POKYN: Record<Krok, string> = {
   2: 'Obkresli po plánku okraj záhonu. Klikáním, Enter uzavře.',
   3: 'Zvýrazňovačem přejeď zhruba tam, kde chceš nízké a kde vysoké rostliny. Je to jen pomůcka pro rozmístění — do výkresu se nekreslí a klidně může přesahovat.',
   4: 'Vyber rostliny do celého záhonu. Rozmístí se samy, výškové oblasti bere rozvrh jako vodítko.',
-  5: 'Vyber keř a naklikej řadu. Enter dokončí.',
+  5: 'Vyber keř, nastav rozestup a naklikej řadu. Enter dokončí. Klik na hotovou řadu ji vybere.',
   6: 'Vyber strom a klikni, kam ho zasadit.',
   7: 'Hotovo. Přepínači si zapni, co má být na výkrese vidět, a vytiskni.',
 };
@@ -352,7 +352,11 @@ function PanelZahonu() {
                     {n ?? 'auto'}
                   </button>
                 ))}
-                {o.skupin == null && <span className="text-gray-400">({autoSkupin(Math.max(0.01, o.podil) / soucet)})</span>}
+                {o.skupin == null && (
+                  <span className="text-gray-400">
+                    ({autoSkupin(Math.max(0.01, o.podil) / soucet, rozvrh?.plocha ?? 10)})
+                  </span>
+                )}
               </div>
             </div>
           );
@@ -390,10 +394,23 @@ function PanelZahonu() {
 
 /** Kroky 5 a 6 - vyber dreviny, ktera se pak kresli do planu. */
 function PanelDrevin({ kategorie, nadpis }: { kategorie: readonly string[]; nadpis: string }) {
-  const { aktivniKod, db, pr } = useStore();
+  const { aktivniKod, db, pr, vybranaSkupina, rozestupNovy } = useStore();
   const st = useStore;
   const aktivni = db.find((r) => r.kod === aktivniKod);
   const krok = pr.krok;
+  const skupina = pr.skupiny.find((s) => s.id === vybranaSkupina);
+  const rostlinaSkupiny = db.find((r) => r.kod === skupina?.kod);
+
+  // rozestup: u vybrane rady jeji vlastni, jinak hodnota pro novou radu
+  const rozestup = skupina
+    ? (skupina.rozestup ?? rostlinaSkupiny?.rozestup ?? 1.2)
+    : (rozestupNovy ?? aktivni?.rozestup ?? 1.2);
+
+  const nastavRozestup = (v: number) => {
+    if (!(v > 0.1)) return;
+    if (skupina) st.getState().zmen((d) => { const x = d.skupiny.find((s) => s.id === skupina.id); if (x) x.rozestup = v; });
+    else st.getState().set('rozestupNovy', v);
+  };
 
   return (
     <div className={OBAL}>
@@ -403,8 +420,38 @@ function PanelDrevin({ kategorie, nadpis }: { kategorie: readonly string[]; nadp
           ? <div className="mt-0.5 text-xs text-gray-600">kreslí se <span className="italic">{aktivni.latin}</span></div>
           : <div className="mt-0.5 text-xs text-amber-700">vyber ze seznamu, pak klikni do plánu</div>}
       </div>
+
+      {krok === 5 && (
+        <div className="border-b border-gray-200 bg-gray-50 px-3 py-2 text-xs">
+          <div className="mb-1 text-gray-600">
+            {skupina
+              ? <>rozestup vybrané řady <span className="italic">{rostlinaSkupiny?.latin}</span></>
+              : <>rozestup nové řady</>}
+          </div>
+          <div className="flex items-center gap-2">
+            <input type="number" step="0.1" min={0.2} value={rozestup} className="w-20 rounded border px-1 py-0.5"
+              onChange={(e) => nastavRozestup(+e.target.value)} />
+            <span className="text-gray-500">m</span>
+            {!skupina && rozestupNovy != null && (
+              <button onClick={() => st.getState().set('rozestupNovy', null)}
+                className="text-emerald-700 underline">zpět na výchozí</button>
+            )}
+            {skupina && (
+              <button onClick={() => st.getState().set('vybranaSkupina', null)}
+                className="ml-auto text-gray-500 underline">zrušit výběr</button>
+            )}
+          </div>
+          <p className="mt-1 text-[11px] text-gray-500">
+            {skupina
+              ? 'Kliknutím do plánu vybereš jinou řadu.'
+              : 'Výchozí hodnota vychází z hustoty výsadby u druhu. Kliknutím na hotovou řadu ji změníš u ní.'}
+          </p>
+        </div>
+      )}
+
       <Katalog kategorie={kategorie} vybrane={aktivniKod ? [aktivniKod] : []}
-        onVyber={(r) => st.getState().set('aktivniKod', r.kod)} />
+        onVyber={(r) => { st.getState().set('aktivniKod', r.kod); st.getState().set('rozestupNovy', null); }} />
+
       <div className="border-t border-gray-200 p-2 text-xs text-gray-500">
         {krok === 5
           ? `${pr.skupiny.length}× skupina keřů v plánu`

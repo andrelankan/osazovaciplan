@@ -32,6 +32,10 @@ type Stav = {
   prichytavat: boolean;
   /** V kroku 1: rezim mereni vzdalenosti / kalibrace meritka. */
   meri: boolean;
+  /** V kroku 5: vybrana skupina keru, u ktere jde menit rozestup. */
+  vybranaSkupina: string | null;
+  /** Rozestup pro nove kreslenou skupinu; null = vzit vychozi u rostliny. */
+  rozestupNovy: number | null;
 
   kamera: { x: number; y: number; z: number };
   koncept: V[];
@@ -85,6 +89,8 @@ export const useStore = create<Stav>((set, get) => ({
   upravovat: false,
   prichytavat: true,
   meri: false,
+  vybranaSkupina: null,
+  rozestupNovy: null,
 
   kamera: { x: 0, y: 0, z: 40 },
   koncept: [],
@@ -128,7 +134,7 @@ export const useStore = create<Stav>((set, get) => ({
     get().zmen((d) => { d.krok = k; });
     const s = get();
     set({
-      koncept: [], upravovat: false, meri: false,
+      koncept: [], upravovat: false, meri: false, vybranaSkupina: null, rozestupNovy: null,
       aktivniZahon: s.aktivniZahon ?? s.pr.zahony[0]?.id ?? null,
       aktivniKod: null,
     });
