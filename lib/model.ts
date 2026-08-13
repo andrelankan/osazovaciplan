@@ -45,16 +45,26 @@ export function sedneVyska(r: Rostlina, u?: Uroven): boolean {
 /** Zhruba nacrtnuty tah, ktery rekne "tady chci nizke rostliny". */
 export type TahVysky = { id: string; uroven: Uroven; body: P[] };
 
-/** Rostlina vybrana do zahonu, s podilem plochy. */
+/**
+ * Rostlina vybrana do zahonu. Vybira se na cely zahon; kam presne prijde,
+ * rozhodne rozvrh - vyskove oblasti bere jen jako voditko.
+ */
 export type Osazeni = {
   kod: string;
-  /** Ve ktere vyskove oblasti; prazdne = zahon bez rozdeleni na vysky. */
-  uroven?: Uroven;
-  /** Vzajemny pomer plochy mezi rostlinami teze oblasti. */
+  /** Vzajemny pomer plochy mezi rostlinami zahonu. */
   podil: number;
   /** Na kolik mist v zahonu se rostlina rozdeli; prazdne = spocitat z podilu. */
   skupin?: number;
 };
+
+/** Do ktere vyskove oblasti rostlina vyskou patri. */
+export function urovenRostliny(vyska: number): Uroven {
+  if (vyska <= UROVNE.nizke.do) return 'nizke';
+  if (vyska <= UROVNE.stredni.do) return 'stredni';
+  return 'vysoke';
+}
+
+export const PORADI_UROVNI: Uroven[] = ['nizke', 'stredni', 'vysoke'];
 
 /** Kolik skupin dostane rostlina, kdyz to neni urcene rucne. */
 export function autoSkupin(podil: number): number {
@@ -121,6 +131,8 @@ export type Projekt = {
   ukazPlochy: boolean;
   /** Ukázat zvýrazňovač výškových oblastí — jen pomůcka, do výkresu nepatří. */
   ukazVysky: boolean;
+  /** Metrová síť přes plán — pomůcka na ověření měřítka podkladu. */
+  ukazSit: boolean;
   krok: number;
 };
 
@@ -128,7 +140,8 @@ export function prazdnyProjekt(nazev = 'Nový osazovací plán'): Projekt {
   return {
     verze: 5, nazev,
     zahony: [], skupiny: [], solitery: [],
-    meritkoTisk: 100, ukazDelky: false, ukazPlochy: false, ukazVysky: false, krok: 1,
+    meritkoTisk: 100, ukazDelky: false, ukazPlochy: false, ukazVysky: true,
+    ukazSit: false, krok: 1,
   };
 }
 

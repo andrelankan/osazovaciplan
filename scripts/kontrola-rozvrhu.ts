@@ -85,30 +85,26 @@ const maxPresah = (body: P[], polygon: P[]) => body.reduce((a, p) => Math.max(a,
       { id: 'v1', uroven: 'nizke', body: [{ x: 1, y: 5 }, { x: 9, y: 5 }] },
       { id: 'v2', uroven: 'vysoke', body: [{ x: 1, y: 1 }, { x: 9, y: 1 }] },
     ],
-    osazeni: [
-      { kod: 'Aaa', uroven: 'nizke', podil: 1 },
-      { kod: 'Ccc', uroven: 'vysoke', podil: 1 },
-    ],
+    // rostliny se vybiraji na cely zahon, oblasti jsou jen voditko
+    osazeni: [{ kod: 'Aaa', podil: 1 }, { kod: 'Ccc', podil: 1 }],
   };
   const r = rozvrhni(z, db);
   const soucet = r.casti.reduce((a, c) => a + c.plocha, 0);
   console.log(`\nZáhon 10×6 m, dva tahy (nízké dole, vysoké nahoře)`);
   console.log(`  ploch: ${r.casti.length}, součet ${soucet.toFixed(2)} m² z ${r.plocha.toFixed(2)} m²`);
-  for (const u of ['nizke', 'vysoke'] as const) {
-    const p = r.casti.filter((c) => c.uroven === u).reduce((a, c) => a + c.plocha, 0);
-    console.log(`    ${u}: ${p.toFixed(2)} m²`);
-    zkontroluj(p > 20, `oblast ${u} je osázená`);
-  }
   zkontroluj(soucet > r.plocha * 0.93, 'osazení vyplní celý záhon', `${((soucet / r.plocha) * 100).toFixed(1)} %`);
 
-  // nizke musi byt dole (vetsi y), vysoke nahore
-  const nizke = r.casti.filter((c) => c.uroven === 'nizke');
-  const vysoke = r.casti.filter((c) => c.uroven === 'vysoke');
-  const tezisteY = (cs: typeof r.casti) => cs.reduce((a, c) => a + c.popisek.y * c.plocha, 0) / cs.reduce((a, c) => a + c.plocha, 0);
-  zkontroluj(tezisteY(nizke) > tezisteY(vysoke),
-    'nízké rostliny sedí u tahu pro nízké', `nízké y=${tezisteY(nizke).toFixed(2)}, vysoké y=${tezisteY(vysoke).toFixed(2)}`);
-  zkontroluj(nizke.every((c) => c.kod === 'Aaa') && vysoke.every((c) => c.kod === 'Ccc'),
-    'do oblasti se dostaly jen rostliny do ní vybrané');
+  const tezisteY = (kod: string) => {
+    const cs = r.casti.filter((c) => c.kod === kod);
+    return cs.reduce((a, c) => a + c.popisek.y * c.plocha, 0) / cs.reduce((a, c) => a + c.plocha, 0);
+  };
+  const yNizka = tezisteY('Aaa'), yVysoka = tezisteY('Ccc');
+  console.log(`    těžiště: nízká Aaa y=${yNizka.toFixed(2)}, vysoká Ccc y=${yVysoka.toFixed(2)}`);
+  zkontroluj(yNizka > yVysoka + 1, 'nízká rostlina tíhne k tahu pro nízké (dole)');
+  for (const kod of ['Aaa', 'Ccc']) {
+    const p = r.casti.filter((c) => c.kod === kod).reduce((a, c) => a + c.plocha, 0);
+    zkontroluj(Math.abs(p / soucet - 0.5) < 0.08, `podíl ${kod} zůstal vyrovnaný`, `${((p / soucet) * 100).toFixed(1)} %`);
+  }
 }
 
 // ------------------------------------------------- 3. slozity tvar
@@ -145,12 +141,7 @@ const maxPresah = (body: P[], polygon: P[]) => body.reduce((a, p) => Math.max(a,
   const z: Zahon = {
     id: 'z4', nazev: 'čmáranice', obrys: obdelnik(10, 8), semeno: 99,
     vysky: [klikatice(1.6, 'vysoke'), klikatice(4, 'stredni'), klikatice(6.4, 'nizke')],
-    osazeni: [
-      { kod: 'Ccc', uroven: 'vysoke', podil: 1 },
-      { kod: 'Bbb', uroven: 'stredni', podil: 1 },
-      { kod: 'Aaa', uroven: 'nizke', podil: 2 },
-      { kod: 'Bbb', uroven: 'nizke', podil: 1 },
-    ],
+    osazeni: [{ kod: 'Ccc', podil: 1 }, { kod: 'Bbb', podil: 1 }, { kod: 'Aaa', podil: 2 }],
   };
   const r = rozvrhni(z, db);
   const soucet = r.casti.reduce((a, c) => a + c.plocha, 0);
@@ -160,8 +151,8 @@ const maxPresah = (body: P[], polygon: P[]) => body.reduce((a, p) => Math.max(a,
   zkontroluj(soucet > r.plocha * 0.93, 'rozeklané oblasti vyplní záhon', `${((soucet / r.plocha) * 100).toFixed(1)} %`);
   const obrys = naBody(z.obrys, 0.02);
   zkontroluj(maxPresah(r.casti.flatMap((c) => c.polygon), obrys) < 0.02, 'nic nepřesahuje ven');
-  for (const u of ['nizke', 'stredni', 'vysoke'] as const) {
-    zkontroluj(r.casti.some((c) => c.uroven === u), `oblast ${u} má svoje plochy`);
+  for (const kod of ['Aaa', 'Bbb', 'Ccc']) {
+    zkontroluj(r.casti.some((c) => c.kod === kod), `${kod} se do záhonu dostala`);
   }
 }
 

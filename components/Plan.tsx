@@ -15,7 +15,7 @@ export default function Plan() {
   const [rozmer, setRozmer] = useState({ w: 1200, h: 800 });
   const {
     pr, db, kategorie, kamera, koncept, podkladUrl, aktivniZahon, aktivniKod,
-    urovenStetec, upravovat, prichytavat,
+    urovenStetec, upravovat, prichytavat, meri,
   } = useStore();
   const st = useStore;
   const krok = pr.krok;
@@ -106,6 +106,9 @@ export default function Plan() {
   const onDown = (e: React.PointerEvent) => {
     try { (e.currentTarget as Element).setPointerCapture?.(e.pointerId); } catch { /* pero/dotyk */ }
     const p = pozice(e);
+    // krok se cte ze store, ne ze zavreni funkce - po prepnuti kroku muze prijit
+    // klik driv, nez se komponenta prekresli
+    const krok = st.getState().pr.krok;
 
     // posun plátna: prostrední/pravé tlačítko nebo Alt
     if (e.button === 1 || e.button === 2 || (e.button === 0 && e.altKey)) {
@@ -113,6 +116,13 @@ export default function Plan() {
       return;
     }
     if (e.button !== 0) return;
+
+    // mereni vzdalenosti na podkladu (a pripadna kalibrace meritka)
+    if (krok === 1 && meri) {
+      const k = st.getState().koncept;
+      st.getState().set('koncept', k.length >= 2 ? [p] : [...k, p]);
+      return;
+    }
 
     if (krok === 2) {
       if (upravovat) {
@@ -201,7 +211,7 @@ export default function Plan() {
     panRef.current = null;
     uchopRef.current = null;
     const nakresleno = tahRef.current;
-    if (nakresleno && nakresleno.length >= 1 && krok === 3) {
+    if (nakresleno && nakresleno.length >= 1 && st.getState().pr.krok === 3) {
       const cil = st.getState().aktivniZahon ?? pr.zahony[0]?.id;
       if (cil) {
         st.getState().zmen((d) => {
@@ -276,7 +286,9 @@ export default function Plan() {
 
   // -------------------------------------------------------------- vykresli
   const podklad = pr.podklad;
-  const ukazVysky = krok === 3 || pr.ukazVysky;
+  // v kroku 3 se kresli naplno, jinde jen jemne jako voditko
+  const ukazVysky = krok === 3 || (pr.ukazVysky && krok === 4);
+  const silaVysek = krok === 3 ? 0.32 : 0.16;
   const kurzor = krok === 1 || krok === 4 ? 'default' : krok === 3 ? 'cell' : 'crosshair';
 
   return (
@@ -325,6 +337,31 @@ export default function Plan() {
       {/* 3 — cary a popisky, nad rastrem */}
       <svg className="absolute inset-0 pointer-events-none" width={W} height={H}>
         <g transform={gt}>
+          {/* metrova sit - na overeni, ze meritko podkladu sedi */}
+          {pr.ukazSit && z >= 4 && (() => {
+            const x0 = kamera.x - W / (2 * z), x1 = kamera.x + W / (2 * z);
+            const y0 = kamera.y - H / (2 * z), y1 = kamera.y + H / (2 * z);
+            if ((x1 - x0) + (y1 - y0) > 600) return null;
+            const cary: React.ReactElement[] = [];
+            for (let x = Math.ceil(x0); x <= x1; x++) {
+              cary.push(<line key={'x' + x} x1={x} y1={y0} x2={x} y2={y1} strokeWidth={x % 5 === 0 ? 1.4 : 0.6} />);
+            }
+            for (let y = Math.ceil(y0); y <= y1; y++) {
+              cary.push(<line key={'y' + y} x1={x0} y1={y} x2={x1} y2={y} strokeWidth={y % 5 === 0 ? 1.4 : 0.6} />);
+            }
+            return <g stroke="#e0189a" opacity={0.45} vectorEffect="non-scaling-stroke">{cary}</g>;
+          })()}
+
+          {/* merena vzdalenost */}
+          {krok === 1 && meri && koncept.length > 0 && (
+            <g stroke="#e0189a" strokeWidth={2} vectorEffect="non-scaling-stroke">
+              {koncept.length >= 2
+                ? <line x1={koncept[0].x} y1={koncept[0].y} x2={koncept[1].x} y2={koncept[1].y} />
+                : mys && <line x1={koncept[0].x} y1={koncept[0].y} x2={mys.x} y2={mys.y} strokeDasharray="6 4" />}
+              {koncept.map((p, i) => <circle key={i} cx={p.x} cy={p.y} r={4 / z} fill="#e0189a" stroke="none" />)}
+            </g>
+          )}
+
           {pr.zahony.map((zh) => {
             const r = rozvrhy.get(zh.id);
             const je = zh.id === aktivniZahon;
@@ -359,7 +396,7 @@ export default function Plan() {
           {ukazVysky && pr.zahony.flatMap((zh) => zh.vysky.map((t) => (
             <polyline key={t.id} points={t.body.map((q) => `${q.x},${q.y}`).join(' ')} fill="none"
               stroke={UROVNE[t.uroven].barva} strokeWidth={0.9} strokeLinecap="round"
-              strokeLinejoin="round" opacity={0.28} />
+              strokeLinejoin="round" opacity={silaVysek} />
           )))}
           {tah && (
             <polyline points={tah.map((q) => `${q.x},${q.y}`).join(' ')} fill="none"
@@ -482,7 +519,17 @@ export default function Plan() {
             );
           })}
 
-          {koncept.length > 0 && mys && (() => {
+          {krok === 1 && meri && koncept.length >= 2 && (() => {
+            const c = naObraz(lerp(koncept[0], koncept[1], 0.5));
+            return (
+              <text x={c.x} y={c.y - 8} textAnchor="middle" fontSize={13} fontWeight={600} fill="#e0189a"
+                stroke="#fff" strokeWidth={3.5} paintOrder="stroke">
+                {dist(koncept[0], koncept[1]).toFixed(2)} m
+              </text>
+            );
+          })()}
+
+          {krok !== 1 && koncept.length > 0 && mys && (() => {
             const a = koncept[koncept.length - 1];
             const c = naObraz(lerp(a, mys, 0.5));
             const u = (Math.atan2(mys.y - a.y, mys.x - a.x) * 180) / Math.PI;

@@ -30,6 +30,8 @@ type Stav = {
   upravovat: boolean;
   /** Prichytavat kresleni k jiz nakreslenym bodum a caram. */
   prichytavat: boolean;
+  /** V kroku 1: rezim mereni vzdalenosti / kalibrace meritka. */
+  meri: boolean;
 
   kamera: { x: number; y: number; z: number };
   koncept: V[];
@@ -82,6 +84,7 @@ export const useStore = create<Stav>((set, get) => ({
   urovenStetec: 'nizke',
   upravovat: false,
   prichytavat: true,
+  meri: false,
 
   kamera: { x: 0, y: 0, z: 40 },
   koncept: [],
@@ -125,7 +128,7 @@ export const useStore = create<Stav>((set, get) => ({
     get().zmen((d) => { d.krok = k; });
     const s = get();
     set({
-      koncept: [], upravovat: false,
+      koncept: [], upravovat: false, meri: false,
       aktivniZahon: s.aktivniZahon ?? s.pr.zahony[0]?.id ?? null,
       aktivniKod: null,
     });
