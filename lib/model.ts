@@ -21,12 +21,50 @@ export type Rostlina = {
 export type KatInfo = { nazev: string; fill: string; stroke: string; plocha: boolean };
 export type Databaze = { kategorie: Record<string, KatInfo>; rostliny: Rostlina[] };
 
-/** Ktere kategorie patri do ktereho kroku - jinam se nedostanou. */
+/** Rozdeleni sortimentu v seznamu rostlin. */
 export const KATEGORIE_KROKU = {
   zahon: ['T', 'G', 'F', 'C'],
   kere: ['K', 'U'],
   stromy: ['S', 'J'],
 } as const;
+
+export const NAZEV_SORTIMENTU = {
+  zahon: 'Trvalky a traviny',
+  kere: 'Keře',
+  stromy: 'Stromy',
+} as const;
+
+/** Zakladni barevne skupiny kvetu pro filtr. */
+export const BARVY_KVETU = {
+  bila: { nazev: 'bílá', vzor: '#ffffff' },
+  zluta: { nazev: 'žlutá', vzor: '#f0d020' },
+  ruzova: { nazev: 'růžová', vzor: '#e07fa8' },
+  cervena: { nazev: 'červená', vzor: '#c02030' },
+  modra: { nazev: 'modrá / fialová', vzor: '#5f5fc0' },
+  zelena: { nazev: 'zelená', vzor: '#9bbf6a' },
+} as const;
+export type BarvaKvetu = keyof typeof BARVY_KVETU;
+
+/** Zaradi hex barvu kvetu do jedne ze zakladnich skupin. */
+export function skupinaBarvy(hex: string): BarvaKvetu | null {
+  const m = /^#([0-9a-f]{6})$/i.exec(hex.trim());
+  if (!m) return null;
+  const n = parseInt(m[1], 16);
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  if (max > 235 && max - min < 26) return 'bila';
+  if (max - min < 26) return null;                       // sedive listy apod.
+  let h = 0;
+  if (max === r) h = ((g - b) / (max - min)) * 60;
+  else if (max === g) h = (2 + (b - r) / (max - min)) * 60;
+  else h = (4 + (r - g) / (max - min)) * 60;
+  if (h < 0) h += 360;
+  if (h < 20 || h >= 330) return r > 200 && g > 140 ? 'ruzova' : 'cervena';
+  if (h < 70) return 'zluta';
+  if (h < 160) return 'zelena';
+  if (h < 280) return 'modra';
+  return 'ruzova';
+}
 
 export type Uroven = 'nizke' | 'stredni' | 'vysoke';
 

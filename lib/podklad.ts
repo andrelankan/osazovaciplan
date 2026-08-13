@@ -8,6 +8,24 @@ const CIL_PX = 3200;
 export type Vysledek = { podklad: Podklad; url: string };
 
 /**
+ * Z bileho pozadi vykresu udela pruhledno, cary zustanou.
+ *
+ * Bez toho by podklad prekryl vybarveni zahonu: rezim "nasobeni" v CSS blenduje
+ * jen v ramci sveho stohovaciho kontextu, a ten kvuli transformaci platna vznika
+ * nad vrstvou s vyplnemi. S opravdovou pruhlednosti na tom uz nezalezi.
+ */
+function zpruhledniBilou(ctx: CanvasRenderingContext2D, w: number, h: number) {
+  const obraz = ctx.getImageData(0, 0, w, h);
+  const d = obraz.data;
+  for (let i = 0; i < d.length; i += 4) {
+    // nejsvetlejsi slozka urcuje, jak moc je pixel "bily"
+    const nej = Math.min(d[i], d[i + 1], d[i + 2]);
+    d[i + 3] = 255 - nej;
+  }
+  ctx.putImageData(obraz, 0, 0);
+}
+
+/**
  * Nacte PDF nebo obrazek jako podklad.
  * U PDF se skutecna velikost spocita z rozmeru stranky a meritka (1:`meritko`).
  * U obrazku se sirka odhadne na 20 m a upresni se nastrojem Kalibrace.
@@ -35,6 +53,7 @@ export async function nactiPodklad(file: File, meritko: number, stranka = 1): Pr
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     await page.render({ canvas, canvasContext: ctx, viewport: vp }).promise;
+    zpruhledniBilou(ctx, canvas.width, canvas.height);
 
     const blob = await new Promise<Blob>((res) => canvas.toBlob((b) => res(b!), 'image/png'));
     await uloz(klic, blob);

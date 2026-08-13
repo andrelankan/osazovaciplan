@@ -4,7 +4,7 @@ import {
   P, V, add, bodVPolygonu, bodyPoCare, bulgeZBodu, cesta, cestaBody, delkaHrany, dist, lerp, mul,
   naBody, obalka, sub, vzdalUsecka,
 } from '@/lib/geom';
-import { Rostlina, UROVNE, Zahon, id, prazdnyZahon } from '@/lib/model';
+import { KATEGORIE_KROKU, Rostlina, UROVNE, Uroven, Zahon, id, prazdnyZahon } from '@/lib/model';
 import { useStore } from '@/lib/store';
 import { useRozvrhy } from '@/lib/useRozvrhy';
 
@@ -14,7 +14,7 @@ export default function Plan() {
   const box = useRef<HTMLDivElement>(null);
   const [rozmer, setRozmer] = useState({ w: 1200, h: 800 });
   const {
-    pr, db, kategorie, kamera, koncept, podkladUrl, aktivniZahon, aktivniKod,
+    pr, db, kategorie, kamera, koncept, podkladUrl, aktivniZahon,
     urovenStetec, upravovat, prichytavat, meri, vybranaSkupina,
   } = useStore();
   const st = useStore;
@@ -29,6 +29,8 @@ export default function Plan() {
   const [presna, setPresna] = useState<{ d: string; u: string } | null>(null);
   const uchopRef = useRef<{ zahon: string; typ: 'vrchol' | 'stred'; i: number } | null>(null);
   const panRef = useRef<{ sx: number; sy: number; kx: number; ky: number } | null>(null);
+  /** Drzi aktualni "dokonci kresbu", aby ji slo zavolat i z tlacitka v lište. */
+  const hotovoRef = useRef<() => void>(() => { });
 
   const rostlina = useCallback((kod?: string) => db.find((r) => r.kod === kod), [db]);
 
@@ -91,17 +93,54 @@ export default function Plan() {
     return p;
   }, [pr.zahony, koncept, z, prichytavat, obrysy]);
 
+  /**
+   * Kolecko posouva, s Ctrl (nebo gestem stazeni prstu na trackpadu) priblizuje.
+   * Priblizuje se k mistu pod kurzorem, at se clovek nemusi doposouvat.
+   */
   const onWheel = (e: React.WheelEvent) => {
     const r = box.current!.getBoundingClientRect();
     const sx = e.clientX - r.left, sy = e.clientY - r.top;
-    const pred = naSvet(sx, sy);
-    const novy = Math.max(2, Math.min(600, z * Math.pow(1.0015, -e.deltaY)));
-    st.getState().setKamera({
-      z: novy,
-      x: kamera.x + pred.x - ((sx - W / 2) / novy + kamera.x),
-      y: kamera.y + pred.y - ((sy - H / 2) / novy + kamera.y),
-    });
+    if (e.ctrlKey || e.metaKey) {
+      const pred = naSvet(sx, sy);
+      const novy = Math.max(2, Math.min(600, z * Math.pow(1.0022, -e.deltaY)));
+      st.getState().setKamera({
+        z: novy,
+        x: kamera.x + pred.x - ((sx - W / 2) / novy + kamera.x),
+        y: kamera.y + pred.y - ((sy - H / 2) / novy + kamera.y),
+      });
+    } else {
+      st.getState().setKamera({ x: kamera.x + e.deltaX / z, y: kamera.y + e.deltaY / z });
+    }
   };
+
+  /** Srovna pohled tak, aby se vesel cely plan. */
+  const naObrazovku = useCallback(() => {
+    const p = st.getState().pr;
+    const body: P[] = [];
+    for (const zh of p.zahony) body.push(...naBody(zh.obrys, 0.1));
+    for (const s of p.skupiny) body.push(...s.body);
+    for (const s of p.solitery) body.push(s.pos);
+    if (!body.length && p.podklad) body.push(
+      { x: p.podklad.x, y: p.podklad.y },
+      { x: p.podklad.x + p.podklad.sirkaM, y: p.podklad.y + p.podklad.vyskaM },
+    );
+    if (!body.length) return;
+    const o = obalka(body);
+    st.getState().setKamera({
+      x: (o.x0 + o.x1) / 2, y: (o.y0 + o.y1) / 2,
+      z: Math.max(2, Math.min(500, Math.min(W / (o.w || 1), H / (o.h || 1)) * 0.88)),
+    });
+  }, [st, W, H]);
+
+  useEffect(() => {
+    const dok = () => hotovoRef.current();
+    window.addEventListener('plan:dokoncit', dok);
+    window.addEventListener('plan:naObrazovku', naObrazovku);
+    return () => {
+      window.removeEventListener('plan:dokoncit', dok);
+      window.removeEventListener('plan:naObrazovku', naObrazovku);
+    };
+  }, [naObrazovku]);
 
   const onDown = (e: React.PointerEvent) => {
     try { (e.currentTarget as Element).setPointerCapture?.(e.pointerId); } catch { /* pero/dotyk */ }
@@ -157,14 +196,18 @@ export default function Plan() {
       return;
     }
 
+    // krok 4 - vsechen rostlinny material; co se deje, urcuje vybrana rostlina
     if (krok === 4) {
-      const zh = zahonPod(p);
-      if (zh) st.getState().set('aktivniZahon', zh.id);
-      return;
-    }
+      const r = rostlina(st.getState().aktivniKod ?? undefined);
+      const kresliRadu = r && (KATEGORIE_KROKU.kere as readonly string[]).includes(r.kat);
+      const sadiStrom = r && (KATEGORIE_KROKU.stromy as readonly string[]).includes(r.kat);
 
-    if (krok === 5) {
-      // kdyz se prave nekresli, klik na hotovou radu ji vybere (kvuli rozestupu)
+      if (sadiStrom) {
+        st.getState().zmen((d) => d.solitery.push({ id: id(), kod: r.kod, pos: p, koruna: r.koruna }));
+        return;
+      }
+
+      // klik na hotovou radu ji vybere (jde pak zmenit rozestup i druh)
       if (!st.getState().koncept.length) {
         const tol = 10 / z;
         const trefena = pr.skupiny.find((s) => {
@@ -174,16 +217,15 @@ export default function Plan() {
         });
         if (trefena) { st.getState().set('vybranaSkupina', trefena.id); return; }
       }
-      if (!aktivniKod) return;
-      st.getState().set('vybranaSkupina', null);
-      st.getState().set('koncept', [...st.getState().koncept, snap(p, e.shiftKey)]);
-      return;
-    }
 
-    if (krok === 6) {
-      if (!aktivniKod) return;
-      const r = rostlina(aktivniKod);
-      st.getState().zmen((d) => d.solitery.push({ id: id(), kod: aktivniKod, pos: p, koruna: r?.koruna ?? 4 }));
+      if (kresliRadu) {
+        st.getState().set('vybranaSkupina', null);
+        st.getState().set('koncept', [...st.getState().koncept, snap(p, e.shiftKey)]);
+        return;
+      }
+
+      const zh = zahonPod(p);
+      if (zh) st.getState().set('aktivniZahon', zh.id);
     }
   };
 
@@ -261,8 +303,9 @@ export default function Plan() {
 
   const hotovo = useCallback(() => {
     if (st.getState().pr.krok === 2) uzavriZahon();
-    else if (st.getState().pr.krok === 5) uzavriKere();
+    else if (st.getState().pr.krok === 4) uzavriKere();
   }, [st, uzavriZahon, uzavriKere]);
+  useEffect(() => { hotovoRef.current = hotovo; }, [hotovo]);
 
   // -------------------------------------------------------------- klavesy
   useEffect(() => {
@@ -299,9 +342,9 @@ export default function Plan() {
   // -------------------------------------------------------------- vykresli
   const podklad = pr.podklad;
   // v kroku 3 se kresli naplno, jinde jen jemne jako voditko
-  const ukazVysky = krok === 3 || (pr.ukazVysky && krok === 4);
+  const ukazVysky = krok === 3 || pr.ukazVysky;
   const silaVysek = krok === 3 ? 0.32 : 0.16;
-  const kurzor = krok === 1 || krok === 4 ? 'default' : krok === 3 ? 'cell' : 'crosshair';
+  const kurzor = krok === 2 ? 'crosshair' : krok === 3 ? 'cell' : 'default';
 
   return (
     <div
@@ -340,7 +383,6 @@ export default function Plan() {
               width: `${podklad.pxW || 1000}px`, height: `${podklad.pxH || 1000}px`,
               maxWidth: 'none', maxHeight: 'none',
               transform: `translate(${podklad.x}px, ${podklad.y}px) rotate(${podklad.otoceni}deg) scale(${podklad.sirkaM / (podklad.pxW || 1000)})`,
-              mixBlendMode: 'multiply',
               opacity: podklad.kryti,
             }} />
         </div>
@@ -404,17 +446,22 @@ export default function Plan() {
             );
           })}
 
-          {/* zvyraznovac vyskovych oblasti - jen pomucka, do vykresu nepatri */}
-          {ukazVysky && pr.zahony.flatMap((zh) => zh.vysky.map((t) => (
-            <polyline key={t.id} points={t.body.map((q) => `${q.x},${q.y}`).join(' ')} fill="none"
-              stroke={UROVNE[t.uroven].barva} strokeWidth={0.9} strokeLinecap="round"
-              strokeLinejoin="round" opacity={silaVysek} />
-          )))}
-          {tah && (
-            <polyline points={tah.map((q) => `${q.x},${q.y}`).join(' ')} fill="none"
-              stroke={UROVNE[urovenStetec].barva} strokeWidth={0.9} strokeLinecap="round"
-              strokeLinejoin="round" opacity={0.4} />
-          )}
+          {/* Zvyraznovac vyskovych oblasti - jen pomucka, do vykresu nepatri.
+              Kryti sedi na skupine, ne na jednotlivych tazich; jinak by se
+              prekryvajici tahy scitaly do tmavsich fleku. */}
+          {ukazVysky && (Object.keys(UROVNE) as Uroven[]).map((u) => {
+            const hotove = pr.zahony.flatMap((zh) => zh.vysky.filter((t) => t.uroven === u).map((t) => t.body));
+            const kresli = tah && urovenStetec === u ? [...hotove, tah] : hotove;
+            if (!kresli.length) return null;
+            return (
+              <g key={u} opacity={silaVysek}>
+                {kresli.map((body, i) => (
+                  <polyline key={i} points={body.map((q) => `${q.x},${q.y}`).join(' ')} fill="none"
+                    stroke={UROVNE[u].barva} strokeWidth={0.9} strokeLinecap="round" strokeLinejoin="round" />
+                ))}
+              </g>
+            );
+          })}
 
           {/* skupiny keru - jen spojene tecky, zadny prumer koruny */}
           {pr.skupiny.map((s) => {
@@ -505,23 +552,34 @@ export default function Plan() {
             );
           })}
 
-          {/* nazev keře u kazde tecky */}
-          {pr.skupiny.map((s) => {
-            const r = rostlina(s.kod);
-            const body = naBody(s.body, 0.02, false);
-            const tecky = bodyPoCare(body, s.rozestup ?? r?.rozestup ?? 1.2);
-            return (
-              <g key={s.id}>
-                {tecky.map((q, i) => {
-                  const c = naObraz(q);
-                  return (
-                    <text key={i} x={c.x + 5} y={c.y - 4} fontSize={9.5} fontStyle="italic" fill="#111"
-                      stroke="#fff" strokeWidth={2.5} paintOrder="stroke">{r?.latin ?? s.kod}</text>
-                  );
-                })}
-              </g>
-            );
-          })}
+          {/* Nazev keře u tecek. Popisky, ktere by se prekryly, se vynechavaji -
+              u husté rady by se jinak slily do necitelne kase. */}
+          {(() => {
+            const obsazeno: { x0: number; y0: number; x1: number; y1: number }[] = [];
+            const volno = (b: { x0: number; y0: number; x1: number; y1: number }) =>
+              !obsazeno.some((o) => b.x0 < o.x1 && b.x1 > o.x0 && b.y0 < o.y1 && b.y1 > o.y0);
+            return pr.skupiny.map((s) => {
+              const r = rostlina(s.kod);
+              const text = r?.latin ?? s.kod;
+              const body = naBody(s.body, 0.02, false);
+              const tecky = bodyPoCare(body, s.rozestup ?? r?.rozestup ?? 1.2);
+              const sirka = text.length * 4.6 + 8;
+              return (
+                <g key={s.id}>
+                  {tecky.map((q, i) => {
+                    const c = naObraz(q);
+                    const ram = { x0: c.x + 4, y0: c.y - 14, x1: c.x + 4 + sirka, y1: c.y - 2 };
+                    if (!volno(ram)) return null;
+                    obsazeno.push(ram);
+                    return (
+                      <text key={i} x={c.x + 5} y={c.y - 4} fontSize={9.5} fontStyle="italic" fill="#111"
+                        stroke="#fff" strokeWidth={2.5} paintOrder="stroke">{text}</text>
+                    );
+                  })}
+                </g>
+              );
+            });
+          })()}
 
           {pr.solitery.map((s) => {
             const r = rostlina(s.kod);

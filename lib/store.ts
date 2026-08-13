@@ -4,17 +4,17 @@ import { P, V } from './geom';
 import { Databaze, KatInfo, Projekt, Rostlina, Uroven, prazdnyProjekt } from './model';
 
 /** Krok pruvodce urcuje, co jde v danou chvili delat - jine ovladani neni videt. */
-export type Krok = 1 | 2 | 3 | 4 | 5 | 6 | 7;
+export type Krok = 1 | 2 | 3 | 4 | 5;
 
 export const KROKY: { cislo: Krok; nazev: string; kratce: string }[] = [
   { cislo: 1, nazev: 'Podklad zahrady', kratce: 'Podklad' },
   { cislo: 2, nazev: 'Obrys záhonu', kratce: 'Záhon' },
   { cislo: 3, nazev: 'Výškové oblasti', kratce: 'Výšky' },
-  { cislo: 4, nazev: 'Rostliny do záhonu', kratce: 'Rostliny' },
-  { cislo: 5, nazev: 'Skupiny keřů', kratce: 'Keře' },
-  { cislo: 6, nazev: 'Stromy a solitéry', kratce: 'Stromy' },
-  { cislo: 7, nazev: 'Hotovo — tisk a výkaz', kratce: 'Tisk' },
+  { cislo: 4, nazev: 'Rostlinný materiál', kratce: 'Rostliny' },
+  { cislo: 5, nazev: 'Hotovo — tisk a výkaz', kratce: 'Tisk' },
 ];
+
+export const POSLEDNI_KROK = 5;
 
 type Stav = {
   pr: Projekt;
@@ -32,8 +32,10 @@ type Stav = {
   prichytavat: boolean;
   /** V kroku 1: rezim mereni vzdalenosti / kalibrace meritka. */
   meri: boolean;
-  /** V kroku 5: vybrana skupina keru, u ktere jde menit rozestup. */
+  /** Vybrana skupina keru - jde u ni menit rozestup i druh. */
   vybranaSkupina: string | null;
+  /** Ktera cast sortimentu je v seznamu videt. */
+  sortiment: 'zahon' | 'kere' | 'stromy';
   /** Rozestup pro nove kreslenou skupinu; null = vzit vychozi u rostliny. */
   rozestupNovy: number | null;
 
@@ -90,6 +92,7 @@ export const useStore = create<Stav>((set, get) => ({
   prichytavat: true,
   meri: false,
   vybranaSkupina: null,
+  sortiment: 'zahon',
   rozestupNovy: null,
 
   kamera: { x: 0, y: 0, z: 40 },

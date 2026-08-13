@@ -2,8 +2,10 @@
 import React, { useRef, useState } from 'react';
 import Katalog from '@/components/Katalog';
 import { dist as vzdalenost } from '@/lib/geom';
-import { KATEGORIE_KROKU, UROVNE, Uroven, Zahon, autoSkupin, urovenRostliny, vykaz } from '@/lib/model';
-import { KROKY, Krok, useStore } from '@/lib/store';
+import {
+  KATEGORIE_KROKU, Rostlina, UROVNE, Uroven, Zahon, urovenRostliny, vykaz,
+} from '@/lib/model';
+import { KROKY, Krok, POSLEDNI_KROK, useStore } from '@/lib/store';
 import { useRozvrhy } from '@/lib/useRozvrhy';
 import { nactiPodklad } from '@/lib/podklad';
 import { smaz } from '@/lib/idb';
@@ -11,12 +13,10 @@ import { smaz } from '@/lib/idb';
 /** Jedna veta, co se ma prave ted delat. Nic jineho na obrazovce nesviti. */
 const POKYN: Record<Krok, string> = {
   1: 'Nahraj plánek zahrady a řekni, v jakém je měřítku. Přepínačem Metrová síť si ověříš, že sedí.',
-  2: 'Obkresli po plánku okraj záhonu. Klikáním, Enter uzavře.',
-  3: 'Zvýrazňovačem přejeď zhruba tam, kde chceš nízké a kde vysoké rostliny. Je to jen pomůcka pro rozmístění — do výkresu se nekreslí a klidně může přesahovat.',
-  4: 'Vyber rostliny do celého záhonu. Rozmístí se samy, výškové oblasti bere rozvrh jako vodítko.',
-  5: 'Vyber keř, nastav rozestup a naklikej řadu. Enter dokončí. Klik na hotovou řadu ji vybere.',
-  6: 'Vyber strom a klikni, kam ho zasadit.',
-  7: 'Hotovo. Přepínači si zapni, co má být na výkrese vidět, a vytiskni.',
+  2: 'Obkresli po plánku okraj záhonu. Klikáním, Enter nebo tlačítkem uzavřeš.',
+  3: 'Zvýrazňovačem přejeď zhruba tam, kde chceš nízké a kde vysoké rostliny. Je to jen pomůcka — do výkresu se nekreslí a klidně může přesahovat.',
+  4: 'Vpravo klikáním vybírej rostliny. Trvalky se rozmístí do záhonu samy, keře a stromy nakreslíš do plánu.',
+  5: 'Hotovo. Přepínači si zapni, co má být na výkrese vidět, a vytiskni.',
 };
 
 export default function Pruvodce() {
@@ -25,17 +25,17 @@ export default function Pruvodce() {
 
   return (
     <>
-      {/* pokyn pres platno */}
       <div className="pointer-events-none absolute left-4 top-4 z-10 max-w-md rounded-lg bg-white/95 px-3 py-2 shadow-md ring-1 ring-black/5">
         <div className="text-[11px] font-semibold uppercase tracking-wide text-emerald-700">
-          Krok {krok} ze 7 · {KROKY[krok - 1].nazev}
+          Krok {krok} z {POSLEDNI_KROK} · {KROKY[krok - 1].nazev}
         </div>
         <div className="text-sm text-gray-700">{POKYN[krok]}</div>
       </div>
 
-      {/* ovladani kroku dole uprostred */}
+      <Zoom />
+
       <div className="pointer-events-none absolute inset-x-0 bottom-4 z-10 flex justify-center px-4">
-        <div className="pointer-events-auto flex max-w-4xl items-center gap-2 rounded-xl bg-white px-3 py-2 shadow-lg ring-1 ring-black/5">
+        <div className="pointer-events-auto flex max-w-5xl items-center gap-2 rounded-xl bg-white px-3 py-2 shadow-lg ring-1 ring-black/5">
           <Navigace />
         </div>
       </div>
@@ -43,11 +43,27 @@ export default function Pruvodce() {
   );
 }
 
+/** Posun a priblizeni - vzdycky po ruce, v kazdem kroku. */
+function Zoom() {
+  const kamera = useStore((s) => s.kamera);
+  const st = useStore;
+  const zmen = (k: number) => st.getState().setKamera({ z: Math.max(2, Math.min(600, kamera.z * k)) });
+
+  return (
+    <div className="absolute right-4 top-4 z-10 flex flex-col overflow-hidden rounded-lg bg-white shadow-md ring-1 ring-black/5">
+      <button onClick={() => zmen(1.3)} title="Přiblížit" className="px-2.5 py-1.5 text-lg leading-none hover:bg-gray-100">+</button>
+      <button onClick={() => zmen(1 / 1.3)} title="Oddálit" className="border-t border-gray-200 px-2.5 py-1.5 text-lg leading-none hover:bg-gray-100">−</button>
+      <button onClick={() => window.dispatchEvent(new CustomEvent('plan:naObrazovku'))} title="Vejít celý plán"
+        className="border-t border-gray-200 px-2 py-1.5 text-[11px] hover:bg-gray-100">celý</button>
+    </div>
+  );
+}
+
 function Navigace() {
   const { pr } = useStore();
   const st = useStore;
   const krok = pr.krok as Krok;
-  const jdi = (k: number) => st.getState().naKrok(Math.max(1, Math.min(7, k)) as Krok);
+  const jdi = (k: number) => st.getState().naKrok(Math.max(1, Math.min(POSLEDNI_KROK, k)) as Krok);
 
   return (
     <>
@@ -60,7 +76,7 @@ function Navigace() {
         ))}
       </div>
       <KrokAkce />
-      <button onClick={() => jdi(krok + 1)} disabled={krok === 7}
+      <button onClick={() => jdi(krok + 1)} disabled={krok === POSLEDNI_KROK}
         className="rounded-lg bg-gray-900 px-4 py-1.5 text-sm text-white hover:bg-gray-700 disabled:opacity-30">
         Další →
       </button>
@@ -70,17 +86,20 @@ function Navigace() {
 
 /** Akce, ktere davaji smysl jen v danem kroku. */
 function KrokAkce() {
-  const { pr, aktivniZahon, urovenStetec, upravovat, prichytavat, meri, koncept, kamera } = useStore();
+  const {
+    pr, aktivniZahon, aktivniKod, db, urovenStetec, upravovat, prichytavat, meri, koncept, kamera,
+  } = useStore();
   const st = useStore;
   const krok = pr.krok as Krok;
   const podkladInput = useRef<HTMLInputElement>(null);
   const [meritko, setMeritko] = useState(pr.podklad?.meritko ?? 100);
   const [nacita, setNacita] = useState(false);
   const zahon = pr.zahony.find((z) => z.id === aktivniZahon) ?? pr.zahony[0];
+  const aktivni = db.find((r) => r.kod === aktivniKod);
 
   /**
    * Prepocet meritka podkladu. Meni se i uz nakreslena geometrie, aby plan
-   * zustal vuci podkladu na miste - jinak by se po kalibraci rozjel.
+   * zustal vuci podkladu na miste.
    */
   const kalibruj = (pomer: number) => {
     if (!(pomer > 0) || Math.abs(pomer - 1) < 1e-6) return;
@@ -100,7 +119,7 @@ function KrokAkce() {
     });
     st.getState().setKamera({ x: kamera.x * pomer, y: kamera.y * pomer, z: kamera.z / pomer });
     st.getState().set('koncept', []);
-    setMeritko(Math.round((st.getState().pr.podklad?.meritko ?? 100)));
+    setMeritko(Math.round(st.getState().pr.podklad?.meritko ?? 100));
   };
 
   const vlozPodklad = async (f: File) => {
@@ -149,23 +168,19 @@ function KrokAkce() {
             <Prepinac zapnuto={meri} onClick={() => { st.getState().set('meri', !meri); st.getState().set('koncept', []); }}>
               Změřit
             </Prepinac>
-            {meri && (
-              namereno > 0
-                ? (
-                  <span className="flex items-center gap-1 rounded-lg bg-pink-50 px-2 py-1 text-sm">
-                    <b>{namereno.toFixed(2)} m</b>
-                    <span className="text-gray-500">· má být</span>
-                    <input type="number" step="0.01" placeholder="m" className="w-20 rounded border px-1 py-0.5"
-                      onKeyDown={(e) => {
-                        if (e.key !== 'Enter') return;
-                        const skutecna = parseFloat((e.target as HTMLInputElement).value.replace(',', '.'));
-                        if (skutecna > 0) kalibruj(skutecna / namereno);
-                      }} />
-                    <span className="text-[11px] text-gray-400">Enter</span>
-                  </span>
-                )
-                : <span className="text-xs text-gray-500">klikni dva body na plánku</span>
-            )}
+            {meri && (namereno > 0 ? (
+              <span className="flex items-center gap-1 rounded-lg bg-pink-50 px-2 py-1 text-sm">
+                <b>{namereno.toFixed(2)} m</b>
+                <span className="text-gray-500">· má být</span>
+                <input type="number" step="0.01" placeholder="m" className="w-20 rounded border px-1 py-0.5"
+                  onKeyDown={(e) => {
+                    if (e.key !== 'Enter') return;
+                    const skutecna = parseFloat((e.target as HTMLInputElement).value.replace(',', '.'));
+                    if (skutecna > 0) kalibruj(skutecna / namereno);
+                  }} />
+                <span className="text-[11px] text-gray-400">Enter</span>
+              </span>
+            ) : <span className="text-xs text-gray-500">klikni dva body na plánku</span>)}
           </>
         )}
       </div>
@@ -179,11 +194,9 @@ function KrokAkce() {
         <Prepinac zapnuto={upravovat} onClick={() => { st.getState().set('upravovat', true); st.getState().set('koncept', []); }}>
           Upravit tvar
         </Prepinac>
-        <Prepinac zapnuto={prichytavat} onClick={() => st.getState().set('prichytavat', !prichytavat)}>
-          Přichytávat
-        </Prepinac>
+        <Prepinac zapnuto={prichytavat} onClick={() => st.getState().set('prichytavat', !prichytavat)}>Přichytávat</Prepinac>
         {!upravovat && koncept.length >= 3 && (
-          <button onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }))}
+          <button onClick={() => window.dispatchEvent(new CustomEvent('plan:dokoncit'))}
             className="rounded-lg bg-emerald-600 px-3 py-1.5 text-sm text-white">Uzavřít záhon</button>
         )}
         {pr.zahony.length > 0 && <span className="text-xs text-gray-500">{pr.zahony.length}× záhon</span>}
@@ -214,25 +227,43 @@ function KrokAkce() {
     );
   }
 
-  if (krok === 7) {
+  if (krok === 4) {
+    const kresliRadu = aktivni && (KATEGORIE_KROKU.kere as readonly string[]).includes(aktivni.kat);
     return (
       <div className="flex items-center gap-2 border-l border-gray-200 pl-2">
-        <Prepinac zapnuto={pr.ukazDelky} onClick={() => st.getState().zmen((d) => { d.ukazDelky = !d.ukazDelky; })}>
-          Délky stran
-        </Prepinac>
-        <Prepinac zapnuto={pr.ukazPlochy} onClick={() => st.getState().zmen((d) => { d.ukazPlochy = !d.ukazPlochy; })}>
-          Výměry m²
-        </Prepinac>
+        {aktivni
+          ? <span className="text-sm text-gray-600">kreslí se <b className="italic">{aktivni.latin}</b></span>
+          : <span className="text-sm text-gray-500">vyber rostlinu vpravo</span>}
+        {kresliRadu && koncept.length >= 2 && (
+          <button onClick={() => window.dispatchEvent(new CustomEvent('plan:dokoncit'))}
+            className="rounded-lg bg-emerald-600 px-3 py-1.5 text-sm text-white">Dokončit řadu</button>
+        )}
+        {koncept.length > 0 && (
+          <button onClick={() => st.getState().set('koncept', [])}
+            className="rounded-lg px-2 py-1.5 text-sm text-gray-500 hover:bg-gray-100">Zrušit</button>
+        )}
         <Prepinac zapnuto={pr.ukazVysky} onClick={() => st.getState().zmen((d) => { d.ukazVysky = !d.ukazVysky; })}>
-          Zvýraznění výšek
+          Výškové oblasti
         </Prepinac>
-        <button onClick={() => window.open('/tisk', '_blank')}
-          className="rounded-lg bg-emerald-600 px-3 py-1.5 text-sm text-white">Tisk / PDF</button>
       </div>
     );
   }
 
-  return null;
+  return (
+    <div className="flex items-center gap-2 border-l border-gray-200 pl-2">
+      <Prepinac zapnuto={pr.ukazDelky} onClick={() => st.getState().zmen((d) => { d.ukazDelky = !d.ukazDelky; })}>
+        Délky stran
+      </Prepinac>
+      <Prepinac zapnuto={pr.ukazPlochy} onClick={() => st.getState().zmen((d) => { d.ukazPlochy = !d.ukazPlochy; })}>
+        Výměry m²
+      </Prepinac>
+      <Prepinac zapnuto={pr.ukazVysky} onClick={() => st.getState().zmen((d) => { d.ukazVysky = !d.ukazVysky; })}>
+        Zvýraznění výšek
+      </Prepinac>
+      <button onClick={() => window.open('/tisk', '_blank')}
+        className="rounded-lg bg-emerald-600 px-3 py-1.5 text-sm text-white">Tisk / PDF</button>
+    </div>
+  );
 }
 
 function Prepinac({ zapnuto, onClick, children }: { zapnuto: boolean; onClick: () => void; children: React.ReactNode }) {
@@ -246,222 +277,169 @@ function Prepinac({ zapnuto, onClick, children }: { zapnuto: boolean; onClick: (
 
 // ============================================================ bocni panel
 
-/** Panel vpravo se ukazuje jen v krocich, kde se vybiraji rostliny. */
 export function BocniPanel() {
-  const pr = useStore((s) => s.pr);
-  const krok = pr.krok as Krok;
-  if (krok === 4) return <PanelZahonu />;
-  if (krok === 5) return <PanelDrevin kategorie={KATEGORIE_KROKU.kere} nadpis="Keře do skupiny" />;
-  if (krok === 6) return <PanelDrevin kategorie={KATEGORIE_KROKU.stromy} nadpis="Strom / solitéra" />;
-  if (krok === 7) return <PanelVykazu />;
+  const krok = useStore((s) => s.pr.krok);
+  if (krok === 4) return <PanelRostlin />;
+  if (krok === POSLEDNI_KROK) return <PanelVykazu />;
   return null;
 }
 
-const OBAL = 'flex h-full w-[340px] shrink-0 flex-col border-l border-gray-200 bg-white';
+const OBAL = 'flex h-full w-[350px] shrink-0 flex-col border-l border-gray-200 bg-white';
 
-/** Krok 4 - vyber rostlin do zahonu, podil plochy, prehazeni rozvrzeni. */
-function PanelZahonu() {
-  const { pr, db, aktivniZahon } = useStore();
+/** Krok 4 - vsechen rostlinny material na jednom miste. */
+function PanelRostlin() {
+  const { pr, db, aktivniZahon, aktivniKod, sortiment, vybranaSkupina, rozestupNovy } = useStore();
   const st = useStore;
   const rozvrhy = useRozvrhy();
   const zahon = pr.zahony.find((z) => z.id === aktivniZahon) ?? pr.zahony[0];
-  const [pridava, setPridava] = useState(false);
-
-  if (!zahon) {
-    return <div className={OBAL}><p className="p-4 text-sm text-gray-500">Nejdřív nakresli záhon (krok 2).</p></div>;
-  }
-
-  const rozvrh = rozvrhy.get(zahon.id);
-  const soucet = zahon.osazeni.reduce((a, x) => a + Math.max(0.01, x.podil), 0) || 1;
-
-  const uprav = (fn: (z: Zahon) => void) =>
-    st.getState().zmen((d) => { const x = d.zahony.find((y) => y.id === zahon.id); if (x) fn(x); });
-
-  if (pridava) {
-    return (
-      <div className={OBAL}>
-        <div className="flex items-center justify-between border-b border-gray-200 px-3 py-2">
-          <span className="text-sm font-medium">Přidat rostlinu do záhonu</span>
-          <button onClick={() => setPridava(false)} className="text-sm text-gray-500 hover:text-gray-900">Zavřít</button>
-        </div>
-        <Katalog kategorie={KATEGORIE_KROKU.zahon}
-          vybrane={zahon.osazeni.map((o) => o.kod)}
-          onVyber={(r) => {
-            uprav((z) => {
-              if (!z.osazeni.some((o) => o.kod === r.kod)) z.osazeni.push({ kod: r.kod, podil: 1 });
-            });
-            setPridava(false);
-          }} />
-      </div>
-    );
-  }
-
-  return (
-    <div className={OBAL}>
-      <div className="border-b border-gray-200 px-3 py-2">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium">{zahon.nazev}</span>
-          <span className="text-xs text-gray-500">{rozvrh?.plocha.toFixed(1)} m²</span>
-        </div>
-        {pr.zahony.length > 1 && (
-          <div className="mt-1 flex flex-wrap gap-1">
-            {pr.zahony.map((z) => (
-              <button key={z.id} onClick={() => st.getState().set('aktivniZahon', z.id)}
-                className={`rounded px-1.5 py-0.5 text-[11px] ${z.id === zahon.id ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600'}`}>
-                {z.nazev}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div className="min-h-0 flex-1 overflow-auto p-2">
-        {zahon.osazeni.map((o) => {
-          const r = db.find((x) => x.kod === o.kod);
-          const kusu = (rozvrh?.casti ?? []).filter((c) => c.kod === o.kod).reduce((a, c) => a + c.kusu, 0);
-          const u = r ? urovenRostliny(r.vyska) : null;
-          return (
-            <div key={o.kod} className="mb-1 rounded border border-gray-200 px-2 py-1.5">
-              <div className="flex items-center gap-2">
-                {u && <span className="h-2.5 w-2.5 shrink-0 rounded-full" title={`patří mezi ${UROVNE[u].kratce}`}
-                  style={{ background: UROVNE[u].barva }} />}
-                <span className="text-[11px] font-bold">{o.kod}</span>
-                <span className="min-w-0 flex-1 truncate text-[12px] italic">{r?.latin}</span>
-                <span className="text-[11px] text-gray-500">{kusu} ks</span>
-                <button onClick={() => uprav((z) => { z.osazeni = z.osazeni.filter((x) => x.kod !== o.kod); })}
-                  className="text-gray-400 hover:text-red-600">×</button>
-              </div>
-              <div className="mt-1 flex items-center gap-2">
-                <input type="range" min={0.2} max={5} step={0.1} value={o.podil} className="flex-1"
-                  onChange={(e) => uprav((z) => {
-                    const x = z.osazeni.find((y) => y.kod === o.kod);
-                    if (x) x.podil = +e.target.value;
-                  })} />
-                <span className="w-10 text-right text-[11px] text-gray-500">
-                  {Math.round((Math.max(0.01, o.podil) / soucet) * 100)} %
-                </span>
-              </div>
-              <div className="mt-1 flex items-center gap-1 text-[11px] text-gray-500">
-                <span>skupin:</span>
-                {([undefined, 1, 2, 3, 4, 5] as (number | undefined)[]).map((n) => (
-                  <button key={n ?? 'auto'} onClick={() => uprav((z) => {
-                    const x = z.osazeni.find((y) => y.kod === o.kod);
-                    if (x) x.skupin = n;
-                  })}
-                    className={`rounded px-1.5 py-0.5 ${o.skupin === n ? 'bg-gray-900 text-white' : 'hover:bg-gray-100'}`}>
-                    {n ?? 'auto'}
-                  </button>
-                ))}
-                {o.skupin == null && (
-                  <span className="text-gray-400">
-                    ({autoSkupin(Math.max(0.01, o.podil) / soucet, rozvrh?.plocha ?? 10)})
-                  </span>
-                )}
-              </div>
-            </div>
-          );
-        })}
-
-        <button onClick={() => setPridava(true)}
-          className="w-full rounded border border-dashed border-gray-300 py-1.5 text-sm text-gray-600 hover:border-emerald-500 hover:text-emerald-700">
-          + přidat rostlinu
-        </button>
-
-        {zahon.vysky.length > 0 && (
-          <p className="mt-2 text-[11px] text-gray-500">
-            Barevná tečka říká, do které výškové oblasti rostlina výškou patří — rozvrh ji tam
-            přitáhne, ale hranice bere jen orientačně.
-          </p>
-        )}
-      </div>
-
-      <div className="space-y-2 border-t border-gray-200 p-2">
-        <button onClick={() => uprav((z) => { z.semeno = Math.floor(Math.random() * 100000); })}
-          className="w-full rounded border border-gray-300 py-1.5 text-sm hover:bg-gray-50">
-          Přeházet rozmístění
-        </button>
-        {zahon.vysky.length > 0 && (
-          <label className="flex items-center gap-2 text-xs text-gray-600">
-            <input type="checkbox" checked={pr.ukazVysky}
-              onChange={() => st.getState().zmen((d) => { d.ukazVysky = !d.ukazVysky; })} />
-            ukazovat výškové oblasti
-          </label>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/** Kroky 5 a 6 - vyber dreviny, ktera se pak kresli do planu. */
-function PanelDrevin({ kategorie, nadpis }: { kategorie: readonly string[]; nadpis: string }) {
-  const { aktivniKod, db, pr, vybranaSkupina, rozestupNovy } = useStore();
-  const st = useStore;
-  const aktivni = db.find((r) => r.kod === aktivniKod);
-  const krok = pr.krok;
+  const rozvrh = zahon ? rozvrhy.get(zahon.id) : undefined;
   const skupina = pr.skupiny.find((s) => s.id === vybranaSkupina);
-  const rostlinaSkupiny = db.find((r) => r.kod === skupina?.kod);
 
-  // rozestup: u vybrane rady jeji vlastni, jinak hodnota pro novou radu
+  const uprav = (fn: (z: Zahon) => void) => {
+    if (!zahon) return;
+    st.getState().zmen((d) => { const x = d.zahony.find((y) => y.id === zahon.id); if (x) fn(x); });
+  };
+
+  /** Klik v seznamu: trvalky do zahonu, dreviny se nastavi ke kresleni. */
+  const vyber = (r: Rostlina) => {
+    if ((KATEGORIE_KROKU.zahon as readonly string[]).includes(r.kat)) {
+      if (!zahon) { alert('Nejdřív nakresli záhon (krok 2).'); return; }
+      uprav((z) => {
+        const i = z.osazeni.findIndex((o) => o.kod === r.kod);
+        if (i >= 0) z.osazeni.splice(i, 1);
+        else z.osazeni.push({ kod: r.kod, podil: 1 });
+      });
+      return;
+    }
+    // vybrana rada keru se prepne na jiny druh
+    if (skupina && (KATEGORIE_KROKU.kere as readonly string[]).includes(r.kat)) {
+      st.getState().zmen((d) => {
+        const x = d.skupiny.find((s) => s.id === skupina.id);
+        if (x) { x.kod = r.kod; x.rozestup = r.rozestup; }
+      });
+      return;
+    }
+    st.getState().set('aktivniKod', r.kod);
+    st.getState().set('rozestupNovy', null);
+  };
+
+  const soucet = zahon?.osazeni.reduce((a, x) => a + Math.max(0.01, x.podil), 0) || 1;
+  const vybraneKody = [
+    ...(zahon?.osazeni.map((o) => o.kod) ?? []),
+    ...(aktivniKod ? [aktivniKod] : []),
+  ];
+
+  const rostlinaSkupiny = db.find((r) => r.kod === skupina?.kod);
+  const aktivni = db.find((r) => r.kod === aktivniKod);
   const rozestup = skupina
     ? (skupina.rozestup ?? rostlinaSkupiny?.rozestup ?? 1.2)
     : (rozestupNovy ?? aktivni?.rozestup ?? 1.2);
 
-  const nastavRozestup = (v: number) => {
-    if (!(v > 0.1)) return;
-    if (skupina) st.getState().zmen((d) => { const x = d.skupiny.find((s) => s.id === skupina.id); if (x) x.rozestup = v; });
-    else st.getState().set('rozestupNovy', v);
-  };
-
   return (
     <div className={OBAL}>
-      <div className="border-b border-gray-200 px-3 py-2">
-        <div className="text-sm font-medium">{nadpis}</div>
-        {aktivni
-          ? <div className="mt-0.5 text-xs text-gray-600">kreslí se <span className="italic">{aktivni.latin}</span></div>
-          : <div className="mt-0.5 text-xs text-amber-700">vyber ze seznamu, pak klikni do plánu</div>}
-      </div>
-
-      {krok === 5 && (
-        <div className="border-b border-gray-200 bg-gray-50 px-3 py-2 text-xs">
-          <div className="mb-1 text-gray-600">
-            {skupina
-              ? <>rozestup vybrané řady <span className="italic">{rostlinaSkupiny?.latin}</span></>
-              : <>rozestup nové řady</>}
+      {/* co uz je v zahonu */}
+      {zahon && (
+        <div className="max-h-[45%] overflow-auto border-b border-gray-200 p-2">
+          <div className="mb-1 flex items-center justify-between">
+            <span className="text-sm font-medium">{zahon.nazev}</span>
+            <span className="text-xs text-gray-500">{rozvrh?.plocha.toFixed(1)} m²</span>
           </div>
+          {pr.zahony.length > 1 && (
+            <div className="mb-1 flex flex-wrap gap-1">
+              {pr.zahony.map((z) => (
+                <button key={z.id} onClick={() => st.getState().set('aktivniZahon', z.id)}
+                  className={`rounded px-1.5 py-0.5 text-[11px] ${z.id === zahon.id ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600'}`}>
+                  {z.nazev}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {!zahon.osazeni.length && (
+            <p className="py-2 text-xs text-gray-500">Zatím prázdný — klikni na trvalku v seznamu dole.</p>
+          )}
+
+          {zahon.osazeni.map((o) => {
+            const r = db.find((x) => x.kod === o.kod);
+            const kusu = (rozvrh?.casti ?? []).filter((c) => c.kod === o.kod).reduce((a, c) => a + c.kusu, 0);
+            const u = r ? urovenRostliny(r.vyska) : null;
+            return (
+              <div key={o.kod} className="mb-1 rounded border border-gray-200 px-2 py-1">
+                <div className="flex items-center gap-2">
+                  {u && <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: UROVNE[u].barva }} />}
+                  <span className="text-[11px] font-bold">{o.kod}</span>
+                  <span className="min-w-0 flex-1 truncate text-[12px] italic">{r?.latin}</span>
+                  <span className="text-[11px] text-gray-500">{kusu} ks</span>
+                  <button onClick={() => uprav((z) => { z.osazeni = z.osazeni.filter((x) => x.kod !== o.kod); })}
+                    className="text-gray-400 hover:text-red-600">×</button>
+                </div>
+                <div className="mt-0.5 flex items-center gap-2">
+                  <input type="range" min={0.2} max={5} step={0.1} value={o.podil} className="flex-1"
+                    onChange={(e) => uprav((z) => {
+                      const x = z.osazeni.find((y) => y.kod === o.kod);
+                      if (x) x.podil = +e.target.value;
+                    })} />
+                  <span className="w-9 text-right text-[11px] text-gray-500">
+                    {Math.round((Math.max(0.01, o.podil) / soucet) * 100)} %
+                  </span>
+                  <span className="text-[11px] text-gray-400">skupin</span>
+                  {([undefined, 1, 2, 3, 4] as (number | undefined)[]).map((n) => (
+                    <button key={n ?? 'auto'} onClick={() => uprav((z) => {
+                      const x = z.osazeni.find((y) => y.kod === o.kod);
+                      if (x) x.skupin = n;
+                    })}
+                      className={`rounded px-1 text-[11px] ${o.skupin === n ? 'bg-gray-900 text-white' : 'text-gray-500 hover:bg-gray-100'}`}>
+                      {n ?? 'a'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+
+          {zahon.osazeni.length > 0 && (
+            <button onClick={() => uprav((z) => { z.semeno = Math.floor(Math.random() * 100000); })}
+              className="mt-1 w-full rounded border border-gray-300 py-1 text-xs hover:bg-gray-50">
+              Přeházet rozmístění
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* rozestup rady keru */}
+      {(sortiment === 'kere' || skupina) && (
+        <div className="border-b border-gray-200 bg-gray-50 px-3 py-1.5 text-xs">
           <div className="flex items-center gap-2">
-            <input type="number" step="0.1" min={0.2} value={rozestup} className="w-20 rounded border px-1 py-0.5"
-              onChange={(e) => nastavRozestup(+e.target.value)} />
+            <span className="text-gray-600">
+              {skupina ? <>rozestup vybrané řady <i>{rostlinaSkupiny?.latin}</i></> : 'rozestup nové řady'}
+            </span>
+            <input type="number" step="0.1" min={0.2} value={rozestup} className="w-16 rounded border px-1 py-0.5"
+              onChange={(e) => {
+                const v = +e.target.value;
+                if (!(v > 0.1)) return;
+                if (skupina) st.getState().zmen((d) => { const x = d.skupiny.find((s) => s.id === skupina.id); if (x) x.rozestup = v; });
+                else st.getState().set('rozestupNovy', v);
+              }} />
             <span className="text-gray-500">m</span>
-            {!skupina && rozestupNovy != null && (
-              <button onClick={() => st.getState().set('rozestupNovy', null)}
-                className="text-emerald-700 underline">zpět na výchozí</button>
-            )}
             {skupina && (
               <button onClick={() => st.getState().set('vybranaSkupina', null)}
                 className="ml-auto text-gray-500 underline">zrušit výběr</button>
             )}
           </div>
-          <p className="mt-1 text-[11px] text-gray-500">
-            {skupina
-              ? 'Kliknutím do plánu vybereš jinou řadu.'
-              : 'Výchozí hodnota vychází z hustoty výsadby u druhu. Kliknutím na hotovou řadu ji změníš u ní.'}
-          </p>
+          {skupina && <p className="mt-0.5 text-[11px] text-gray-500">Klikem na keř v seznamu změníš druh celé řady.</p>}
         </div>
       )}
 
-      <Katalog kategorie={kategorie} vybrane={aktivniKod ? [aktivniKod] : []}
-        onVyber={(r) => { st.getState().set('aktivniKod', r.kod); st.getState().set('rozestupNovy', null); }} />
+      <Katalog vybrane={vybraneKody} onVyber={vyber} />
 
-      <div className="border-t border-gray-200 p-2 text-xs text-gray-500">
-        {krok === 5
-          ? `${pr.skupiny.length}× skupina keřů v plánu`
-          : `${pr.solitery.length}× strom v plánu`}
+      <div className="border-t border-gray-200 px-3 py-1.5 text-[11px] text-gray-500">
+        {pr.skupiny.length}× řada keřů · {pr.solitery.length}× strom
       </div>
     </div>
   );
 }
 
-/** Krok 7 - vykaz rostlin. */
+/** Posledni krok - vykaz rostlin. */
 function PanelVykazu() {
   const { pr, db, kategorie } = useStore();
   const rozvrhy = useRozvrhy();

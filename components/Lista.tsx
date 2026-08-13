@@ -1,6 +1,5 @@
 'use client';
 import React, { useRef } from 'react';
-import { naBody, obalka } from '@/lib/geom';
 import { Projekt, prazdnyProjekt } from '@/lib/model';
 import { useStore } from '@/lib/store';
 
@@ -10,22 +9,8 @@ export default function Lista() {
   const st = useStore;
   const soubor = useRef<HTMLInputElement>(null);
 
-  const naObrazovku = () => {
-    const body: { x: number; y: number }[] = [];
-    for (const z of pr.zahony) body.push(...naBody(z.obrys, 0.1));
-    for (const s of pr.skupiny) body.push(...s.body);
-    for (const s of pr.solitery) body.push(s.pos);
-    if (!body.length && pr.podklad) body.push(
-      { x: pr.podklad.x, y: pr.podklad.y },
-      { x: pr.podklad.x + pr.podklad.sirkaM, y: pr.podklad.y + pr.podklad.vyskaM },
-    );
-    if (!body.length) return;
-    const o = obalka(body);
-    st.getState().setKamera({
-      x: (o.x0 + o.x1) / 2, y: (o.y0 + o.y1) / 2,
-      z: Math.max(2, Math.min(400, Math.min((window.innerWidth - 420) / (o.w || 1), (window.innerHeight - 200) / (o.h || 1)) * 0.9)),
-    });
-  };
+  // vlastni srovnani pohledu umi platno, ktere jako jedine zna svoji velikost
+  const naObrazovku = () => window.dispatchEvent(new CustomEvent('plan:naObrazovku'));
 
   const ulozSoubor = () => {
     const a = document.createElement('a');
