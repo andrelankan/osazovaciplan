@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+}
+
+/* Vykres je vzdy na bilem papire - tmavy rezim by mel plan necitelny. */
+html, body {
+  background: #ffffff;
+  color: #171717;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+input, select, button { font-family: inherit; }
+
+/* Zadne posuvniky kolem platna. */
+body { overscroll-behavior: none; }

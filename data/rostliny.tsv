@@ -1,0 +1,197 @@
+# kat:  T=trvalka  G=travina  F=kapradina  C=cibulovina  K=ker  S=strom  J=jehlicnan  U=uzitkovy ker / ovocna drevina
+# svetlo: S=slunce  P=polostin  N=stin  (lze kombinovat, napr. SP)
+# vyska v metrech, kvet = mesice od-do, barva = hex nebo prazdne
+#
+# KODY jsou prevzate z tabulky rostlin na Google Drive.
+# Kde mela tabulka jeden kod pro vic rostlin, je pridano ctvrte pismeno podle
+# kultivaru - stejnym zpusobem, jakym uz to v tabulce je (GerA, SalR, PoA/PoK, HyA/HyB).
+#
+kod	latin	cesky	kat	svetlo	vyska	kvet	barva	pozn	hustota
+Ach	Achillea millefolium 'Desert Eve Cream'	řebříček obecný 'Desert Eve Cream'	T	S	0.3	6-8	#f2ead0		5
+AjM	Ajuga reptans 'Midnight Mystery'	zběhovec plazivý 'Midnight Mystery'	T	SP	0.2	6-7	#5b4b8a	purpurové listy	9
+Aju	Ajuga reptans 'Feathered Friends Cordial Canary'	zběhovec plazivý 'Cordial Canary'	T	SP	0.2	5-6	#6b7fc7	žlutozelené listy	9
+Ame	Aster amellus	hvězdnice chlumní	T	S	0.6	7-9	#8f7fd1		5
+Ant	Antennaria dioica	kociánek dvoudomý	T	S	0.2	5-6	#e8b4c8	stříbřité listy	9
+Arm	Armeria maritima 'Morning Star White'	trávnička přímořská 'Morning Star White'	T	S	0.2	5-6	#ffffff		9
+Art	Artemisia schmidtiana 'Nana'	pelyněk Schmidtův 'Nana'	T	S	0.2	7-9	#d9d9b0	stříbřité listy	7
+Asa	Aster novae-angliae	hvězdnice novoanglická	T	S	1.5	8-10	#b06bb0		3
+Asb	Aster novi-belgii 'Milka'	hvězdnice novobelgická 'Milka'	T	S	0.8	9-10	#c77fc7		5
+Ase	Aster novi-belgii 'Elta'	hvězdnice novobelgická 'Elta'	T	S	1.2	9-10	#9b7fd4		4
+Ast	Aster dumosus 'Herbstgruss von Bresserhof'	hvězdnice keříčkovitá 'Herbstgruss v. Bresserhof'	T	SP	0.4	9-10	#e07fb0		7
+Ask	Aster ageratoides 'Asran'	hvězdnice 'Asran'	T	SP	0.8	9-10	#a890d0		4
+AstD	Astilbe x arendsii 'Diamant'	čechrava arendsova 'Diamant'	T	PN	0.8	6-8	#ffffff		4
+Aua	Aubrieta deltoidea 'Axcent Deep Purple'	tařička kosníkovitá 'Axcent Deep Purple'	T	SP	0.1	4-5	#7b3f9e		9
+Auh	Aubrieta hybrida 'Hamburger Stadtpark'	tařička zahradní 'Hamburger Stadtpark'	T	S	0.1	4-5	#9b4f9e		9
+Aud	Aurinia saxatilis	tařice skalní	T	S	0.25	4-5	#f0c020	skalnička	7
+Ane	Anemone hupehensis 'September Charm'	sasanka japonská 'September Charm'	T	PN	0.8	8-10	#e0a0c0		4
+Asp	Asplenium trichomanes	sleziník červený	F	N	0.15	-		skalní kapradina	7
+Bap	Baptisia pendula var. alba	baptisie bílá	T	S	1	5	#ffffff	modrozelené listy	3
+Ber	Bergenia cordifolia 'Rosi Klose'	bergénie srdčitá 'Rosi Klose'	T	SP	0.3	4-5	#e090a8		6
+Bru	Brunnera macrophylla	pomněnkovec velkolistý	T	PN	0.4	4-5	#5f8fd8		5
+Cam	Campanula portenschlagiana	zvonek dalmatský	T	SP	0.15	6-8	#6f5fc0	půdopokryvný	9
+Cen	Centaurea montana	chrpa horská	T	S	0.5	6-8	#4a6fd4		5
+Cer	Cerastium tomentosum	rožec plstnatý	T	S	0.2	5-6	#ffffff	stříbřité listy	9
+Ces	Cerastium tomentosum 'Silberteppich'	rožec plstnatý 'Silberteppich'	T	S	0.2	5-6	#ffffff	stříbřité listy	9
+Cim	Cimicifuga ramosa 'Atropurpurea'	ploštičník hroznatý 'Atropurpurea'	T	PN	1.5	8-9	#f0ead8	vínové listy	3
+Chn	Chamaemelum nobile 'Treneague'	heřmánek římský 'Treneague'	T	S	0.1	6-8	#ffffff	pochozí, aromatický	12
+Cor	Coreopsis verticillata 'Moonbeam'	krásnoočko přeslenité 'Moonbeam'	T	S	0.4	7-9	#f0e08f		6
+CorG	Coreopsis grandiflora	krásnoočko velkokvěté	T	S	0.5	6-9	#f0c020		5
+DelA	Delphinium pacific 'Astolat'	ostrožka 'Astolat'	T	S	1.8	6-8	#d99bc4		3
+DelK	Delphinium pacific 'King Arthur'	ostrožka 'King Arthur'	T	S	1.8	6-8	#4a3f9e		3
+Dia	Dianthus plumarius 'Roseus Plenus'	hvozdík péřovitý 'Roseus Plenus'	T	S	0.1	6-7	#e07fa0	stříbřité listy	9
+Dic	Dicentra spectabilis 'Alba'	srdcovka nádherná 'Alba'	T	PN	0.8	5-6	#ffffff		3
+Dig	Digitalis purpurea	náprstník červený	T	PN	1.2	6-7	#c05f9e	jedovatý	4
+Dod	Dodecatheon jeffreyi	božíkvítko	T	PN	0.6	6-8	#c85f9e		5
+Dry	Dryopteris filix-mas 'Crispa Cristata'	kapraď samec 'Crispa Cristata'	F	PN	0.4	-		kadeřavé listy	4
+Ech	Echinacea purpurea	třapatkovka nachová	T	S	1	6-8	#cf5f8f		5
+EchA	Echinacea purpurea 'Alba'	třapatkovka nachová 'Alba'	T	S	0.8	6-8	#ffffff		5
+EchG	Echinacea purpurea 'Green Jewel'	třapatkovka nachová 'Green Jewel'	T	S	0.6	6-9	#c8d98f		5
+F	Festuca cinerea	kostřava popelavá	G	S	0.2	-		stříbřitá	9
+FesG	Festuca glauca	kostřava sivá	G	S	0.25	6-7	#c8c8b0	modrošedá	9
+Gau	Gaura lindheimeri 'Summer Breeze'	svíčkovec 'Summer Breeze'	T	S	0.9	6-9	#f0d0d8		3
+Gen	Gentiana officinalis	hořec	T	SP	0.4	7-9	#2f4fb0		7
+Ger	Geranium sanguineum	kakost krvavý	T	SP	0.4	6-8	#b83f7f		5
+GerA	Geranium sanguineum 'Album'	kakost krvavý 'Album'	T	SP	0.4	6-8	#ffffff		5
+GerE	Geranium sanguineum 'Elsbeth'	kakost krvavý 'Elsbeth'	T	SP	0.4	5-9	#d1508f		5
+Gyp	Gypsophila paniculata 'Festival White'	šater latnatý 'Festival White'	T	S	0.6	6-9	#ffffff	kombinace s třapatkou	4
+GypR	Gypsophila repens	šater plazivý	T	SP	0.2	5-7	#f0dde5		7
+Hel	Helleborus x ericsmithii 'Ivory Prince'	čemeřice 'Ivory Prince'	T	PN	0.4	2-4	#f0ead0		5
+Hes	Hesperis matronalis	večernice vonná	T	SP	0.9	5-8	#c78fd1	voňavá	4
+Heu	Heuchera hybrida 'Midnight Rose'	dlužicha 'Midnight Rose'	T	SP	0.3	6-8	#e8c0d0	purpurové listy	7
+Hos	Hosta 'Alvatine Taylor'	bohyška 'Alvatine Taylor'	T	PN	0.6	7-8	#c8b8d8		3
+HosA	Hosta 'Avocado'	bohyška 'Avocado'	T	PN	0.6	7-8	#e8e8f0		3
+Ibe	Iberis sempervirens 'Schneeflocke'	iberka vždyzelená 'Schneeflocke'	T	S	0.2	4-5	#ffffff	stálezelená	6
+Iri	Iris barbata-nana 'White Gem'	kosatec nízký 'White Gem'	T	S	0.3	4-5	#ffffff		7
+Kna	Knautia macedonica	chrastavec makedonský	T	S	0.8	7-9	#a02040		4
+Lae	Lavandula angustifolia 'Ellagance Snow'	levandule úzkolistá 'Ellagance Snow'	T	S	0.5	7-9	#ffffff		5
+Lah	Lavandula angustifolia 'Hidcote Blue'	levandule úzkolistá 'Hidcote Blue'	T	S	0.4	7-8	#6b5fa8		5
+Lam	Lavandula angustifolia 'Munstead Strain'	levandule úzkolistá 'Munstead Strain'	T	S	0.4	7-8	#8f7fc0		5
+Lep	Leptinella squalida	leptinela	T	PN	0.05	6-7	#c8c880	pochozí půdopokryvka	16
+LeuA	Leucanthemum x superbum 'Alaska'	kopretina velkokvětá 'Alaska'	T	S	0.8	7-8	#ffffff		5
+LeuM	Leucanthemum maximum 'Madonna'	kopretina velkokvětá 'Madonna'	T	S	0.3	6-8	#ffffff		7
+Lit	Lithodora diffusa 'Tidepool Blue'	kamejka rozprostřená 'Tidepool Blue'	T	S	0.2	5-6	#2f5fc0		7
+Lys	Lysimachia nummularia	vrbina penízková	T	PN	0.1	6-7	#f0d020	půdopokryvná	9
+Ori	Origanum sp.	dobromysl	T	S	0.5	5-9	#c07fb0	aromatická	6
+PerL	Perovskia atriplicifolia 'Little Spire'	perovskie lebedolistá 'Little Spire'	T	S	0.5	8-9	#7f8fd1	stříbřité listy	4
+PerS	Perovskia atriplicifolia 'Steel Blue'	perovskie lebedolistá 'Steel Blue'	T	S	0.9	8-9	#7f8fd1		3
+Phl	Phlox divaricata 'May Breeze'	plamenka rozkladitá 'May Breeze'	T	PN	0.4	5-7	#e8f0f0		7
+PhlB	Phlox divaricata 'Blue Moon'	plamenka rozkladitá 'Blue Moon'	T	PN	0.3	4-5	#7f8fd8		7
+Phs	Phlox subulata	plamenka šídlovitá	T	S	0.15	4-5	#d87fb0	půdopokryvná	9
+Pyl	Phyllitis scolopendrium	jelení jazyk	F	N	0.4	-		celolistá kapradina	4
+PlaC	Platycodon grandiflorus 'Codo White'	boubelka velkokvětá 'Codo White'	T	SP	0.2	6-8	#ffffff		7
+PlaP	Platycodon grandiflorus 'Pop Star White'	boubelka velkokvětá 'Pop Star White'	T	SP	0.2	6-8	#ffffff		7
+Pri	Primula denticulata 'Blue'	prvosenka zoubkatá 'Blue'	T	PN	0.3	5-6	#6f7fc8		7
+Pul	Pulsatilla vulgaris 'Bells Red'	koniklec obecný 'Bells Red'	T	S	0.2	4-5	#a02f4f		7
+Rud	Rudbeckia fulgida 'Goldsturm'	třapatka zářivá 'Goldsturm'	T	S	0.8	7-10	#f0b820		5
+Sag	Sagina subulata	úrazník šídlovitý	T	SP	0.05	6-7	#ffffff	mechový polštář	16
+Sal	Salvia nemorosa 'Violette Königin'	šalvěj hajní 'Violette Königin'	T	S	0.5	5-9	#5f3f9e		6
+SalR	Salvia nemorosa 'Rosa Königin'	šalvěj hajní 'Rosa Königin'	T	S	0.5	5-9	#d17fa8		6
+SalE	Salvia superba 'Edula Rose'	šalvěj nádherná 'Edula Rose'	T	S	0.3	5-8	#d98fb8		7
+San	Sanguisorba officinalis	krvavec toten	T	SP	1	6-9	#8f2f3f		3
+SanC	Sanguisorba officinalis 'Crimson Queen'	krvavec toten 'Crimson Queen'	T	SP	1	6-9	#a02040		3
+Sax	Saxifraga x arendsii 'Red Cap'	lomikámen arendsův 'Red Cap'	T	SP	0.2	4-5	#d02f5f	skalky, písčitá půda	9
+Sca	Scabiosa caucasica 'Perfecta'	hlaváč kavkazský 'Perfecta'	T	S	0.6	5-8	#8f9fd8		5
+ScaA	Scabiosa caucasica 'Perfecta Alba'	hlaváč kavkazský 'Perfecta Alba'	T	S	0.8	5-8	#ffffff		4
+Sed	Sedum spectabile 'Carl'	rozchodník nádherný 'Carl'	T	S	0.5	8-9	#c85f8f	kožnaté listy	5
+Sta	Stachys byzantina	čistec vlnatý	T	S	0.4	6-8	#c78fc0	stříbřité listy	7
+Tha	Thalictrum aquilegiifolium	žluťucha orlíčkolistá	T	PN	1	5-7	#c89fd8		3
+Thy	Thymus sp.	mateřídouška	T	S	0.2	7-9	#c07fb0	aromatická	9
+ThyT	Thymus pulegioides 'Tabor'	mateřídouška vejčitá 'Tabor'	T	SP	0.2	5-8	#c07fb0		9
+Ven	Veronica spicata nana 'Blauteppich'	rozrazil klasnatý 'Blauteppich'	T	S	0.2	7-9	#4f5fc0		7
+VeR	Veronica spicata 'Candles Royal'	rozrazil klasnatý 'Candles Royal'	T	S	0.4	6-8	#5f4f9e		6
+VeS	Veronica spicata 'Candles Snow'	rozrazil klasnatý 'Candles Snow'	T	S	0.4	7-8	#ffffff		6
+Ver	Verbena hybrida 'Vanessa Bicolor Indigo'	sporýš 'Vanessa Bicolor Indigo'	T	S	0.3	5-9	#4f3f9e		6
+VerB	Verbena bonariensis	sporýš argentinský	T	S	1.2	7-10	#8f5fb0	prosvítavý	4
+Vin	Vinca minor	barvínek menší	T	PN	0.2	5-9	#7f8fd8	půdopokryvný	9
+VinH	Vinca minor 'Hawaii'	barvínek menší 'Hawaii'	T	PN	0.2	5-9	#5f6fc8		9
+Vio	Viola odorata	violka vonná	T	PN	0.2	3-4	#6f4f9e	voňavá	9
+Cal	Calamagrostis brachytricha	třtina rákosovitá	G	SP	1	7-10	#d8c8d0		3
+Luz	Luzula sylvatica	bika lesní	G	PN	0.4	4-5	#c8b890	půdopokryvná travina	7
+MisG	Miscanthus floridulus 'Giganteus'	ozdobnice obrovská 'Giganteus'	G	SP	3	-		solitérní travina	0.7
+MisS	Miscanthus sinensis	ozdobnice čínská	G	S	2	8-10	#d8c0b0		1
+Pen	Pennisetum alopecuroides 'Hameln'	dochan psárkovitý 'Hameln'	G	SP	0.8	7-10	#d8c8b8		3
+StiG	Stipa gigantea	kavyl obrovský	G	S	1.5	6-8	#e0d0a0	solitérní travina	1
+StiT	Stipa tenuissima	kavyl péřovitý	G	S	0.5	-		vlásková travina	5
+AllC	Allium caeruleum	česnek azurový	C	S	0.4	5-6	#4f7fd0		50
+AllT	Allium triquetrum	česnek trojhranný	C	N	0.6	2-4	#ffffff		40
+Cro	Crocus speciosus 'Conqueror'	šafrán 'Conqueror'	C	S	0.1	9-10	#7f7fd0		60
+Gal	Galanthus nivalis	sněženka podsněžník	C	N	0.2	2-3	#ffffff		60
+Hya	Hyacinthoides hispanica 'Blue'	hyacintovec španělský 'Blue'	C	PN	0.3	4-6	#6f8fd8		40
+Hyn	Hyacinthoides non-scripta	hyacintovec britský	C	PN	0.4	4-5	#5f7fd0		40
+Nar	Narcissus 'White Marvel'	narcis 'White Marvel'	C	SP	0.3	4-5	#ffffff		40
+NarA	Narcissus 'Angel's Breath'	narcis 'Angel's Breath'	C	SP	0.3	4-5	#f5f0d8		40
+Tri	Triteleia laxa 'Queen Fabiola'	tritélie řídká 'Queen Fabiola'	C	S	0.4	5-6	#6f6fc8		40
+Tul	Tulipa Triumph 'Negrita'	tulipán Triumph 'Negrita'	C	SP	0.4	4-5	#7f3f8f		40
+Aml	Amelanchier lamarckii	muchovník Lamarckův	K	SP	4	4-5	#ffffff	kvete před olistěním	0.3
+Cap	Callicarpa dichotoma	krásnoplodka vidličnatá	K	SP	2	7-8	#c890c8	fialové plody přes zimu	0.6
+Car	Caryopteris x clandonensis 'Kew Blue'	ořechokřídlec 'Kew Blue'	K	S	1	8-9	#4f5fb0		1.2
+ChaF	Chaenomeles speciosa 'Fire Dance'	kdoulovec lahvicovitý 'Fire Dance'	K	SP	1.2	3-4	#d02f2f		1
+ChaG	Chaenomeles speciosa 'Geisha Girl'	kdoulovec lahvicovitý 'Geisha Girl'	K	SP	1.2	3-4	#e8905f		1
+CorA	Cornus alba 'Sibirica'	svída bílá 'Sibirica'	K	SP	3	5-6	#f0f0e0	červené výhony v zimě	0.5
+CorK	Cornus kousa	dřín japonský	K	S	5	4-5	#ffffff		0.2
+CorS	Cornus sanguinea	svída krvavá	K	SP	4	5-6	#f0f0e0		0.4
+Cyt	Cytisus 'Apricot Gem'	čilimník 'Apricot Gem'	K	S	1.3	5-6	#e8a05a		1
+EriC	Erica carnea mix	vřesovec pleťový mix	K	S	0.3	4-12	#d98fb0	kyselá půda, rašelina	7
+EriD	Erica x darleyensis	vřesovec darlejský	K	S	0.4	2-5	#d98fb0	stálezelený	5
+Esc	Escallonia 'Iveyi'	zábluda 'Iveyi'	K	S	3	6-9	#ffffff	stálezelená, voňavá	0.5
+Exo	Exochorda racemosa	hroznovec hroznatý	K	S	3	4-5	#ffffff		0.4
+For	Forsythia x intermedia 'Courtalyn'	zlatice prostřední 'Courtalyn'	K	SP	2	4	#f0d020		0.6
+HyA	Hydrangea arborescens 'Annabelle'	hortenzie stromečkovitá 'Annabelle'	K	P	1.5	6-10	#f0f0e0		0.8
+HyB	Hydrangea arborescens 'Bounty'	hortenzie stromečkovitá 'Bounty'	K	P	1.8	6-10	#f0f0e0		0.7
+HyC	Hydrangea paniculata 'Candlelight'	hortenzie latnatá 'Candlelight'	K	S	1.2	6-10	#f5f0d0		1
+Hyd	Hydrangea macrophylla	hortenzie velkolistá	K	P	1.5	6-9	#d88fb0	různé barvy	0.8
+Hyp	Hypericum x inodorum	třezalka nevonná	K	SP	1	6-10	#f0d84f	červené plody	1.2
+Kol	Kolkwitzia amabilis	kolkvicie krásná	K	S	3	5-6	#e8a8c0		0.4
+Phi	Philadelphus coronarius	pustoryl věncový	K	SP	3	6	#ffffff	voňavý	0.4
+PhiB	Philadelphus 'Bouquet Blanc'	pustoryl 'Bouquet Blanc'	K	SP	2	6	#ffffff	voňavý	0.6
+Phy	Physocarpus opulifolius 'Red Esquire'	tavola kalinolistá 'Red Esquire'	K	SP	2	5-6	#f0e0e8	vínové listy	0.6
+PoA	Potentilla fruticosa 'Abbotswood'	mochna křovitá 'Abbotswood'	K	S	0.8	5-10	#ffffff		1.5
+PoB	Potentilla fruticosa 'Bella Apple'	mochna křovitá 'Bella Apple'	K	SP	0.5	5-10	#f5e8b0	zpevňuje svah	2
+PoG	Potentilla fruticosa 'Goldstar'	mochna křovitá 'Goldstar'	K	SP	0.8	5-10	#f0d84f		1.5
+PoK	Potentilla fruticosa 'Kobold'	mochna křovitá 'Kobold'	K	S	1	5-10	#f0d84f		1.2
+Prl	Prunus laurocerasus	bobkovišeň lékařská	K	PN	2.5	4-5	#ffffff	stálezelená	0.8
+PtuF	Prunus tenella 'Fire Hill'	mandloň nízká 'Fire Hill'	K	S	1.5	4-5	#d0407f		1
+RodA	Rhododendron impeditum 'Azurika'	pěnišník obtížený 'Azurika'	K	P	0.5	4-5	#6f5fb0	stálezelený	3
+RodM	Rhododendron 'Dora Amateis'	pěnišník 'Dora Amateis'	K	P	1	4-5	#ffffff	stálezelený	1.2
+Ros	Rosmarinus officinalis	rozmarýn lékařský	K	S	1	5-9	#a8b8d8	aromatický	1.5
+SpG	Spiraea japonica 'Goldflame'	tavolník japonský 'Goldflame'	K	SP	0.8	6-9	#d87f9e	žlutooranžové listy	1.5
+SpL	Spiraea japonica 'Little Flame'	tavolník japonský 'Little Flame'	K	SP	0.4	7-8	#d87f9e	narůžovělé listy	2.5
+SpO	Spiraea japonica 'Odessa'	tavolník japonský 'Odessa'	K	SP	0.6	6-8	#d87f9e		2
+Spj	Spiraea japonica 'Genpei'	tavolník japonský 'Genpei'	K	SP	0.8	6-9	#e0a0b8		1.5
+SpV	Spiraea x vanhouttei	tavolník van Houtteův	K	S	2.5	5-6	#ffffff		0.4
+SyH	Syringa x hyacinthiflora 'Maiden's Blush'	šeřík hyacintokvětý 'Maiden's Blush'	K	SP	3.5	5-6	#e8b0c0		0.3
+SyM	Syringa vulgaris 'Madame Lemoine'	šeřík obecný 'Madame Lemoine'	K	S	3	5	#ffffff		0.3
+Syr	Syringa vulgaris	šeřík obecný	K	SP	5	5-6	#c8a0d0		0.25
+VibF	Viburnum farreri	kalina vonná	K	SP	3	3-5	#f0e0e8	kvete před olistěním	0.4
+VibR	Viburnum rhytidophyllum	kalina vrásčitolistá	K	PN	4	5-6	#f0f0e0	stálezelená	0.3
+Vir	Viburnum opulus 'Roseum'	kalina obecná 'Roseum'	K	S	3	5	#f0f0e0		0.4
+Wei	Weigela florida 'Rosea'	vajgélie květnatá 'Rosea'	K	SP	2	5-6	#e08fa8		0.6
+Jun	Juniperus horizontalis	jalovec polehlý	J	S	0.5	-		půdokryvný jehličnan	1
+PiM	Pinus mugo 'Mops'	borovice kleč 'Mops'	J	S	1	-		kulovitý jehličnan	1
+Pin	Pinus sylvestris 'Watereri'	borovice lesní 'Watereri'	J	S	3	-		zakrslá	0.3
+Pic	Picea abies	smrk ztepilý	J	SP	30	-			0.05
+PicE	Picea pungens 'Edith'	smrk pichlavý 'Edith'	J	S	4	-		modrostříbrný	0.2
+Tax	Taxus baccata	tis červený	J	PN	10	-		jedovatý, stříhatelný	0.5
+Ace	Acer truncatum x platanoides 'Pacific Sunset'	javor 'Pacific Sunset'	S	S	10	4-5	#e0e090	podzimní barva	0.08
+AmS	Amelanchier laevis 'Snowflakes'	muchovník hladký 'Snowflakes'	S	S	6	4-5	#ffffff		0.15
+Bet	Betula utilis var. jacquemontii	bříza himálajská	S	S	9	4-5	#c8c890	bílá kůra	0.1
+CarB	Carpinus betulus	habr obecný	S	SP	20	4-5		i na střihaný plot	0.08
+Ela	Elaeagnus angustifolia	hlošina úzkolistá	S	S	10	5-6	#f0e8b0	stříbřitý list	0.1
+MalR	Malus 'Rudolph'	okrasná jabloň 'Rudolph'	S	S	6	5	#d0508f		0.15
+PruK	Prunus serrulata 'Kanzan'	sakura 'Kanzan'	S	S	10	4-5	#e890b0		0.1
+Sop	Sophora japonica	jerlín japonský	S	S	15	7-8	#f0f0d0		0.08
+Sor	Sorbus aucuparia	jeřáb ptačí	S	SP	15	5	#ffffff	červené plody	0.1
+Til	Tilia cordata	lípa srdčitá	S	SP	25	6-7	#e8e8b0	voňavá	0.05
+HipH	Hippophae rhamnoides 'Hikul'	rakytník řešetlákový samčí 'Hikul'	U	S	1.8	3-4		opylovač	0.6
+HipJ	Hippophae rhamnoides 'Julia'	rakytník řešetlákový samičí 'Julia'	U	S	4	3-4		samičí, nutný opylovač	0.4
+Lon	Lonicera kamtschatica 'Duet'	zimolez kamčatský 'Duet'	U	SP	1.5	3-5	#f0f0d0	kamčatská borůvka	0.8
+Mal	Malus sp.	jabloň	U	S	5	4-5	#f0e0e8	ovocná	0.1
+PrA	Prunus avium	třešeň	U	S	10	4-5	#ffffff	ovocná	0.06
+PrD	Prunus domestica	slivoň	U	S	6	4	#ffffff	ovocná	0.1
+Pru	Prunus spinosa	trnka obecná	U	S	3.5	4-5	#ffffff	trnitá	0.5
+Pyr	Pyrus sp.	hrušeň	U	S	7	4-5	#ffffff	ovocná	0.08
+RibD	Ribes rubrum 'Detvan'	rybíz červený 'Detvan'	U	SP	1.5	4-5	#c8d090		0.8
+RibT	Ribes nigrum 'Triton'	rybíz černý 'Triton'	U	SP	1.5	4-5	#c8d090		0.8
+RubC	Rubus fruticosus 'Coolaris Early'	ostružiník beztrnný 'Coolaris Early'	U	SP	2.5	5-6	#f0f0f0		0.8
+RubS	Rubus idaeus 'Sanibelle'	maliník 'Sanibelle'	U	SP	2	5-7	#ffffff		1.5
+Vac	Vaccinium corymbosum 'Nelson'	borůvka chocholičnatá 'Nelson'	U	S	1.6	4-5	#f0f0f0	kyselá půda	0.8

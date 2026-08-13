@@ -1,0 +1,4367 @@
+{
+ "kategorie": {
+  "T": {
+   "nazev": "trvalka",
+   "fill": "#e8cfe8",
+   "stroke": "#9c62a0",
+   "plocha": true
+  },
+  "G": {
+   "nazev": "travina",
+   "fill": "#f6edad",
+   "stroke": "#b0a03a",
+   "plocha": true
+  },
+  "F": {
+   "nazev": "kapradina",
+   "fill": "#cfe6cf",
+   "stroke": "#5b9a5b",
+   "plocha": true
+  },
+  "C": {
+   "nazev": "cibulovina",
+   "fill": "#dcdcf2",
+   "stroke": "#7b7bc4",
+   "plocha": true
+  },
+  "K": {
+   "nazev": "keř",
+   "fill": "#d9edd1",
+   "stroke": "#679a57",
+   "plocha": false
+  },
+  "S": {
+   "nazev": "strom",
+   "fill": "#bdd9b1",
+   "stroke": "#4a7d3c",
+   "plocha": false
+  },
+  "J": {
+   "nazev": "jehličnan",
+   "fill": "#cfe2de",
+   "stroke": "#5a8d86",
+   "plocha": false
+  },
+  "U": {
+   "nazev": "užitková dřevina",
+   "fill": "#f1dcc0",
+   "stroke": "#ac7c3c",
+   "plocha": false
+  }
+ },
+ "rostliny": [
+  {
+   "kod": "Ach",
+   "latin": "Achillea millefolium 'Desert Eve Cream'",
+   "cesky": "řebříček obecný 'Desert Eve Cream'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.3,
+   "kvet": "6-8",
+   "mesice": [
+    6,
+    7,
+    8
+   ],
+   "barva": "#f2ead0",
+   "pozn": "",
+   "hustota": 5,
+   "rozestup": 0.45,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "AjM",
+   "latin": "Ajuga reptans 'Midnight Mystery'",
+   "cesky": "zběhovec plazivý 'Midnight Mystery'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 0.2,
+   "kvet": "6-7",
+   "mesice": [
+    6,
+    7
+   ],
+   "barva": "#5b4b8a",
+   "pozn": "purpurové listy",
+   "hustota": 9,
+   "rozestup": 0.33,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Aju",
+   "latin": "Ajuga reptans 'Feathered Friends Cordial Canary'",
+   "cesky": "zběhovec plazivý 'Cordial Canary'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 0.2,
+   "kvet": "5-6",
+   "mesice": [
+    5,
+    6
+   ],
+   "barva": "#6b7fc7",
+   "pozn": "žlutozelené listy",
+   "hustota": 9,
+   "rozestup": 0.33,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Ame",
+   "latin": "Aster amellus",
+   "cesky": "hvězdnice chlumní",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.6,
+   "kvet": "7-9",
+   "mesice": [
+    7,
+    8,
+    9
+   ],
+   "barva": "#8f7fd1",
+   "pozn": "",
+   "hustota": 5,
+   "rozestup": 0.45,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Ant",
+   "latin": "Antennaria dioica",
+   "cesky": "kociánek dvoudomý",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.2,
+   "kvet": "5-6",
+   "mesice": [
+    5,
+    6
+   ],
+   "barva": "#e8b4c8",
+   "pozn": "stříbřité listy",
+   "hustota": 9,
+   "rozestup": 0.33,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Arm",
+   "latin": "Armeria maritima 'Morning Star White'",
+   "cesky": "trávnička přímořská 'Morning Star White'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.2,
+   "kvet": "5-6",
+   "mesice": [
+    5,
+    6
+   ],
+   "barva": "#ffffff",
+   "pozn": "",
+   "hustota": 9,
+   "rozestup": 0.33,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Art",
+   "latin": "Artemisia schmidtiana 'Nana'",
+   "cesky": "pelyněk Schmidtův 'Nana'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.2,
+   "kvet": "7-9",
+   "mesice": [
+    7,
+    8,
+    9
+   ],
+   "barva": "#d9d9b0",
+   "pozn": "stříbřité listy",
+   "hustota": 7,
+   "rozestup": 0.38,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Asa",
+   "latin": "Aster novae-angliae",
+   "cesky": "hvězdnice novoanglická",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 1.5,
+   "kvet": "8-10",
+   "mesice": [
+    8,
+    9,
+    10
+   ],
+   "barva": "#b06bb0",
+   "pozn": "",
+   "hustota": 3,
+   "rozestup": 0.58,
+   "koruna": 1,
+   "foto": ""
+  },
+  {
+   "kod": "Asb",
+   "latin": "Aster novi-belgii 'Milka'",
+   "cesky": "hvězdnice novobelgická 'Milka'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.8,
+   "kvet": "9-10",
+   "mesice": [
+    9,
+    10
+   ],
+   "barva": "#c77fc7",
+   "pozn": "",
+   "hustota": 5,
+   "rozestup": 0.45,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Ase",
+   "latin": "Aster novi-belgii 'Elta'",
+   "cesky": "hvězdnice novobelgická 'Elta'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 1.2,
+   "kvet": "9-10",
+   "mesice": [
+    9,
+    10
+   ],
+   "barva": "#9b7fd4",
+   "pozn": "",
+   "hustota": 4,
+   "rozestup": 0.5,
+   "koruna": 0.8,
+   "foto": ""
+  },
+  {
+   "kod": "Ast",
+   "latin": "Aster dumosus 'Herbstgruss von Bresserhof'",
+   "cesky": "hvězdnice keříčkovitá 'Herbstgruss v. Bresserhof'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 0.4,
+   "kvet": "9-10",
+   "mesice": [
+    9,
+    10
+   ],
+   "barva": "#e07fb0",
+   "pozn": "",
+   "hustota": 7,
+   "rozestup": 0.38,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Ask",
+   "latin": "Aster ageratoides 'Asran'",
+   "cesky": "hvězdnice 'Asran'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 0.8,
+   "kvet": "9-10",
+   "mesice": [
+    9,
+    10
+   ],
+   "barva": "#a890d0",
+   "pozn": "",
+   "hustota": 4,
+   "rozestup": 0.5,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "AstD",
+   "latin": "Astilbe x arendsii 'Diamant'",
+   "cesky": "čechrava arendsova 'Diamant'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "polostín",
+    "stín"
+   ],
+   "vyska": 0.8,
+   "kvet": "6-8",
+   "mesice": [
+    6,
+    7,
+    8
+   ],
+   "barva": "#ffffff",
+   "pozn": "",
+   "hustota": 4,
+   "rozestup": 0.5,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Aua",
+   "latin": "Aubrieta deltoidea 'Axcent Deep Purple'",
+   "cesky": "tařička kosníkovitá 'Axcent Deep Purple'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 0.1,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "#7b3f9e",
+   "pozn": "",
+   "hustota": 9,
+   "rozestup": 0.33,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Auh",
+   "latin": "Aubrieta hybrida 'Hamburger Stadtpark'",
+   "cesky": "tařička zahradní 'Hamburger Stadtpark'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.1,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "#9b4f9e",
+   "pozn": "",
+   "hustota": 9,
+   "rozestup": 0.33,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Aud",
+   "latin": "Aurinia saxatilis",
+   "cesky": "tařice skalní",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.25,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "#f0c020",
+   "pozn": "skalnička",
+   "hustota": 7,
+   "rozestup": 0.38,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Ane",
+   "latin": "Anemone hupehensis 'September Charm'",
+   "cesky": "sasanka japonská 'September Charm'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "polostín",
+    "stín"
+   ],
+   "vyska": 0.8,
+   "kvet": "8-10",
+   "mesice": [
+    8,
+    9,
+    10
+   ],
+   "barva": "#e0a0c0",
+   "pozn": "",
+   "hustota": 4,
+   "rozestup": 0.5,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Asp",
+   "latin": "Asplenium trichomanes",
+   "cesky": "sleziník červený",
+   "kat": "F",
+   "kategorie": "kapradina",
+   "svetlo": [
+    "stín"
+   ],
+   "vyska": 0.15,
+   "kvet": "",
+   "mesice": [],
+   "barva": "",
+   "pozn": "skalní kapradina",
+   "hustota": 7,
+   "rozestup": 0.38,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Bap",
+   "latin": "Baptisia pendula var. alba",
+   "cesky": "baptisie bílá",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 1,
+   "kvet": "5",
+   "mesice": [
+    5
+   ],
+   "barva": "#ffffff",
+   "pozn": "modrozelené listy",
+   "hustota": 3,
+   "rozestup": 0.58,
+   "koruna": 0.7,
+   "foto": ""
+  },
+  {
+   "kod": "Ber",
+   "latin": "Bergenia cordifolia 'Rosi Klose'",
+   "cesky": "bergénie srdčitá 'Rosi Klose'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 0.3,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "#e090a8",
+   "pozn": "",
+   "hustota": 6,
+   "rozestup": 0.41,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Bru",
+   "latin": "Brunnera macrophylla",
+   "cesky": "pomněnkovec velkolistý",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "polostín",
+    "stín"
+   ],
+   "vyska": 0.4,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "#5f8fd8",
+   "pozn": "",
+   "hustota": 5,
+   "rozestup": 0.45,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Cam",
+   "latin": "Campanula portenschlagiana",
+   "cesky": "zvonek dalmatský",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 0.15,
+   "kvet": "6-8",
+   "mesice": [
+    6,
+    7,
+    8
+   ],
+   "barva": "#6f5fc0",
+   "pozn": "půdopokryvný",
+   "hustota": 9,
+   "rozestup": 0.33,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Cen",
+   "latin": "Centaurea montana",
+   "cesky": "chrpa horská",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.5,
+   "kvet": "6-8",
+   "mesice": [
+    6,
+    7,
+    8
+   ],
+   "barva": "#4a6fd4",
+   "pozn": "",
+   "hustota": 5,
+   "rozestup": 0.45,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Cer",
+   "latin": "Cerastium tomentosum",
+   "cesky": "rožec plstnatý",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.2,
+   "kvet": "5-6",
+   "mesice": [
+    5,
+    6
+   ],
+   "barva": "#ffffff",
+   "pozn": "stříbřité listy",
+   "hustota": 9,
+   "rozestup": 0.33,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Ces",
+   "latin": "Cerastium tomentosum 'Silberteppich'",
+   "cesky": "rožec plstnatý 'Silberteppich'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.2,
+   "kvet": "5-6",
+   "mesice": [
+    5,
+    6
+   ],
+   "barva": "#ffffff",
+   "pozn": "stříbřité listy",
+   "hustota": 9,
+   "rozestup": 0.33,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Cim",
+   "latin": "Cimicifuga ramosa 'Atropurpurea'",
+   "cesky": "ploštičník hroznatý 'Atropurpurea'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "polostín",
+    "stín"
+   ],
+   "vyska": 1.5,
+   "kvet": "8-9",
+   "mesice": [
+    8,
+    9
+   ],
+   "barva": "#f0ead8",
+   "pozn": "vínové listy",
+   "hustota": 3,
+   "rozestup": 0.58,
+   "koruna": 1,
+   "foto": ""
+  },
+  {
+   "kod": "Chn",
+   "latin": "Chamaemelum nobile 'Treneague'",
+   "cesky": "heřmánek římský 'Treneague'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.1,
+   "kvet": "6-8",
+   "mesice": [
+    6,
+    7,
+    8
+   ],
+   "barva": "#ffffff",
+   "pozn": "pochozí, aromatický",
+   "hustota": 12,
+   "rozestup": 0.29,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Cor",
+   "latin": "Coreopsis verticillata 'Moonbeam'",
+   "cesky": "krásnoočko přeslenité 'Moonbeam'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.4,
+   "kvet": "7-9",
+   "mesice": [
+    7,
+    8,
+    9
+   ],
+   "barva": "#f0e08f",
+   "pozn": "",
+   "hustota": 6,
+   "rozestup": 0.41,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "CorG",
+   "latin": "Coreopsis grandiflora",
+   "cesky": "krásnoočko velkokvěté",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.5,
+   "kvet": "6-9",
+   "mesice": [
+    6,
+    7,
+    8,
+    9
+   ],
+   "barva": "#f0c020",
+   "pozn": "",
+   "hustota": 5,
+   "rozestup": 0.45,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "DelA",
+   "latin": "Delphinium pacific 'Astolat'",
+   "cesky": "ostrožka 'Astolat'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 1.8,
+   "kvet": "6-8",
+   "mesice": [
+    6,
+    7,
+    8
+   ],
+   "barva": "#d99bc4",
+   "pozn": "",
+   "hustota": 3,
+   "rozestup": 0.58,
+   "koruna": 1.3,
+   "foto": ""
+  },
+  {
+   "kod": "DelK",
+   "latin": "Delphinium pacific 'King Arthur'",
+   "cesky": "ostrožka 'King Arthur'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 1.8,
+   "kvet": "6-8",
+   "mesice": [
+    6,
+    7,
+    8
+   ],
+   "barva": "#4a3f9e",
+   "pozn": "",
+   "hustota": 3,
+   "rozestup": 0.58,
+   "koruna": 1.3,
+   "foto": ""
+  },
+  {
+   "kod": "Dia",
+   "latin": "Dianthus plumarius 'Roseus Plenus'",
+   "cesky": "hvozdík péřovitý 'Roseus Plenus'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.1,
+   "kvet": "6-7",
+   "mesice": [
+    6,
+    7
+   ],
+   "barva": "#e07fa0",
+   "pozn": "stříbřité listy",
+   "hustota": 9,
+   "rozestup": 0.33,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Dic",
+   "latin": "Dicentra spectabilis 'Alba'",
+   "cesky": "srdcovka nádherná 'Alba'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "polostín",
+    "stín"
+   ],
+   "vyska": 0.8,
+   "kvet": "5-6",
+   "mesice": [
+    5,
+    6
+   ],
+   "barva": "#ffffff",
+   "pozn": "",
+   "hustota": 3,
+   "rozestup": 0.58,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Dig",
+   "latin": "Digitalis purpurea",
+   "cesky": "náprstník červený",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "polostín",
+    "stín"
+   ],
+   "vyska": 1.2,
+   "kvet": "6-7",
+   "mesice": [
+    6,
+    7
+   ],
+   "barva": "#c05f9e",
+   "pozn": "jedovatý",
+   "hustota": 4,
+   "rozestup": 0.5,
+   "koruna": 0.8,
+   "foto": ""
+  },
+  {
+   "kod": "Dod",
+   "latin": "Dodecatheon jeffreyi",
+   "cesky": "božíkvítko",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "polostín",
+    "stín"
+   ],
+   "vyska": 0.6,
+   "kvet": "6-8",
+   "mesice": [
+    6,
+    7,
+    8
+   ],
+   "barva": "#c85f9e",
+   "pozn": "",
+   "hustota": 5,
+   "rozestup": 0.45,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Dry",
+   "latin": "Dryopteris filix-mas 'Crispa Cristata'",
+   "cesky": "kapraď samec 'Crispa Cristata'",
+   "kat": "F",
+   "kategorie": "kapradina",
+   "svetlo": [
+    "polostín",
+    "stín"
+   ],
+   "vyska": 0.4,
+   "kvet": "",
+   "mesice": [],
+   "barva": "",
+   "pozn": "kadeřavé listy",
+   "hustota": 4,
+   "rozestup": 0.5,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Ech",
+   "latin": "Echinacea purpurea",
+   "cesky": "třapatkovka nachová",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 1,
+   "kvet": "6-8",
+   "mesice": [
+    6,
+    7,
+    8
+   ],
+   "barva": "#cf5f8f",
+   "pozn": "",
+   "hustota": 5,
+   "rozestup": 0.45,
+   "koruna": 0.7,
+   "foto": ""
+  },
+  {
+   "kod": "EchA",
+   "latin": "Echinacea purpurea 'Alba'",
+   "cesky": "třapatkovka nachová 'Alba'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.8,
+   "kvet": "6-8",
+   "mesice": [
+    6,
+    7,
+    8
+   ],
+   "barva": "#ffffff",
+   "pozn": "",
+   "hustota": 5,
+   "rozestup": 0.45,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "EchG",
+   "latin": "Echinacea purpurea 'Green Jewel'",
+   "cesky": "třapatkovka nachová 'Green Jewel'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.6,
+   "kvet": "6-9",
+   "mesice": [
+    6,
+    7,
+    8,
+    9
+   ],
+   "barva": "#c8d98f",
+   "pozn": "",
+   "hustota": 5,
+   "rozestup": 0.45,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "F",
+   "latin": "Festuca cinerea",
+   "cesky": "kostřava popelavá",
+   "kat": "G",
+   "kategorie": "travina",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.2,
+   "kvet": "",
+   "mesice": [],
+   "barva": "",
+   "pozn": "stříbřitá",
+   "hustota": 9,
+   "rozestup": 0.33,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "FesG",
+   "latin": "Festuca glauca",
+   "cesky": "kostřava sivá",
+   "kat": "G",
+   "kategorie": "travina",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.25,
+   "kvet": "6-7",
+   "mesice": [
+    6,
+    7
+   ],
+   "barva": "#c8c8b0",
+   "pozn": "modrošedá",
+   "hustota": 9,
+   "rozestup": 0.33,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Gau",
+   "latin": "Gaura lindheimeri 'Summer Breeze'",
+   "cesky": "svíčkovec 'Summer Breeze'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.9,
+   "kvet": "6-9",
+   "mesice": [
+    6,
+    7,
+    8,
+    9
+   ],
+   "barva": "#f0d0d8",
+   "pozn": "",
+   "hustota": 3,
+   "rozestup": 0.58,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Gen",
+   "latin": "Gentiana officinalis",
+   "cesky": "hořec",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 0.4,
+   "kvet": "7-9",
+   "mesice": [
+    7,
+    8,
+    9
+   ],
+   "barva": "#2f4fb0",
+   "pozn": "",
+   "hustota": 7,
+   "rozestup": 0.38,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Ger",
+   "latin": "Geranium sanguineum",
+   "cesky": "kakost krvavý",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 0.4,
+   "kvet": "6-8",
+   "mesice": [
+    6,
+    7,
+    8
+   ],
+   "barva": "#b83f7f",
+   "pozn": "",
+   "hustota": 5,
+   "rozestup": 0.45,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "GerA",
+   "latin": "Geranium sanguineum 'Album'",
+   "cesky": "kakost krvavý 'Album'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 0.4,
+   "kvet": "6-8",
+   "mesice": [
+    6,
+    7,
+    8
+   ],
+   "barva": "#ffffff",
+   "pozn": "",
+   "hustota": 5,
+   "rozestup": 0.45,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "GerE",
+   "latin": "Geranium sanguineum 'Elsbeth'",
+   "cesky": "kakost krvavý 'Elsbeth'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 0.4,
+   "kvet": "5-9",
+   "mesice": [
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "barva": "#d1508f",
+   "pozn": "",
+   "hustota": 5,
+   "rozestup": 0.45,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Gyp",
+   "latin": "Gypsophila paniculata 'Festival White'",
+   "cesky": "šater latnatý 'Festival White'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.6,
+   "kvet": "6-9",
+   "mesice": [
+    6,
+    7,
+    8,
+    9
+   ],
+   "barva": "#ffffff",
+   "pozn": "kombinace s třapatkou",
+   "hustota": 4,
+   "rozestup": 0.5,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "GypR",
+   "latin": "Gypsophila repens",
+   "cesky": "šater plazivý",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 0.2,
+   "kvet": "5-7",
+   "mesice": [
+    5,
+    6,
+    7
+   ],
+   "barva": "#f0dde5",
+   "pozn": "",
+   "hustota": 7,
+   "rozestup": 0.38,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Hel",
+   "latin": "Helleborus x ericsmithii 'Ivory Prince'",
+   "cesky": "čemeřice 'Ivory Prince'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "polostín",
+    "stín"
+   ],
+   "vyska": 0.4,
+   "kvet": "2-4",
+   "mesice": [
+    2,
+    3,
+    4
+   ],
+   "barva": "#f0ead0",
+   "pozn": "",
+   "hustota": 5,
+   "rozestup": 0.45,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Hes",
+   "latin": "Hesperis matronalis",
+   "cesky": "večernice vonná",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 0.9,
+   "kvet": "5-8",
+   "mesice": [
+    5,
+    6,
+    7,
+    8
+   ],
+   "barva": "#c78fd1",
+   "pozn": "voňavá",
+   "hustota": 4,
+   "rozestup": 0.5,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Heu",
+   "latin": "Heuchera hybrida 'Midnight Rose'",
+   "cesky": "dlužicha 'Midnight Rose'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 0.3,
+   "kvet": "6-8",
+   "mesice": [
+    6,
+    7,
+    8
+   ],
+   "barva": "#e8c0d0",
+   "pozn": "purpurové listy",
+   "hustota": 7,
+   "rozestup": 0.38,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Hos",
+   "latin": "Hosta 'Alvatine Taylor'",
+   "cesky": "bohyška 'Alvatine Taylor'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "polostín",
+    "stín"
+   ],
+   "vyska": 0.6,
+   "kvet": "7-8",
+   "mesice": [
+    7,
+    8
+   ],
+   "barva": "#c8b8d8",
+   "pozn": "",
+   "hustota": 3,
+   "rozestup": 0.58,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "HosA",
+   "latin": "Hosta 'Avocado'",
+   "cesky": "bohyška 'Avocado'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "polostín",
+    "stín"
+   ],
+   "vyska": 0.6,
+   "kvet": "7-8",
+   "mesice": [
+    7,
+    8
+   ],
+   "barva": "#e8e8f0",
+   "pozn": "",
+   "hustota": 3,
+   "rozestup": 0.58,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Ibe",
+   "latin": "Iberis sempervirens 'Schneeflocke'",
+   "cesky": "iberka vždyzelená 'Schneeflocke'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.2,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "#ffffff",
+   "pozn": "stálezelená",
+   "hustota": 6,
+   "rozestup": 0.41,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Iri",
+   "latin": "Iris barbata-nana 'White Gem'",
+   "cesky": "kosatec nízký 'White Gem'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.3,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "#ffffff",
+   "pozn": "",
+   "hustota": 7,
+   "rozestup": 0.38,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Kna",
+   "latin": "Knautia macedonica",
+   "cesky": "chrastavec makedonský",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.8,
+   "kvet": "7-9",
+   "mesice": [
+    7,
+    8,
+    9
+   ],
+   "barva": "#a02040",
+   "pozn": "",
+   "hustota": 4,
+   "rozestup": 0.5,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Lae",
+   "latin": "Lavandula angustifolia 'Ellagance Snow'",
+   "cesky": "levandule úzkolistá 'Ellagance Snow'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.5,
+   "kvet": "7-9",
+   "mesice": [
+    7,
+    8,
+    9
+   ],
+   "barva": "#ffffff",
+   "pozn": "",
+   "hustota": 5,
+   "rozestup": 0.45,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Lah",
+   "latin": "Lavandula angustifolia 'Hidcote Blue'",
+   "cesky": "levandule úzkolistá 'Hidcote Blue'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.4,
+   "kvet": "7-8",
+   "mesice": [
+    7,
+    8
+   ],
+   "barva": "#6b5fa8",
+   "pozn": "",
+   "hustota": 5,
+   "rozestup": 0.45,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Lam",
+   "latin": "Lavandula angustifolia 'Munstead Strain'",
+   "cesky": "levandule úzkolistá 'Munstead Strain'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.4,
+   "kvet": "7-8",
+   "mesice": [
+    7,
+    8
+   ],
+   "barva": "#8f7fc0",
+   "pozn": "",
+   "hustota": 5,
+   "rozestup": 0.45,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Lep",
+   "latin": "Leptinella squalida",
+   "cesky": "leptinela",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "polostín",
+    "stín"
+   ],
+   "vyska": 0.05,
+   "kvet": "6-7",
+   "mesice": [
+    6,
+    7
+   ],
+   "barva": "#c8c880",
+   "pozn": "pochozí půdopokryvka",
+   "hustota": 16,
+   "rozestup": 0.25,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "LeuA",
+   "latin": "Leucanthemum x superbum 'Alaska'",
+   "cesky": "kopretina velkokvětá 'Alaska'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.8,
+   "kvet": "7-8",
+   "mesice": [
+    7,
+    8
+   ],
+   "barva": "#ffffff",
+   "pozn": "",
+   "hustota": 5,
+   "rozestup": 0.45,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "LeuM",
+   "latin": "Leucanthemum maximum 'Madonna'",
+   "cesky": "kopretina velkokvětá 'Madonna'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.3,
+   "kvet": "6-8",
+   "mesice": [
+    6,
+    7,
+    8
+   ],
+   "barva": "#ffffff",
+   "pozn": "",
+   "hustota": 7,
+   "rozestup": 0.38,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Lit",
+   "latin": "Lithodora diffusa 'Tidepool Blue'",
+   "cesky": "kamejka rozprostřená 'Tidepool Blue'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.2,
+   "kvet": "5-6",
+   "mesice": [
+    5,
+    6
+   ],
+   "barva": "#2f5fc0",
+   "pozn": "",
+   "hustota": 7,
+   "rozestup": 0.38,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Lys",
+   "latin": "Lysimachia nummularia",
+   "cesky": "vrbina penízková",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "polostín",
+    "stín"
+   ],
+   "vyska": 0.1,
+   "kvet": "6-7",
+   "mesice": [
+    6,
+    7
+   ],
+   "barva": "#f0d020",
+   "pozn": "půdopokryvná",
+   "hustota": 9,
+   "rozestup": 0.33,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Ori",
+   "latin": "Origanum sp.",
+   "cesky": "dobromysl",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.5,
+   "kvet": "5-9",
+   "mesice": [
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "barva": "#c07fb0",
+   "pozn": "aromatická",
+   "hustota": 6,
+   "rozestup": 0.41,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "PerL",
+   "latin": "Perovskia atriplicifolia 'Little Spire'",
+   "cesky": "perovskie lebedolistá 'Little Spire'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.5,
+   "kvet": "8-9",
+   "mesice": [
+    8,
+    9
+   ],
+   "barva": "#7f8fd1",
+   "pozn": "stříbřité listy",
+   "hustota": 4,
+   "rozestup": 0.5,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "PerS",
+   "latin": "Perovskia atriplicifolia 'Steel Blue'",
+   "cesky": "perovskie lebedolistá 'Steel Blue'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.9,
+   "kvet": "8-9",
+   "mesice": [
+    8,
+    9
+   ],
+   "barva": "#7f8fd1",
+   "pozn": "",
+   "hustota": 3,
+   "rozestup": 0.58,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Phl",
+   "latin": "Phlox divaricata 'May Breeze'",
+   "cesky": "plamenka rozkladitá 'May Breeze'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "polostín",
+    "stín"
+   ],
+   "vyska": 0.4,
+   "kvet": "5-7",
+   "mesice": [
+    5,
+    6,
+    7
+   ],
+   "barva": "#e8f0f0",
+   "pozn": "",
+   "hustota": 7,
+   "rozestup": 0.38,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "PhlB",
+   "latin": "Phlox divaricata 'Blue Moon'",
+   "cesky": "plamenka rozkladitá 'Blue Moon'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "polostín",
+    "stín"
+   ],
+   "vyska": 0.3,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "#7f8fd8",
+   "pozn": "",
+   "hustota": 7,
+   "rozestup": 0.38,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Phs",
+   "latin": "Phlox subulata",
+   "cesky": "plamenka šídlovitá",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.15,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "#d87fb0",
+   "pozn": "půdopokryvná",
+   "hustota": 9,
+   "rozestup": 0.33,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Pyl",
+   "latin": "Phyllitis scolopendrium",
+   "cesky": "jelení jazyk",
+   "kat": "F",
+   "kategorie": "kapradina",
+   "svetlo": [
+    "stín"
+   ],
+   "vyska": 0.4,
+   "kvet": "",
+   "mesice": [],
+   "barva": "",
+   "pozn": "celolistá kapradina",
+   "hustota": 4,
+   "rozestup": 0.5,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "PlaC",
+   "latin": "Platycodon grandiflorus 'Codo White'",
+   "cesky": "boubelka velkokvětá 'Codo White'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 0.2,
+   "kvet": "6-8",
+   "mesice": [
+    6,
+    7,
+    8
+   ],
+   "barva": "#ffffff",
+   "pozn": "",
+   "hustota": 7,
+   "rozestup": 0.38,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "PlaP",
+   "latin": "Platycodon grandiflorus 'Pop Star White'",
+   "cesky": "boubelka velkokvětá 'Pop Star White'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 0.2,
+   "kvet": "6-8",
+   "mesice": [
+    6,
+    7,
+    8
+   ],
+   "barva": "#ffffff",
+   "pozn": "",
+   "hustota": 7,
+   "rozestup": 0.38,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Pri",
+   "latin": "Primula denticulata 'Blue'",
+   "cesky": "prvosenka zoubkatá 'Blue'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "polostín",
+    "stín"
+   ],
+   "vyska": 0.3,
+   "kvet": "5-6",
+   "mesice": [
+    5,
+    6
+   ],
+   "barva": "#6f7fc8",
+   "pozn": "",
+   "hustota": 7,
+   "rozestup": 0.38,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Pul",
+   "latin": "Pulsatilla vulgaris 'Bells Red'",
+   "cesky": "koniklec obecný 'Bells Red'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.2,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "#a02f4f",
+   "pozn": "",
+   "hustota": 7,
+   "rozestup": 0.38,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Rud",
+   "latin": "Rudbeckia fulgida 'Goldsturm'",
+   "cesky": "třapatka zářivá 'Goldsturm'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.8,
+   "kvet": "7-10",
+   "mesice": [
+    7,
+    8,
+    9,
+    10
+   ],
+   "barva": "#f0b820",
+   "pozn": "",
+   "hustota": 5,
+   "rozestup": 0.45,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Sag",
+   "latin": "Sagina subulata",
+   "cesky": "úrazník šídlovitý",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 0.05,
+   "kvet": "6-7",
+   "mesice": [
+    6,
+    7
+   ],
+   "barva": "#ffffff",
+   "pozn": "mechový polštář",
+   "hustota": 16,
+   "rozestup": 0.25,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Sal",
+   "latin": "Salvia nemorosa 'Violette Königin'",
+   "cesky": "šalvěj hajní 'Violette Königin'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.5,
+   "kvet": "5-9",
+   "mesice": [
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "barva": "#5f3f9e",
+   "pozn": "",
+   "hustota": 6,
+   "rozestup": 0.41,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "SalR",
+   "latin": "Salvia nemorosa 'Rosa Königin'",
+   "cesky": "šalvěj hajní 'Rosa Königin'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.5,
+   "kvet": "5-9",
+   "mesice": [
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "barva": "#d17fa8",
+   "pozn": "",
+   "hustota": 6,
+   "rozestup": 0.41,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "SalE",
+   "latin": "Salvia superba 'Edula Rose'",
+   "cesky": "šalvěj nádherná 'Edula Rose'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.3,
+   "kvet": "5-8",
+   "mesice": [
+    5,
+    6,
+    7,
+    8
+   ],
+   "barva": "#d98fb8",
+   "pozn": "",
+   "hustota": 7,
+   "rozestup": 0.38,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "San",
+   "latin": "Sanguisorba officinalis",
+   "cesky": "krvavec toten",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 1,
+   "kvet": "6-9",
+   "mesice": [
+    6,
+    7,
+    8,
+    9
+   ],
+   "barva": "#8f2f3f",
+   "pozn": "",
+   "hustota": 3,
+   "rozestup": 0.58,
+   "koruna": 0.7,
+   "foto": ""
+  },
+  {
+   "kod": "SanC",
+   "latin": "Sanguisorba officinalis 'Crimson Queen'",
+   "cesky": "krvavec toten 'Crimson Queen'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 1,
+   "kvet": "6-9",
+   "mesice": [
+    6,
+    7,
+    8,
+    9
+   ],
+   "barva": "#a02040",
+   "pozn": "",
+   "hustota": 3,
+   "rozestup": 0.58,
+   "koruna": 0.7,
+   "foto": ""
+  },
+  {
+   "kod": "Sax",
+   "latin": "Saxifraga x arendsii 'Red Cap'",
+   "cesky": "lomikámen arendsův 'Red Cap'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 0.2,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "#d02f5f",
+   "pozn": "skalky, písčitá půda",
+   "hustota": 9,
+   "rozestup": 0.33,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Sca",
+   "latin": "Scabiosa caucasica 'Perfecta'",
+   "cesky": "hlaváč kavkazský 'Perfecta'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.6,
+   "kvet": "5-8",
+   "mesice": [
+    5,
+    6,
+    7,
+    8
+   ],
+   "barva": "#8f9fd8",
+   "pozn": "",
+   "hustota": 5,
+   "rozestup": 0.45,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "ScaA",
+   "latin": "Scabiosa caucasica 'Perfecta Alba'",
+   "cesky": "hlaváč kavkazský 'Perfecta Alba'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.8,
+   "kvet": "5-8",
+   "mesice": [
+    5,
+    6,
+    7,
+    8
+   ],
+   "barva": "#ffffff",
+   "pozn": "",
+   "hustota": 4,
+   "rozestup": 0.5,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Sed",
+   "latin": "Sedum spectabile 'Carl'",
+   "cesky": "rozchodník nádherný 'Carl'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.5,
+   "kvet": "8-9",
+   "mesice": [
+    8,
+    9
+   ],
+   "barva": "#c85f8f",
+   "pozn": "kožnaté listy",
+   "hustota": 5,
+   "rozestup": 0.45,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Sta",
+   "latin": "Stachys byzantina",
+   "cesky": "čistec vlnatý",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.4,
+   "kvet": "6-8",
+   "mesice": [
+    6,
+    7,
+    8
+   ],
+   "barva": "#c78fc0",
+   "pozn": "stříbřité listy",
+   "hustota": 7,
+   "rozestup": 0.38,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Tha",
+   "latin": "Thalictrum aquilegiifolium",
+   "cesky": "žluťucha orlíčkolistá",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "polostín",
+    "stín"
+   ],
+   "vyska": 1,
+   "kvet": "5-7",
+   "mesice": [
+    5,
+    6,
+    7
+   ],
+   "barva": "#c89fd8",
+   "pozn": "",
+   "hustota": 3,
+   "rozestup": 0.58,
+   "koruna": 0.7,
+   "foto": ""
+  },
+  {
+   "kod": "Thy",
+   "latin": "Thymus sp.",
+   "cesky": "mateřídouška",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.2,
+   "kvet": "7-9",
+   "mesice": [
+    7,
+    8,
+    9
+   ],
+   "barva": "#c07fb0",
+   "pozn": "aromatická",
+   "hustota": 9,
+   "rozestup": 0.33,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "ThyT",
+   "latin": "Thymus pulegioides 'Tabor'",
+   "cesky": "mateřídouška vejčitá 'Tabor'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 0.2,
+   "kvet": "5-8",
+   "mesice": [
+    5,
+    6,
+    7,
+    8
+   ],
+   "barva": "#c07fb0",
+   "pozn": "",
+   "hustota": 9,
+   "rozestup": 0.33,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Ven",
+   "latin": "Veronica spicata nana 'Blauteppich'",
+   "cesky": "rozrazil klasnatý 'Blauteppich'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.2,
+   "kvet": "7-9",
+   "mesice": [
+    7,
+    8,
+    9
+   ],
+   "barva": "#4f5fc0",
+   "pozn": "",
+   "hustota": 7,
+   "rozestup": 0.38,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "VeR",
+   "latin": "Veronica spicata 'Candles Royal'",
+   "cesky": "rozrazil klasnatý 'Candles Royal'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.4,
+   "kvet": "6-8",
+   "mesice": [
+    6,
+    7,
+    8
+   ],
+   "barva": "#5f4f9e",
+   "pozn": "",
+   "hustota": 6,
+   "rozestup": 0.41,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "VeS",
+   "latin": "Veronica spicata 'Candles Snow'",
+   "cesky": "rozrazil klasnatý 'Candles Snow'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.4,
+   "kvet": "7-8",
+   "mesice": [
+    7,
+    8
+   ],
+   "barva": "#ffffff",
+   "pozn": "",
+   "hustota": 6,
+   "rozestup": 0.41,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Ver",
+   "latin": "Verbena hybrida 'Vanessa Bicolor Indigo'",
+   "cesky": "sporýš 'Vanessa Bicolor Indigo'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.3,
+   "kvet": "5-9",
+   "mesice": [
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "barva": "#4f3f9e",
+   "pozn": "",
+   "hustota": 6,
+   "rozestup": 0.41,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "VerB",
+   "latin": "Verbena bonariensis",
+   "cesky": "sporýš argentinský",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 1.2,
+   "kvet": "7-10",
+   "mesice": [
+    7,
+    8,
+    9,
+    10
+   ],
+   "barva": "#8f5fb0",
+   "pozn": "prosvítavý",
+   "hustota": 4,
+   "rozestup": 0.5,
+   "koruna": 0.8,
+   "foto": ""
+  },
+  {
+   "kod": "Vin",
+   "latin": "Vinca minor",
+   "cesky": "barvínek menší",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "polostín",
+    "stín"
+   ],
+   "vyska": 0.2,
+   "kvet": "5-9",
+   "mesice": [
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "barva": "#7f8fd8",
+   "pozn": "půdopokryvný",
+   "hustota": 9,
+   "rozestup": 0.33,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "VinH",
+   "latin": "Vinca minor 'Hawaii'",
+   "cesky": "barvínek menší 'Hawaii'",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "polostín",
+    "stín"
+   ],
+   "vyska": 0.2,
+   "kvet": "5-9",
+   "mesice": [
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "barva": "#5f6fc8",
+   "pozn": "",
+   "hustota": 9,
+   "rozestup": 0.33,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Vio",
+   "latin": "Viola odorata",
+   "cesky": "violka vonná",
+   "kat": "T",
+   "kategorie": "trvalka",
+   "svetlo": [
+    "polostín",
+    "stín"
+   ],
+   "vyska": 0.2,
+   "kvet": "3-4",
+   "mesice": [
+    3,
+    4
+   ],
+   "barva": "#6f4f9e",
+   "pozn": "voňavá",
+   "hustota": 9,
+   "rozestup": 0.33,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Cal",
+   "latin": "Calamagrostis brachytricha",
+   "cesky": "třtina rákosovitá",
+   "kat": "G",
+   "kategorie": "travina",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 1,
+   "kvet": "7-10",
+   "mesice": [
+    7,
+    8,
+    9,
+    10
+   ],
+   "barva": "#d8c8d0",
+   "pozn": "",
+   "hustota": 3,
+   "rozestup": 0.58,
+   "koruna": 0.7,
+   "foto": ""
+  },
+  {
+   "kod": "Luz",
+   "latin": "Luzula sylvatica",
+   "cesky": "bika lesní",
+   "kat": "G",
+   "kategorie": "travina",
+   "svetlo": [
+    "polostín",
+    "stín"
+   ],
+   "vyska": 0.4,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "#c8b890",
+   "pozn": "půdopokryvná travina",
+   "hustota": 7,
+   "rozestup": 0.38,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "MisG",
+   "latin": "Miscanthus floridulus 'Giganteus'",
+   "cesky": "ozdobnice obrovská 'Giganteus'",
+   "kat": "G",
+   "kategorie": "travina",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 3,
+   "kvet": "",
+   "mesice": [],
+   "barva": "",
+   "pozn": "solitérní travina",
+   "hustota": 0.7,
+   "rozestup": 1.2,
+   "koruna": 2.1,
+   "foto": ""
+  },
+  {
+   "kod": "MisS",
+   "latin": "Miscanthus sinensis",
+   "cesky": "ozdobnice čínská",
+   "kat": "G",
+   "kategorie": "travina",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 2,
+   "kvet": "8-10",
+   "mesice": [
+    8,
+    9,
+    10
+   ],
+   "barva": "#d8c0b0",
+   "pozn": "",
+   "hustota": 1,
+   "rozestup": 1,
+   "koruna": 1.4,
+   "foto": ""
+  },
+  {
+   "kod": "Pen",
+   "latin": "Pennisetum alopecuroides 'Hameln'",
+   "cesky": "dochan psárkovitý 'Hameln'",
+   "kat": "G",
+   "kategorie": "travina",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 0.8,
+   "kvet": "7-10",
+   "mesice": [
+    7,
+    8,
+    9,
+    10
+   ],
+   "barva": "#d8c8b8",
+   "pozn": "",
+   "hustota": 3,
+   "rozestup": 0.58,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "StiG",
+   "latin": "Stipa gigantea",
+   "cesky": "kavyl obrovský",
+   "kat": "G",
+   "kategorie": "travina",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 1.5,
+   "kvet": "6-8",
+   "mesice": [
+    6,
+    7,
+    8
+   ],
+   "barva": "#e0d0a0",
+   "pozn": "solitérní travina",
+   "hustota": 1,
+   "rozestup": 1,
+   "koruna": 1,
+   "foto": ""
+  },
+  {
+   "kod": "StiT",
+   "latin": "Stipa tenuissima",
+   "cesky": "kavyl péřovitý",
+   "kat": "G",
+   "kategorie": "travina",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.5,
+   "kvet": "",
+   "mesice": [],
+   "barva": "",
+   "pozn": "vlásková travina",
+   "hustota": 5,
+   "rozestup": 0.45,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "AllC",
+   "latin": "Allium caeruleum",
+   "cesky": "česnek azurový",
+   "kat": "C",
+   "kategorie": "cibulovina",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.4,
+   "kvet": "5-6",
+   "mesice": [
+    5,
+    6
+   ],
+   "barva": "#4f7fd0",
+   "pozn": "",
+   "hustota": 50,
+   "rozestup": 0.14,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "AllT",
+   "latin": "Allium triquetrum",
+   "cesky": "česnek trojhranný",
+   "kat": "C",
+   "kategorie": "cibulovina",
+   "svetlo": [
+    "stín"
+   ],
+   "vyska": 0.6,
+   "kvet": "2-4",
+   "mesice": [
+    2,
+    3,
+    4
+   ],
+   "barva": "#ffffff",
+   "pozn": "",
+   "hustota": 40,
+   "rozestup": 0.16,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Cro",
+   "latin": "Crocus speciosus 'Conqueror'",
+   "cesky": "šafrán 'Conqueror'",
+   "kat": "C",
+   "kategorie": "cibulovina",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.1,
+   "kvet": "9-10",
+   "mesice": [
+    9,
+    10
+   ],
+   "barva": "#7f7fd0",
+   "pozn": "",
+   "hustota": 60,
+   "rozestup": 0.13,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Gal",
+   "latin": "Galanthus nivalis",
+   "cesky": "sněženka podsněžník",
+   "kat": "C",
+   "kategorie": "cibulovina",
+   "svetlo": [
+    "stín"
+   ],
+   "vyska": 0.2,
+   "kvet": "2-3",
+   "mesice": [
+    2,
+    3
+   ],
+   "barva": "#ffffff",
+   "pozn": "",
+   "hustota": 60,
+   "rozestup": 0.13,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Hya",
+   "latin": "Hyacinthoides hispanica 'Blue'",
+   "cesky": "hyacintovec španělský 'Blue'",
+   "kat": "C",
+   "kategorie": "cibulovina",
+   "svetlo": [
+    "polostín",
+    "stín"
+   ],
+   "vyska": 0.3,
+   "kvet": "4-6",
+   "mesice": [
+    4,
+    5,
+    6
+   ],
+   "barva": "#6f8fd8",
+   "pozn": "",
+   "hustota": 40,
+   "rozestup": 0.16,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Hyn",
+   "latin": "Hyacinthoides non-scripta",
+   "cesky": "hyacintovec britský",
+   "kat": "C",
+   "kategorie": "cibulovina",
+   "svetlo": [
+    "polostín",
+    "stín"
+   ],
+   "vyska": 0.4,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "#5f7fd0",
+   "pozn": "",
+   "hustota": 40,
+   "rozestup": 0.16,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Nar",
+   "latin": "Narcissus 'White Marvel'",
+   "cesky": "narcis 'White Marvel'",
+   "kat": "C",
+   "kategorie": "cibulovina",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 0.3,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "#ffffff",
+   "pozn": "",
+   "hustota": 40,
+   "rozestup": 0.16,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "NarA",
+   "latin": "Narcissus 'Angel's Breath'",
+   "cesky": "narcis 'Angel's Breath'",
+   "kat": "C",
+   "kategorie": "cibulovina",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 0.3,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "#f5f0d8",
+   "pozn": "",
+   "hustota": 40,
+   "rozestup": 0.16,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Tri",
+   "latin": "Triteleia laxa 'Queen Fabiola'",
+   "cesky": "tritélie řídká 'Queen Fabiola'",
+   "kat": "C",
+   "kategorie": "cibulovina",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.4,
+   "kvet": "5-6",
+   "mesice": [
+    5,
+    6
+   ],
+   "barva": "#6f6fc8",
+   "pozn": "",
+   "hustota": 40,
+   "rozestup": 0.16,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Tul",
+   "latin": "Tulipa Triumph 'Negrita'",
+   "cesky": "tulipán Triumph 'Negrita'",
+   "kat": "C",
+   "kategorie": "cibulovina",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 0.4,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "#7f3f8f",
+   "pozn": "",
+   "hustota": 40,
+   "rozestup": 0.16,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Aml",
+   "latin": "Amelanchier lamarckii",
+   "cesky": "muchovník Lamarckův",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 4,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "#ffffff",
+   "pozn": "kvete před olistěním",
+   "hustota": 0.3,
+   "rozestup": 1.83,
+   "koruna": 2.8,
+   "foto": ""
+  },
+  {
+   "kod": "Cap",
+   "latin": "Callicarpa dichotoma",
+   "cesky": "krásnoplodka vidličnatá",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 2,
+   "kvet": "7-8",
+   "mesice": [
+    7,
+    8
+   ],
+   "barva": "#c890c8",
+   "pozn": "fialové plody přes zimu",
+   "hustota": 0.6,
+   "rozestup": 1.29,
+   "koruna": 1.4,
+   "foto": ""
+  },
+  {
+   "kod": "Car",
+   "latin": "Caryopteris x clandonensis 'Kew Blue'",
+   "cesky": "ořechokřídlec 'Kew Blue'",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 1,
+   "kvet": "8-9",
+   "mesice": [
+    8,
+    9
+   ],
+   "barva": "#4f5fb0",
+   "pozn": "",
+   "hustota": 1.2,
+   "rozestup": 0.91,
+   "koruna": 0.7,
+   "foto": ""
+  },
+  {
+   "kod": "ChaF",
+   "latin": "Chaenomeles speciosa 'Fire Dance'",
+   "cesky": "kdoulovec lahvicovitý 'Fire Dance'",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 1.2,
+   "kvet": "3-4",
+   "mesice": [
+    3,
+    4
+   ],
+   "barva": "#d02f2f",
+   "pozn": "",
+   "hustota": 1,
+   "rozestup": 1,
+   "koruna": 0.8,
+   "foto": ""
+  },
+  {
+   "kod": "ChaG",
+   "latin": "Chaenomeles speciosa 'Geisha Girl'",
+   "cesky": "kdoulovec lahvicovitý 'Geisha Girl'",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 1.2,
+   "kvet": "3-4",
+   "mesice": [
+    3,
+    4
+   ],
+   "barva": "#e8905f",
+   "pozn": "",
+   "hustota": 1,
+   "rozestup": 1,
+   "koruna": 0.8,
+   "foto": ""
+  },
+  {
+   "kod": "CorA",
+   "latin": "Cornus alba 'Sibirica'",
+   "cesky": "svída bílá 'Sibirica'",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 3,
+   "kvet": "5-6",
+   "mesice": [
+    5,
+    6
+   ],
+   "barva": "#f0f0e0",
+   "pozn": "červené výhony v zimě",
+   "hustota": 0.5,
+   "rozestup": 1.41,
+   "koruna": 2.1,
+   "foto": ""
+  },
+  {
+   "kod": "CorK",
+   "latin": "Cornus kousa",
+   "cesky": "dřín japonský",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 5,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "#ffffff",
+   "pozn": "",
+   "hustota": 0.2,
+   "rozestup": 2.24,
+   "koruna": 3.5,
+   "foto": ""
+  },
+  {
+   "kod": "CorS",
+   "latin": "Cornus sanguinea",
+   "cesky": "svída krvavá",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 4,
+   "kvet": "5-6",
+   "mesice": [
+    5,
+    6
+   ],
+   "barva": "#f0f0e0",
+   "pozn": "",
+   "hustota": 0.4,
+   "rozestup": 1.58,
+   "koruna": 2.8,
+   "foto": ""
+  },
+  {
+   "kod": "Cyt",
+   "latin": "Cytisus 'Apricot Gem'",
+   "cesky": "čilimník 'Apricot Gem'",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 1.3,
+   "kvet": "5-6",
+   "mesice": [
+    5,
+    6
+   ],
+   "barva": "#e8a05a",
+   "pozn": "",
+   "hustota": 1,
+   "rozestup": 1,
+   "koruna": 0.9,
+   "foto": ""
+  },
+  {
+   "kod": "EriC",
+   "latin": "Erica carnea mix",
+   "cesky": "vřesovec pleťový mix",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.3,
+   "kvet": "4-12",
+   "mesice": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+   ],
+   "barva": "#d98fb0",
+   "pozn": "kyselá půda, rašelina",
+   "hustota": 7,
+   "rozestup": 0.38,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "EriD",
+   "latin": "Erica x darleyensis",
+   "cesky": "vřesovec darlejský",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.4,
+   "kvet": "2-5",
+   "mesice": [
+    2,
+    3,
+    4,
+    5
+   ],
+   "barva": "#d98fb0",
+   "pozn": "stálezelený",
+   "hustota": 5,
+   "rozestup": 0.45,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Esc",
+   "latin": "Escallonia 'Iveyi'",
+   "cesky": "zábluda 'Iveyi'",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 3,
+   "kvet": "6-9",
+   "mesice": [
+    6,
+    7,
+    8,
+    9
+   ],
+   "barva": "#ffffff",
+   "pozn": "stálezelená, voňavá",
+   "hustota": 0.5,
+   "rozestup": 1.41,
+   "koruna": 2.1,
+   "foto": ""
+  },
+  {
+   "kod": "Exo",
+   "latin": "Exochorda racemosa",
+   "cesky": "hroznovec hroznatý",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 3,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "#ffffff",
+   "pozn": "",
+   "hustota": 0.4,
+   "rozestup": 1.58,
+   "koruna": 2.1,
+   "foto": ""
+  },
+  {
+   "kod": "For",
+   "latin": "Forsythia x intermedia 'Courtalyn'",
+   "cesky": "zlatice prostřední 'Courtalyn'",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 2,
+   "kvet": "4",
+   "mesice": [
+    4
+   ],
+   "barva": "#f0d020",
+   "pozn": "",
+   "hustota": 0.6,
+   "rozestup": 1.29,
+   "koruna": 1.4,
+   "foto": ""
+  },
+  {
+   "kod": "HyA",
+   "latin": "Hydrangea arborescens 'Annabelle'",
+   "cesky": "hortenzie stromečkovitá 'Annabelle'",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "polostín"
+   ],
+   "vyska": 1.5,
+   "kvet": "6-10",
+   "mesice": [
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "barva": "#f0f0e0",
+   "pozn": "",
+   "hustota": 0.8,
+   "rozestup": 1.12,
+   "koruna": 1,
+   "foto": ""
+  },
+  {
+   "kod": "HyB",
+   "latin": "Hydrangea arborescens 'Bounty'",
+   "cesky": "hortenzie stromečkovitá 'Bounty'",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "polostín"
+   ],
+   "vyska": 1.8,
+   "kvet": "6-10",
+   "mesice": [
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "barva": "#f0f0e0",
+   "pozn": "",
+   "hustota": 0.7,
+   "rozestup": 1.2,
+   "koruna": 1.3,
+   "foto": ""
+  },
+  {
+   "kod": "HyC",
+   "latin": "Hydrangea paniculata 'Candlelight'",
+   "cesky": "hortenzie latnatá 'Candlelight'",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 1.2,
+   "kvet": "6-10",
+   "mesice": [
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "barva": "#f5f0d0",
+   "pozn": "",
+   "hustota": 1,
+   "rozestup": 1,
+   "koruna": 0.8,
+   "foto": ""
+  },
+  {
+   "kod": "Hyd",
+   "latin": "Hydrangea macrophylla",
+   "cesky": "hortenzie velkolistá",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "polostín"
+   ],
+   "vyska": 1.5,
+   "kvet": "6-9",
+   "mesice": [
+    6,
+    7,
+    8,
+    9
+   ],
+   "barva": "#d88fb0",
+   "pozn": "různé barvy",
+   "hustota": 0.8,
+   "rozestup": 1.12,
+   "koruna": 1,
+   "foto": ""
+  },
+  {
+   "kod": "Hyp",
+   "latin": "Hypericum x inodorum",
+   "cesky": "třezalka nevonná",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 1,
+   "kvet": "6-10",
+   "mesice": [
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "barva": "#f0d84f",
+   "pozn": "červené plody",
+   "hustota": 1.2,
+   "rozestup": 0.91,
+   "koruna": 0.7,
+   "foto": ""
+  },
+  {
+   "kod": "Kol",
+   "latin": "Kolkwitzia amabilis",
+   "cesky": "kolkvicie krásná",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 3,
+   "kvet": "5-6",
+   "mesice": [
+    5,
+    6
+   ],
+   "barva": "#e8a8c0",
+   "pozn": "",
+   "hustota": 0.4,
+   "rozestup": 1.58,
+   "koruna": 2.1,
+   "foto": ""
+  },
+  {
+   "kod": "Phi",
+   "latin": "Philadelphus coronarius",
+   "cesky": "pustoryl věncový",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 3,
+   "kvet": "6",
+   "mesice": [
+    6
+   ],
+   "barva": "#ffffff",
+   "pozn": "voňavý",
+   "hustota": 0.4,
+   "rozestup": 1.58,
+   "koruna": 2.1,
+   "foto": ""
+  },
+  {
+   "kod": "PhiB",
+   "latin": "Philadelphus 'Bouquet Blanc'",
+   "cesky": "pustoryl 'Bouquet Blanc'",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 2,
+   "kvet": "6",
+   "mesice": [
+    6
+   ],
+   "barva": "#ffffff",
+   "pozn": "voňavý",
+   "hustota": 0.6,
+   "rozestup": 1.29,
+   "koruna": 1.4,
+   "foto": ""
+  },
+  {
+   "kod": "Phy",
+   "latin": "Physocarpus opulifolius 'Red Esquire'",
+   "cesky": "tavola kalinolistá 'Red Esquire'",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 2,
+   "kvet": "5-6",
+   "mesice": [
+    5,
+    6
+   ],
+   "barva": "#f0e0e8",
+   "pozn": "vínové listy",
+   "hustota": 0.6,
+   "rozestup": 1.29,
+   "koruna": 1.4,
+   "foto": ""
+  },
+  {
+   "kod": "PoA",
+   "latin": "Potentilla fruticosa 'Abbotswood'",
+   "cesky": "mochna křovitá 'Abbotswood'",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.8,
+   "kvet": "5-10",
+   "mesice": [
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "barva": "#ffffff",
+   "pozn": "",
+   "hustota": 1.5,
+   "rozestup": 0.82,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "PoB",
+   "latin": "Potentilla fruticosa 'Bella Apple'",
+   "cesky": "mochna křovitá 'Bella Apple'",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 0.5,
+   "kvet": "5-10",
+   "mesice": [
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "barva": "#f5e8b0",
+   "pozn": "zpevňuje svah",
+   "hustota": 2,
+   "rozestup": 0.71,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "PoG",
+   "latin": "Potentilla fruticosa 'Goldstar'",
+   "cesky": "mochna křovitá 'Goldstar'",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 0.8,
+   "kvet": "5-10",
+   "mesice": [
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "barva": "#f0d84f",
+   "pozn": "",
+   "hustota": 1.5,
+   "rozestup": 0.82,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "PoK",
+   "latin": "Potentilla fruticosa 'Kobold'",
+   "cesky": "mochna křovitá 'Kobold'",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 1,
+   "kvet": "5-10",
+   "mesice": [
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "barva": "#f0d84f",
+   "pozn": "",
+   "hustota": 1.2,
+   "rozestup": 0.91,
+   "koruna": 0.7,
+   "foto": ""
+  },
+  {
+   "kod": "Prl",
+   "latin": "Prunus laurocerasus",
+   "cesky": "bobkovišeň lékařská",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "polostín",
+    "stín"
+   ],
+   "vyska": 2.5,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "#ffffff",
+   "pozn": "stálezelená",
+   "hustota": 0.8,
+   "rozestup": 1.12,
+   "koruna": 1.8,
+   "foto": ""
+  },
+  {
+   "kod": "PtuF",
+   "latin": "Prunus tenella 'Fire Hill'",
+   "cesky": "mandloň nízká 'Fire Hill'",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 1.5,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "#d0407f",
+   "pozn": "",
+   "hustota": 1,
+   "rozestup": 1,
+   "koruna": 1,
+   "foto": ""
+  },
+  {
+   "kod": "RodA",
+   "latin": "Rhododendron impeditum 'Azurika'",
+   "cesky": "pěnišník obtížený 'Azurika'",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "polostín"
+   ],
+   "vyska": 0.5,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "#6f5fb0",
+   "pozn": "stálezelený",
+   "hustota": 3,
+   "rozestup": 0.58,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "RodM",
+   "latin": "Rhododendron 'Dora Amateis'",
+   "cesky": "pěnišník 'Dora Amateis'",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "polostín"
+   ],
+   "vyska": 1,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "#ffffff",
+   "pozn": "stálezelený",
+   "hustota": 1.2,
+   "rozestup": 0.91,
+   "koruna": 0.7,
+   "foto": ""
+  },
+  {
+   "kod": "Ros",
+   "latin": "Rosmarinus officinalis",
+   "cesky": "rozmarýn lékařský",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 1,
+   "kvet": "5-9",
+   "mesice": [
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "barva": "#a8b8d8",
+   "pozn": "aromatický",
+   "hustota": 1.5,
+   "rozestup": 0.82,
+   "koruna": 0.7,
+   "foto": ""
+  },
+  {
+   "kod": "SpG",
+   "latin": "Spiraea japonica 'Goldflame'",
+   "cesky": "tavolník japonský 'Goldflame'",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 0.8,
+   "kvet": "6-9",
+   "mesice": [
+    6,
+    7,
+    8,
+    9
+   ],
+   "barva": "#d87f9e",
+   "pozn": "žlutooranžové listy",
+   "hustota": 1.5,
+   "rozestup": 0.82,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "SpL",
+   "latin": "Spiraea japonica 'Little Flame'",
+   "cesky": "tavolník japonský 'Little Flame'",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 0.4,
+   "kvet": "7-8",
+   "mesice": [
+    7,
+    8
+   ],
+   "barva": "#d87f9e",
+   "pozn": "narůžovělé listy",
+   "hustota": 2.5,
+   "rozestup": 0.63,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "SpO",
+   "latin": "Spiraea japonica 'Odessa'",
+   "cesky": "tavolník japonský 'Odessa'",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 0.6,
+   "kvet": "6-8",
+   "mesice": [
+    6,
+    7,
+    8
+   ],
+   "barva": "#d87f9e",
+   "pozn": "",
+   "hustota": 2,
+   "rozestup": 0.71,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "Spj",
+   "latin": "Spiraea japonica 'Genpei'",
+   "cesky": "tavolník japonský 'Genpei'",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 0.8,
+   "kvet": "6-9",
+   "mesice": [
+    6,
+    7,
+    8,
+    9
+   ],
+   "barva": "#e0a0b8",
+   "pozn": "",
+   "hustota": 1.5,
+   "rozestup": 0.82,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "SpV",
+   "latin": "Spiraea x vanhouttei",
+   "cesky": "tavolník van Houtteův",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 2.5,
+   "kvet": "5-6",
+   "mesice": [
+    5,
+    6
+   ],
+   "barva": "#ffffff",
+   "pozn": "",
+   "hustota": 0.4,
+   "rozestup": 1.58,
+   "koruna": 1.8,
+   "foto": ""
+  },
+  {
+   "kod": "SyH",
+   "latin": "Syringa x hyacinthiflora 'Maiden's Blush'",
+   "cesky": "šeřík hyacintokvětý 'Maiden's Blush'",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 3.5,
+   "kvet": "5-6",
+   "mesice": [
+    5,
+    6
+   ],
+   "barva": "#e8b0c0",
+   "pozn": "",
+   "hustota": 0.3,
+   "rozestup": 1.83,
+   "koruna": 2.4,
+   "foto": ""
+  },
+  {
+   "kod": "SyM",
+   "latin": "Syringa vulgaris 'Madame Lemoine'",
+   "cesky": "šeřík obecný 'Madame Lemoine'",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 3,
+   "kvet": "5",
+   "mesice": [
+    5
+   ],
+   "barva": "#ffffff",
+   "pozn": "",
+   "hustota": 0.3,
+   "rozestup": 1.83,
+   "koruna": 2.1,
+   "foto": ""
+  },
+  {
+   "kod": "Syr",
+   "latin": "Syringa vulgaris",
+   "cesky": "šeřík obecný",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 5,
+   "kvet": "5-6",
+   "mesice": [
+    5,
+    6
+   ],
+   "barva": "#c8a0d0",
+   "pozn": "",
+   "hustota": 0.25,
+   "rozestup": 2,
+   "koruna": 3.5,
+   "foto": ""
+  },
+  {
+   "kod": "VibF",
+   "latin": "Viburnum farreri",
+   "cesky": "kalina vonná",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 3,
+   "kvet": "3-5",
+   "mesice": [
+    3,
+    4,
+    5
+   ],
+   "barva": "#f0e0e8",
+   "pozn": "kvete před olistěním",
+   "hustota": 0.4,
+   "rozestup": 1.58,
+   "koruna": 2.1,
+   "foto": ""
+  },
+  {
+   "kod": "VibR",
+   "latin": "Viburnum rhytidophyllum",
+   "cesky": "kalina vrásčitolistá",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "polostín",
+    "stín"
+   ],
+   "vyska": 4,
+   "kvet": "5-6",
+   "mesice": [
+    5,
+    6
+   ],
+   "barva": "#f0f0e0",
+   "pozn": "stálezelená",
+   "hustota": 0.3,
+   "rozestup": 1.83,
+   "koruna": 2.8,
+   "foto": ""
+  },
+  {
+   "kod": "Vir",
+   "latin": "Viburnum opulus 'Roseum'",
+   "cesky": "kalina obecná 'Roseum'",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 3,
+   "kvet": "5",
+   "mesice": [
+    5
+   ],
+   "barva": "#f0f0e0",
+   "pozn": "",
+   "hustota": 0.4,
+   "rozestup": 1.58,
+   "koruna": 2.1,
+   "foto": ""
+  },
+  {
+   "kod": "Wei",
+   "latin": "Weigela florida 'Rosea'",
+   "cesky": "vajgélie květnatá 'Rosea'",
+   "kat": "K",
+   "kategorie": "keř",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 2,
+   "kvet": "5-6",
+   "mesice": [
+    5,
+    6
+   ],
+   "barva": "#e08fa8",
+   "pozn": "",
+   "hustota": 0.6,
+   "rozestup": 1.29,
+   "koruna": 1.4,
+   "foto": ""
+  },
+  {
+   "kod": "Jun",
+   "latin": "Juniperus horizontalis",
+   "cesky": "jalovec polehlý",
+   "kat": "J",
+   "kategorie": "jehličnan",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 0.5,
+   "kvet": "",
+   "mesice": [],
+   "barva": "",
+   "pozn": "půdokryvný jehličnan",
+   "hustota": 1,
+   "rozestup": 1,
+   "koruna": 0.6,
+   "foto": ""
+  },
+  {
+   "kod": "PiM",
+   "latin": "Pinus mugo 'Mops'",
+   "cesky": "borovice kleč 'Mops'",
+   "kat": "J",
+   "kategorie": "jehličnan",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 1,
+   "kvet": "",
+   "mesice": [],
+   "barva": "",
+   "pozn": "kulovitý jehličnan",
+   "hustota": 1,
+   "rozestup": 1,
+   "koruna": 0.7,
+   "foto": ""
+  },
+  {
+   "kod": "Pin",
+   "latin": "Pinus sylvestris 'Watereri'",
+   "cesky": "borovice lesní 'Watereri'",
+   "kat": "J",
+   "kategorie": "jehličnan",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 3,
+   "kvet": "",
+   "mesice": [],
+   "barva": "",
+   "pozn": "zakrslá",
+   "hustota": 0.3,
+   "rozestup": 1.83,
+   "koruna": 2.1,
+   "foto": ""
+  },
+  {
+   "kod": "Pic",
+   "latin": "Picea abies",
+   "cesky": "smrk ztepilý",
+   "kat": "J",
+   "kategorie": "jehličnan",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 30,
+   "kvet": "",
+   "mesice": [],
+   "barva": "",
+   "pozn": "",
+   "hustota": 0.05,
+   "rozestup": 4.47,
+   "koruna": 14,
+   "foto": ""
+  },
+  {
+   "kod": "PicE",
+   "latin": "Picea pungens 'Edith'",
+   "cesky": "smrk pichlavý 'Edith'",
+   "kat": "J",
+   "kategorie": "jehličnan",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 4,
+   "kvet": "",
+   "mesice": [],
+   "barva": "",
+   "pozn": "modrostříbrný",
+   "hustota": 0.2,
+   "rozestup": 2.24,
+   "koruna": 2.8,
+   "foto": ""
+  },
+  {
+   "kod": "Tax",
+   "latin": "Taxus baccata",
+   "cesky": "tis červený",
+   "kat": "J",
+   "kategorie": "jehličnan",
+   "svetlo": [
+    "polostín",
+    "stín"
+   ],
+   "vyska": 10,
+   "kvet": "",
+   "mesice": [],
+   "barva": "",
+   "pozn": "jedovatý, stříhatelný",
+   "hustota": 0.5,
+   "rozestup": 1.41,
+   "koruna": 7,
+   "foto": ""
+  },
+  {
+   "kod": "Ace",
+   "latin": "Acer truncatum x platanoides 'Pacific Sunset'",
+   "cesky": "javor 'Pacific Sunset'",
+   "kat": "S",
+   "kategorie": "strom",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 10,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "#e0e090",
+   "pozn": "podzimní barva",
+   "hustota": 0.08,
+   "rozestup": 3.54,
+   "koruna": 7,
+   "foto": ""
+  },
+  {
+   "kod": "AmS",
+   "latin": "Amelanchier laevis 'Snowflakes'",
+   "cesky": "muchovník hladký 'Snowflakes'",
+   "kat": "S",
+   "kategorie": "strom",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 6,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "#ffffff",
+   "pozn": "",
+   "hustota": 0.15,
+   "rozestup": 2.58,
+   "koruna": 4.2,
+   "foto": ""
+  },
+  {
+   "kod": "Bet",
+   "latin": "Betula utilis var. jacquemontii",
+   "cesky": "bříza himálajská",
+   "kat": "S",
+   "kategorie": "strom",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 9,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "#c8c890",
+   "pozn": "bílá kůra",
+   "hustota": 0.1,
+   "rozestup": 3.16,
+   "koruna": 6.3,
+   "foto": ""
+  },
+  {
+   "kod": "CarB",
+   "latin": "Carpinus betulus",
+   "cesky": "habr obecný",
+   "kat": "S",
+   "kategorie": "strom",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 20,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "",
+   "pozn": "i na střihaný plot",
+   "hustota": 0.08,
+   "rozestup": 3.54,
+   "koruna": 14,
+   "foto": ""
+  },
+  {
+   "kod": "Ela",
+   "latin": "Elaeagnus angustifolia",
+   "cesky": "hlošina úzkolistá",
+   "kat": "S",
+   "kategorie": "strom",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 10,
+   "kvet": "5-6",
+   "mesice": [
+    5,
+    6
+   ],
+   "barva": "#f0e8b0",
+   "pozn": "stříbřitý list",
+   "hustota": 0.1,
+   "rozestup": 3.16,
+   "koruna": 7,
+   "foto": ""
+  },
+  {
+   "kod": "MalR",
+   "latin": "Malus 'Rudolph'",
+   "cesky": "okrasná jabloň 'Rudolph'",
+   "kat": "S",
+   "kategorie": "strom",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 6,
+   "kvet": "5",
+   "mesice": [
+    5
+   ],
+   "barva": "#d0508f",
+   "pozn": "",
+   "hustota": 0.15,
+   "rozestup": 2.58,
+   "koruna": 4.2,
+   "foto": ""
+  },
+  {
+   "kod": "PruK",
+   "latin": "Prunus serrulata 'Kanzan'",
+   "cesky": "sakura 'Kanzan'",
+   "kat": "S",
+   "kategorie": "strom",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 10,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "#e890b0",
+   "pozn": "",
+   "hustota": 0.1,
+   "rozestup": 3.16,
+   "koruna": 7,
+   "foto": ""
+  },
+  {
+   "kod": "Sop",
+   "latin": "Sophora japonica",
+   "cesky": "jerlín japonský",
+   "kat": "S",
+   "kategorie": "strom",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 15,
+   "kvet": "7-8",
+   "mesice": [
+    7,
+    8
+   ],
+   "barva": "#f0f0d0",
+   "pozn": "",
+   "hustota": 0.08,
+   "rozestup": 3.54,
+   "koruna": 10.5,
+   "foto": ""
+  },
+  {
+   "kod": "Sor",
+   "latin": "Sorbus aucuparia",
+   "cesky": "jeřáb ptačí",
+   "kat": "S",
+   "kategorie": "strom",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 15,
+   "kvet": "5",
+   "mesice": [
+    5
+   ],
+   "barva": "#ffffff",
+   "pozn": "červené plody",
+   "hustota": 0.1,
+   "rozestup": 3.16,
+   "koruna": 10.5,
+   "foto": ""
+  },
+  {
+   "kod": "Til",
+   "latin": "Tilia cordata",
+   "cesky": "lípa srdčitá",
+   "kat": "S",
+   "kategorie": "strom",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 25,
+   "kvet": "6-7",
+   "mesice": [
+    6,
+    7
+   ],
+   "barva": "#e8e8b0",
+   "pozn": "voňavá",
+   "hustota": 0.05,
+   "rozestup": 4.47,
+   "koruna": 14,
+   "foto": ""
+  },
+  {
+   "kod": "HipH",
+   "latin": "Hippophae rhamnoides 'Hikul'",
+   "cesky": "rakytník řešetlákový samčí 'Hikul'",
+   "kat": "U",
+   "kategorie": "užitková dřevina",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 1.8,
+   "kvet": "3-4",
+   "mesice": [
+    3,
+    4
+   ],
+   "barva": "",
+   "pozn": "opylovač",
+   "hustota": 0.6,
+   "rozestup": 1.29,
+   "koruna": 1.3,
+   "foto": ""
+  },
+  {
+   "kod": "HipJ",
+   "latin": "Hippophae rhamnoides 'Julia'",
+   "cesky": "rakytník řešetlákový samičí 'Julia'",
+   "kat": "U",
+   "kategorie": "užitková dřevina",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 4,
+   "kvet": "3-4",
+   "mesice": [
+    3,
+    4
+   ],
+   "barva": "",
+   "pozn": "samičí, nutný opylovač",
+   "hustota": 0.4,
+   "rozestup": 1.58,
+   "koruna": 2.8,
+   "foto": ""
+  },
+  {
+   "kod": "Lon",
+   "latin": "Lonicera kamtschatica 'Duet'",
+   "cesky": "zimolez kamčatský 'Duet'",
+   "kat": "U",
+   "kategorie": "užitková dřevina",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 1.5,
+   "kvet": "3-5",
+   "mesice": [
+    3,
+    4,
+    5
+   ],
+   "barva": "#f0f0d0",
+   "pozn": "kamčatská borůvka",
+   "hustota": 0.8,
+   "rozestup": 1.12,
+   "koruna": 1,
+   "foto": ""
+  },
+  {
+   "kod": "Mal",
+   "latin": "Malus sp.",
+   "cesky": "jabloň",
+   "kat": "U",
+   "kategorie": "užitková dřevina",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 5,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "#f0e0e8",
+   "pozn": "ovocná",
+   "hustota": 0.1,
+   "rozestup": 3.16,
+   "koruna": 3.5,
+   "foto": ""
+  },
+  {
+   "kod": "PrA",
+   "latin": "Prunus avium",
+   "cesky": "třešeň",
+   "kat": "U",
+   "kategorie": "užitková dřevina",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 10,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "#ffffff",
+   "pozn": "ovocná",
+   "hustota": 0.06,
+   "rozestup": 4.08,
+   "koruna": 7,
+   "foto": ""
+  },
+  {
+   "kod": "PrD",
+   "latin": "Prunus domestica",
+   "cesky": "slivoň",
+   "kat": "U",
+   "kategorie": "užitková dřevina",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 6,
+   "kvet": "4",
+   "mesice": [
+    4
+   ],
+   "barva": "#ffffff",
+   "pozn": "ovocná",
+   "hustota": 0.1,
+   "rozestup": 3.16,
+   "koruna": 4.2,
+   "foto": ""
+  },
+  {
+   "kod": "Pru",
+   "latin": "Prunus spinosa",
+   "cesky": "trnka obecná",
+   "kat": "U",
+   "kategorie": "užitková dřevina",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 3.5,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "#ffffff",
+   "pozn": "trnitá",
+   "hustota": 0.5,
+   "rozestup": 1.41,
+   "koruna": 2.4,
+   "foto": ""
+  },
+  {
+   "kod": "Pyr",
+   "latin": "Pyrus sp.",
+   "cesky": "hrušeň",
+   "kat": "U",
+   "kategorie": "užitková dřevina",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 7,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "#ffffff",
+   "pozn": "ovocná",
+   "hustota": 0.08,
+   "rozestup": 3.54,
+   "koruna": 4.9,
+   "foto": ""
+  },
+  {
+   "kod": "RibD",
+   "latin": "Ribes rubrum 'Detvan'",
+   "cesky": "rybíz červený 'Detvan'",
+   "kat": "U",
+   "kategorie": "užitková dřevina",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 1.5,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "#c8d090",
+   "pozn": "",
+   "hustota": 0.8,
+   "rozestup": 1.12,
+   "koruna": 1,
+   "foto": ""
+  },
+  {
+   "kod": "RibT",
+   "latin": "Ribes nigrum 'Triton'",
+   "cesky": "rybíz černý 'Triton'",
+   "kat": "U",
+   "kategorie": "užitková dřevina",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 1.5,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "#c8d090",
+   "pozn": "",
+   "hustota": 0.8,
+   "rozestup": 1.12,
+   "koruna": 1,
+   "foto": ""
+  },
+  {
+   "kod": "RubC",
+   "latin": "Rubus fruticosus 'Coolaris Early'",
+   "cesky": "ostružiník beztrnný 'Coolaris Early'",
+   "kat": "U",
+   "kategorie": "užitková dřevina",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 2.5,
+   "kvet": "5-6",
+   "mesice": [
+    5,
+    6
+   ],
+   "barva": "#f0f0f0",
+   "pozn": "",
+   "hustota": 0.8,
+   "rozestup": 1.12,
+   "koruna": 1.8,
+   "foto": ""
+  },
+  {
+   "kod": "RubS",
+   "latin": "Rubus idaeus 'Sanibelle'",
+   "cesky": "maliník 'Sanibelle'",
+   "kat": "U",
+   "kategorie": "užitková dřevina",
+   "svetlo": [
+    "slunce",
+    "polostín"
+   ],
+   "vyska": 2,
+   "kvet": "5-7",
+   "mesice": [
+    5,
+    6,
+    7
+   ],
+   "barva": "#ffffff",
+   "pozn": "",
+   "hustota": 1.5,
+   "rozestup": 0.82,
+   "koruna": 1.4,
+   "foto": ""
+  },
+  {
+   "kod": "Vac",
+   "latin": "Vaccinium corymbosum 'Nelson'",
+   "cesky": "borůvka chocholičnatá 'Nelson'",
+   "kat": "U",
+   "kategorie": "užitková dřevina",
+   "svetlo": [
+    "slunce"
+   ],
+   "vyska": 1.6,
+   "kvet": "4-5",
+   "mesice": [
+    4,
+    5
+   ],
+   "barva": "#f0f0f0",
+   "pozn": "kyselá půda",
+   "hustota": 0.8,
+   "rozestup": 1.12,
+   "koruna": 1.1,
+   "foto": ""
+  }
+ ]
+}
