@@ -1,4 +1,4 @@
-import { P, Ring, naBody, plochaBodu } from './geom';
+import { P, Ring } from './geom';
 
 export type Rostlina = {
   kod: string;
@@ -21,24 +21,50 @@ export type Rostlina = {
 export type KatInfo = { nazev: string; fill: string; stroke: string; plocha: boolean };
 export type Databaze = { kategorie: Record<string, KatInfo>; rostliny: Rostlina[] };
 
-/**
- * Ploska = cast zahonu. Vznika delenim zahonu carou.
- * Nejdriv se zahon rozdeli na vyskove oblasti (`uroven`), pak se oblasti
- * deli dal na plosky jednotlivych rostlin (`kod`).
- */
-export type Ploska = {
-  id: string;
-  ring: Ring;
-  kod?: string;
-  /** Vyskova oblast - je vlastnosti casti zahonu, ne samostatneho tvaru pres nej. */
-  uroven?: Uroven;
-  /** Rucne prepsany pocet kusu; jinak se pocita z plochy a hustoty. */
-  pocet?: number;
-  /** Posun popisku od automatickeho mista. */
-  popisek?: P;
+/** Ktere kategorie patri do ktereho kroku - jinam se nedostanou. */
+export const KATEGORIE_KROKU = {
+  zahon: ['T', 'G', 'F', 'C'],
+  kere: ['K', 'U'],
+  stromy: ['S', 'J'],
+} as const;
+
+export type Uroven = 'nizke' | 'stredni' | 'vysoke';
+
+export const UROVNE: Record<Uroven, { nazev: string; kratce: string; barva: string; od: number; do: number }> = {
+  nizke: { nazev: 'nízké — půdopokryvky', kratce: 'nízké', barva: '#2f8fe0', od: 0, do: 0.3 },
+  stredni: { nazev: 'střední', kratce: 'střední', barva: '#1f9e5a', od: 0.3, do: 0.8 },
+  vysoke: { nazev: 'vysoké — dominanty', kratce: 'vysoké', barva: '#e07a1f', od: 0.8, do: 99 },
 };
 
-export type Zahon = { id: string; nazev: string; plosky: Ploska[] };
+export function sedneVyska(r: Rostlina, u?: Uroven): boolean {
+  if (!u) return true;
+  const { od, do: dd } = UROVNE[u];
+  return r.vyska >= od && r.vyska <= dd;
+}
+
+/** Zhruba nacrtnuty tah, ktery rekne "tady chci nizke rostliny". */
+export type TahVysky = { id: string; uroven: Uroven; body: P[] };
+
+/** Rostlina vybrana do zahonu, s podilem plochy. */
+export type Osazeni = {
+  kod: string;
+  /** Ve ktere vyskove oblasti; prazdne = zahon bez rozdeleni na vysky. */
+  uroven?: Uroven;
+  /** Vzajemny pomer plochy mezi rostlinami teze oblasti. */
+  podil: number;
+  /** Na kolik mist v zahonu se rostlina rozdeli. */
+  skupin?: number;
+};
+
+export type Zahon = {
+  id: string;
+  nazev: string;
+  obrys: Ring;
+  vysky: TahVysky[];
+  osazeni: Osazeni[];
+  /** Meni rozmisteni skupin, aniz by se menilo zadani. */
+  semeno: number;
+};
 
 /** Skupina keru - lomena cara s tečkami. */
 export type Skupina = {
@@ -60,29 +86,26 @@ export type Solitera = {
   popisek?: P;
 };
 
-export type Uroven = 'nizke' | 'stredni' | 'vysoke';
-
 export type Kota = { id: string; a: P; b: P; odsazeni: number };
 
 export type Podklad = {
   nazev: string;
   typ: 'pdf' | 'obraz';
-  klic: string;          // klic v IndexedDB
+  klic: string;
   sirkaM: number;
   vyskaM: number;
-  /** Rozlisení rastru v pixelech - obrazek se vykresluje v nem, aby zustal ostry. */
   pxW: number;
   pxH: number;
   x: number;
   y: number;
   otoceni: number;
   kryti: number;
-  meritko?: number;      // jmenovatel meritka, napr. 100 pro 1:100
+  meritko?: number;
   stranka?: number;
 };
 
 export type Projekt = {
-  verze: 3;
+  verze: 4;
   nazev: string;
   podklad?: Podklad;
   zahony: Zahon[];
@@ -91,26 +114,12 @@ export type Projekt = {
   koty: Kota[];
   meritkoTisk: number;
   ukazKoty: boolean;
-  /** Rozkresleny krok pruvodce, aby se dalo navazat. */
   krok: number;
 };
 
-export const UROVNE: Record<Uroven, { nazev: string; kratce: string; barva: string; od: number; do: number }> = {
-  nizke: { nazev: 'nízké — půdopokryvky', kratce: 'nízké', barva: '#4da3ff', od: 0, do: 0.3 },
-  stredni: { nazev: 'střední', kratce: 'střední', barva: '#37c46a', od: 0.3, do: 0.8 },
-  vysoke: { nazev: 'vysoké — dominanty', kratce: 'vysoké', barva: '#ff8f3f', od: 0.8, do: 99 },
-};
-
-/** Sedne rostlina do vyskove oblasti? */
-export function sedneVyska(r: Rostlina, u?: Uroven): boolean {
-  if (!u) return true;
-  const { od, do: dd } = UROVNE[u];
-  return r.vyska >= od && r.vyska <= dd;
-}
-
 export function prazdnyProjekt(nazev = 'Nový osazovací plán'): Projekt {
   return {
-    verze: 3, nazev,
+    verze: 4, nazev,
     zahony: [], skupiny: [], solitery: [], koty: [],
     meritkoTisk: 100, ukazKoty: true, krok: 1,
   };
@@ -118,26 +127,23 @@ export function prazdnyProjekt(nazev = 'Nový osazovací plán'): Projekt {
 
 export const id = () => Math.random().toString(36).slice(2, 9);
 
-export const plochaPlosky = (p: Ploska) => plochaBodu(naBody(p.ring, 0.005));
-
-/** Pocet kusu v plosce - rucni prepis, jinak plocha x hustota. */
-export function pocetKusu(p: Ploska, r?: Rostlina): number {
-  if (p.pocet != null) return p.pocet;
-  if (!r) return 0;
-  return Math.max(1, Math.round(plochaPlosky(p) * r.hustota));
+export function prazdnyZahon(obrys: Ring, poradi: number): Zahon {
+  return {
+    id: id(), nazev: `Záhon ${poradi}`, obrys,
+    vysky: [], osazeni: [], semeno: Math.floor(Math.random() * 100000),
+  };
 }
 
-export function popisekPlosky(p: Ploska, r?: Rostlina): string {
-  if (!p.kod) return '';
-  return `${p.kod}${pocetKusu(p, r)}`;
-}
+// ------------------------------------------------------------------- vykaz
 
-/** Souhrn pro vykaz rostlin. */
-export type RadekVykazu = {
-  kod: string; rostlina?: Rostlina; kusu: number; plocha: number; kde: string;
-};
+export type RadekVykazu = { kod: string; rostlina?: Rostlina; kusu: number; plocha: number; kde: string };
 
-export function vykaz(pr: Projekt, db: Rostlina[]): RadekVykazu[] {
+/** Souhrn pro objednavku. `casti` prichazi z rozvrhu zahonu. */
+export function vykaz(
+  pr: Projekt,
+  db: Rostlina[],
+  castiZahonu: { nazevZahonu: string; kod?: string; kusu: number; plocha: number }[],
+): RadekVykazu[] {
   const mapa = new Map<string, Rostlina>(db.map((r) => [r.kod, r]));
   const soucet = new Map<string, RadekVykazu>();
   const pridej = (kod: string, kusu: number, plocha: number, kde: string) => {
@@ -149,15 +155,14 @@ export function vykaz(pr: Projekt, db: Rostlina[]): RadekVykazu[] {
     r.kde = [...kdes].join(', ');
     soucet.set(kod, r);
   };
-  for (const z of pr.zahony)
-    for (const p of z.plosky)
-      if (p.kod) pridej(p.kod, pocetKusu(p, mapa.get(p.kod)), plochaPlosky(p), z.nazev);
+
+  for (const c of castiZahonu) if (c.kod) pridej(c.kod, c.kusu, c.plocha, c.nazevZahonu);
   for (const s of pr.skupiny) if (s.kod) pridej(s.kod, s.pocet ?? 0, 0, 'skupiny keřů');
   for (const s of pr.solitery) if (s.kod) pridej(s.kod, 1, 0, 'solitéry');
+
   return [...soucet.values()].sort((a, b) => {
-    const ka = a.rostlina?.kat ?? 'Z', kb = b.rostlina?.kat ?? 'Z';
     const poradi = 'SJKUTGFC';
-    const d = poradi.indexOf(ka) - poradi.indexOf(kb);
+    const d = poradi.indexOf(a.rostlina?.kat ?? 'Z') - poradi.indexOf(b.rostlina?.kat ?? 'Z');
     return d !== 0 ? d : (a.rostlina?.latin ?? a.kod).localeCompare(b.rostlina?.latin ?? b.kod, 'cs');
   });
 }

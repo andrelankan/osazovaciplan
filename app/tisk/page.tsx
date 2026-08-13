@@ -1,9 +1,11 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
 import {
-  P, add, bodProPopisek, bodyPoCare, cesta, dist, lerp, mul, naBody, norm, obalka, sjednot, sub,
+  P, add, bodyPoCare, cesta, cestaBody, dist, lerp, mul, naBody, norm, obalka, sub,
 } from '@/lib/geom';
-import { Databaze, KatInfo, Projekt, Rostlina, popisekPlosky, vykaz } from '@/lib/model';
+import { Databaze, KatInfo, Projekt, Rostlina, UROVNE, vykaz } from '@/lib/model';
+import { Rozvrh } from '@/lib/rozvrh';
+import { rozvrhyProjektu } from '@/lib/useRozvrhy';
 import { nactiUlozeny } from '@/lib/store';
 import { nacti } from '@/lib/idb';
 
@@ -32,7 +34,11 @@ export default function Tisk() {
     }).catch(() => { });
   }, []);
 
-  const radky = useMemo(() => (pr ? vykaz(pr, db) : []), [pr, db]);
+  const rozvrhy = useMemo<Map<string, Rozvrh>>(() => (pr ? rozvrhyProjektu(pr, db) : new Map()), [pr, db]);
+  const casti = useMemo(() => (pr ?? { zahony: [] }).zahony.flatMap((z) =>
+    (rozvrhy.get(z.id)?.casti ?? []).map((c) => ({ nazevZahonu: z.nazev, kod: c.kod, kusu: c.kusu, plocha: c.plocha }))),
+    [pr, rozvrhy]);
+  const radky = useMemo(() => (pr ? vykaz(pr, db, casti) : []), [pr, db, casti]);
 
   if (!pr) return <p className="p-8">Není co tisknout — nejdřív si v editoru rozkresli plán.</p>;
 
@@ -44,7 +50,7 @@ export default function Tisk() {
   const svetW = kreslici.w * mnm, svetH = kreslici.h * mnm;
 
   const body: P[] = [];
-  for (const z of pr.zahony) for (const p of z.plosky) body.push(...naBody(p.ring, 0.1));
+  for (const z of pr.zahony) body.push(...naBody(z.obrys, 0.1));
   for (const s of pr.skupiny) body.push(...s.body);
   for (const s of pr.solitery) body.push(s.pos);
   const o = body.length ? obalka(body) : { x0: 0, y0: 0, x1: svetW, y1: svetH, w: svetW, h: svetH };
@@ -78,9 +84,15 @@ export default function Tisk() {
         <svg width={`${kreslici.w}mm`} height={`${kreslici.h}mm`} viewBox={vb}
           style={{ position: 'absolute', left: `${okraj}mm`, top: `${okraj}mm` }}>
           {/* vybarveni */}
-          {pr.zahony.map((zh) => zh.plosky.map((p) => (
-            <path key={p.id} d={cesta(p.ring)} fill={rost(p.kod) ? kat[rost(p.kod)!.kat]?.fill ?? '#eee' : '#eee'} />
-          )))}
+          {pr.zahony.map((zh) => (
+            <g key={zh.id}>
+              <path d={cesta(zh.obrys)} fill="#eee" />
+              {(rozvrhy.get(zh.id)?.casti ?? []).map((c) => (
+                <path key={c.id} d={cestaBody(c.polygon)}
+                  fill={rost(c.kod) ? kat[rost(c.kod)!.kat]?.fill ?? '#eee' : '#eee'} />
+              ))}
+            </g>
+          ))}
 
           {/* podklad s rastrem pres vybarveni */}
           {pr.podklad && podklad && (
@@ -89,12 +101,18 @@ export default function Tisk() {
               style={{ mixBlendMode: 'multiply' }} opacity={pr.podklad.kryti} preserveAspectRatio="none" />
           )}
 
-          {pr.zahony.map((zh) => zh.plosky.map((p) => (
-            <path key={p.id} d={cesta(p.ring)} fill="none" stroke="#666" strokeWidth={0.18 * tl} />
-          )))}
-          {pr.zahony.map((zh) => sjednot(zh.plosky.map((p) => naBody(p.ring, 0.01))).map((r, i) => (
-            <path key={zh.id + i} d={cesta(r)} fill="none" stroke="#111" strokeWidth={0.5 * tl} />
-          )))}
+          {pr.zahony.map((zh) => (
+            <g key={zh.id}>
+              {(rozvrhy.get(zh.id)?.casti ?? []).map((c) => (
+                <path key={c.id} d={cestaBody(c.polygon)} fill="none" stroke="#777" strokeWidth={0.15 * tl} />
+              ))}
+              {(rozvrhy.get(zh.id)?.oblasti ?? []).map((ob, i) => ob.polygony.map((pg, j) => (
+                <path key={`o${i}-${j}`} d={cestaBody(pg)} fill="none"
+                  stroke={UROVNE[ob.uroven].barva} strokeWidth={0.3 * tl} />
+              )))}
+              <path d={cesta(zh.obrys)} fill="none" stroke="#111" strokeWidth={0.5 * tl} />
+            </g>
+          ))}
 
           {pr.skupiny.map((s) => {
             const r = rost(s.kod);
@@ -137,16 +155,12 @@ export default function Tisk() {
           })}
 
           {/* popisky nad vsim */}
-          {pr.zahony.map((zh) => zh.plosky.map((p) => {
-            if (!p.kod) return null;
-            const c = add(bodProPopisek(naBody(p.ring, 0.02)), p.popisek ?? { x: 0, y: 0 });
-            return (
-              <text key={p.id} x={c.x} y={c.y} textAnchor="middle" dominantBaseline="middle"
-                fontSize={2.6 * tl} fontWeight={600} fill="#111" stroke="#fff" strokeWidth={0.7 * tl} paintOrder="stroke">
-                {popisekPlosky(p, rost(p.kod))}
-              </text>
-            );
-          }))}
+          {pr.zahony.map((zh) => (rozvrhy.get(zh.id)?.casti ?? []).map((c) => (
+            <text key={c.id} x={c.popisek.x} y={c.popisek.y} textAnchor="middle" dominantBaseline="middle"
+              fontSize={2.6 * tl} fontWeight={600} fill="#111" stroke="#fff" strokeWidth={0.7 * tl} paintOrder="stroke">
+              {c.kod}{c.kusu}
+            </text>
+          )))}
 
           {pr.skupiny.map((s) => {
             const stred = s.body[Math.floor(s.body.length / 2)];

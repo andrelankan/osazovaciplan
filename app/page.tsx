@@ -1,9 +1,8 @@
 'use client';
 import { useEffect } from 'react';
-import Kroky from '@/components/Kroky';
 import Lista from '@/components/Lista';
-import Panel from '@/components/Panel';
 import Plan from '@/components/Plan';
+import Pruvodce, { BocniPanel } from '@/components/Pruvodce';
 import { nactiUlozeny, useStore } from '@/lib/store';
 import { nacti } from '@/lib/idb';
 
@@ -26,14 +25,15 @@ export default function Stranka() {
   }, [st]);
 
   return (
-    <div className="flex h-screen w-screen flex-col overflow-hidden bg-gray-100 text-gray-900">
+    <div className="flex h-screen w-screen flex-col overflow-hidden bg-white text-gray-900">
       <Lista />
       <div className="flex min-h-0 flex-1">
-        <Kroky />
-        <div className="min-w-0 flex-1">
-          {nacteno ? <Plan /> : <div className="p-8 text-gray-500">Načítám databázi rostlin…</div>}
+        <div className="relative min-w-0 flex-1">
+          {nacteno
+            ? <><Plan /><Pruvodce /></>
+            : <div className="p-8 text-gray-500">Načítám databázi rostlin…</div>}
         </div>
-        <Panel />
+        <BocniPanel />
       </div>
     </div>
   );

@@ -94,23 +94,23 @@ function uhlyRozsah(o: Oblouk, t: number) {
   return o.a1 + d * t;
 }
 
-/** SVG path prstence, obloukove hrany jako A prikaz (ostre a lehke). */
+/**
+ * SVG path prstence.
+ *
+ * Zamerne se kresli z rozlozene lomene cary, ne pres SVG prikaz `A`: vypln,
+ * obrys, vypocet plochy i chytani mysi tak pracuji s uplne stejnymi body.
+ * Kdyz se to rozchazelo, delaly ohnute strany pri uprave zahonu falesne tvary.
+ */
 export function cesta(ring: Ring, uzavrit = true): string {
   if (!ring.length) return '';
-  const n = ring.length;
-  let d = `M ${ring[0].x} ${ring[0].y}`;
-  const posledni = uzavrit ? n : n - 1;
-  for (let i = 0; i < posledni; i++) {
-    const p1 = ring[i], p2 = ring[(i + 1) % n];
-    const o = oblouk(p1, p2, p1.b);
-    if (o) {
-      const velky = Math.abs(p1.b!) > 1 ? 1 : 0;
-      const sweep = p1.b! > 0 ? 1 : 0;
-      d += ` A ${o.r} ${o.r} 0 ${velky} ${sweep} ${p2.x} ${p2.y}`;
-    } else {
-      d += ` L ${p2.x} ${p2.y}`;
-    }
-  }
+  return cestaBody(naBody(ring, 0.008, uzavrit), uzavrit);
+}
+
+/** SVG path z hotovych bodu. */
+export function cestaBody(body: P[], uzavrit = true): string {
+  if (!body.length) return '';
+  let d = `M ${body[0].x.toFixed(3)} ${body[0].y.toFixed(3)}`;
+  for (let i = 1; i < body.length; i++) d += ` L ${body[i].x.toFixed(3)} ${body[i].y.toFixed(3)}`;
   return uzavrit ? d + ' Z' : d;
 }
 
@@ -152,6 +152,13 @@ export function bodVPolygonu(pt: P, pts: P[]): boolean {
     if ((yi > pt.y) !== (yj > pt.y) && pt.x < ((xj - xi) * (pt.y - yi)) / (yj - yi) + xi) uvnitr = !uvnitr;
   }
   return uvnitr;
+}
+
+/** Vzdalenost bodu od usecky. */
+export function vzdalUsecka(p: P, a: P, b: P): number {
+  const ab = sub(b, a), ap = sub(p, a);
+  const t = Math.max(0, Math.min(1, (ap.x * ab.x + ap.y * ab.y) / (ab.x * ab.x + ab.y * ab.y || 1)));
+  return dist(p, add(a, mul(ab, t)));
 }
 
 function vzdalenostOdHrany(pt: P, pts: P[]): number {

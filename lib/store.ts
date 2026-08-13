@@ -3,26 +3,18 @@ import { create } from 'zustand';
 import { P, V } from './geom';
 import { Databaze, KatInfo, Projekt, Rostlina, Uroven, prazdnyProjekt } from './model';
 
-export type Nastroj =
-  | 'vyber' | 'zahon' | 'rez' | 'uroven' | 'kere' | 'strom' | 'kota' | 'kalibrace';
+/** Krok pruvodce urcuje, co jde v danou chvili delat - jine ovladani neni videt. */
+export type Krok = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
-export const NASTROJE: Record<Nastroj, { nazev: string; popis: string }> = {
-  vyber: { nazev: 'Výběr', popis: 'Vybírat, posouvat body, ohýbat strany' },
-  zahon: { nazev: 'Obrys záhonu', popis: 'Klikáním obkreslit obrys, Enter uzavře' },
-  rez: { nazev: 'Rozdělit čarou', popis: 'Tahem přes záhon ho rozdělit na dvě části' },
-  uroven: { nazev: 'Označit výšku', popis: 'Kliknutím přiřadit části záhonu výškovou oblast' },
-  kere: { nazev: 'Skupina keřů', popis: 'Naklikat řadu, Enter dokončí' },
-  strom: { nazev: 'Strom / solitéra', popis: 'Kliknutím osadit strom' },
-  kota: { nazev: 'Kóta', popis: 'Dva kliky = okótovaná vzdálenost' },
-  kalibrace: { nazev: 'Kalibrace', popis: 'Dva body o známé vzdálenosti určí měřítko' },
-};
-
-export type Vyber =
-  | { typ: 'ploska'; zahon: string; ploska: string }
-  | { typ: 'skupina'; id: string }
-  | { typ: 'solitera'; id: string }
-  | { typ: 'kota'; id: string }
-  | null;
+export const KROKY: { cislo: Krok; nazev: string; kratce: string }[] = [
+  { cislo: 1, nazev: 'Podklad zahrady', kratce: 'Podklad' },
+  { cislo: 2, nazev: 'Obrys záhonu', kratce: 'Záhon' },
+  { cislo: 3, nazev: 'Výškové oblasti', kratce: 'Výšky' },
+  { cislo: 4, nazev: 'Rostliny do záhonu', kratce: 'Rostliny' },
+  { cislo: 5, nazev: 'Skupiny keřů', kratce: 'Keře' },
+  { cislo: 6, nazev: 'Stromy a solitéry', kratce: 'Stromy' },
+  { cislo: 7, nazev: 'Hotovo — tisk a výkaz', kratce: 'Tisk' },
+];
 
 type Stav = {
   pr: Projekt;
@@ -30,18 +22,17 @@ type Stav = {
   kategorie: Record<string, KatInfo>;
   nacteno: boolean;
 
-  nastroj: Nastroj;
-  vyber: Vyber;
+  /** Zahon, na kterem se zrovna pracuje (kroky 3 a 4). */
+  aktivniZahon: string | null;
   aktivniKod: string | null;
-  /** Uroven, kterou nastroj "Označit výšku" prirazuje. */
   urovenStetec: Uroven;
-  /** Cim se plosky vybarvuji: podle rostlin, nebo podle vyskovych oblasti. */
-  zobrazeni: 'rostliny' | 'vysky';
-  zalozka: 'katalog' | 'vlastnosti' | 'vykaz';
+  /** V kroku 2: upravovat existujici obrys misto kresleni noveho. */
+  upravovat: boolean;
+  /** V kroku 7: rezim pridavani kot. */
+  kotuje: boolean;
 
-  kamera: { x: number; y: number; z: number };   // z = pixelu na metr
+  kamera: { x: number; y: number; z: number };
   koncept: V[];
-  mysWorld: P | null;
   podkladUrl: string | null;
 
   historie: Projekt[];
@@ -50,11 +41,8 @@ type Stav = {
   nactiDb: () => Promise<void>;
   upravRostlinu: (kod: string, zmeny: Partial<Rostlina>) => void;
   zmen: (fn: (p: Projekt) => void) => void;
-  /** Zmena bez zapisu do historie - pro prubeh tazeni mysi. */
-  zmenTiche: (fn: (p: Projekt) => void) => void;
-  /** Jeden snimek do historie - vola se na zacatku tazeni. */
-  pamatuj: () => void;
   nastavProjekt: (p: Projekt) => void;
+  naKrok: (k: Krok) => void;
   zpet: () => void;
   vpred: () => void;
   set: <K extends keyof Stav>(kl: K, h: Stav[K]) => void;
@@ -64,7 +52,6 @@ type Stav = {
 const KLIC = 'osazovaci-plan:projekt';
 const KLIC_UPRAV = 'osazovaci-plan:upravy-rostlin';
 
-/** Rucni upravy databaze (hustota, koruna...) - drzi se lokalne vedle plants.json. */
 function nactiUpravy(): Record<string, Partial<Rostlina>> {
   try { return JSON.parse(localStorage.getItem(KLIC_UPRAV) ?? '{}'); } catch { return {}; }
 }
@@ -76,22 +63,10 @@ function uloz(p: Projekt) {
 export function nactiUlozeny(): Projekt | null {
   try {
     const s = localStorage.getItem(KLIC);
-    return s ? prevedProjekt(JSON.parse(s)) : null;
+    if (!s) return null;
+    const p = JSON.parse(s);
+    return p?.verze === 4 ? (p as Projekt) : null;
   } catch { return null; }
-}
-
-/** Starsi plany (verze 2 mela vyskove zony jako samostatne tvary) se prenesou. */
-export function prevedProjekt(p: unknown): Projekt | null {
-  if (!p || typeof p !== 'object') return null;
-  const x = p as Record<string, unknown>;
-  if (x.verze === 3) return p as Projekt;
-  if (x.verze === 2) {
-    const n = { ...x } as unknown as Projekt & { zony?: unknown; ukazZony?: unknown; ukazSazenice?: unknown };
-    delete n.zony; delete n.ukazZony; delete n.ukazSazenice;
-    n.verze = 3; n.krok = 1;
-    return n as Projekt;
-  }
-  return null;
 }
 
 const klon = <T,>(x: T): T => JSON.parse(JSON.stringify(x));
@@ -102,16 +77,14 @@ export const useStore = create<Stav>((set, get) => ({
   kategorie: {},
   nacteno: false,
 
-  nastroj: 'vyber',
-  vyber: null,
+  aktivniZahon: null,
   aktivniKod: null,
   urovenStetec: 'nizke',
-  zobrazeni: 'rostliny',
-  zalozka: 'katalog',
+  upravovat: false,
+  kotuje: false,
 
   kamera: { x: 0, y: 0, z: 40 },
   koncept: [],
-  mysWorld: null,
   podkladUrl: null,
 
   historie: [],
@@ -121,8 +94,11 @@ export const useStore = create<Stav>((set, get) => ({
     const r = await fetch('/data/plants.json');
     const d: Databaze = await r.json();
     const upravy = nactiUpravy();
-    const db = d.rostliny.map((x) => (upravy[x.kod] ? { ...x, ...upravy[x.kod] } : x));
-    set({ db, kategorie: d.kategorie, nacteno: true });
+    set({
+      db: d.rostliny.map((x) => (upravy[x.kod] ? { ...x, ...upravy[x.kod] } : x)),
+      kategorie: d.kategorie,
+      nacteno: true,
+    });
   },
 
   upravRostlinu(kod, zmeny) {
@@ -136,32 +112,30 @@ export const useStore = create<Stav>((set, get) => ({
     const { pr, historie } = get();
     const novy = klon(pr);
     fn(novy);
-    set({ pr: novy, historie: [...historie.slice(-49), pr], budoucnost: [] });
+    set({ pr: novy, historie: [...historie.slice(-39), pr], budoucnost: [] });
     uloz(novy);
-  },
-
-  zmenTiche(fn) {
-    const novy = klon(get().pr);
-    fn(novy);
-    set({ pr: novy });
-    uloz(novy);
-  },
-
-  pamatuj() {
-    const { pr, historie } = get();
-    set({ historie: [...historie.slice(-49), klon(pr)], budoucnost: [] });
   },
 
   nastavProjekt(p) {
-    set({ pr: p, historie: [], budoucnost: [], vyber: null, koncept: [] });
+    set({ pr: p, historie: [], budoucnost: [], koncept: [], aktivniZahon: p.zahony[0]?.id ?? null });
     uloz(p);
+  },
+
+  naKrok(k) {
+    get().zmen((d) => { d.krok = k; });
+    const s = get();
+    set({
+      koncept: [], upravovat: false, kotuje: false,
+      aktivniZahon: s.aktivniZahon ?? s.pr.zahony[0]?.id ?? null,
+      aktivniKod: null,
+    });
   },
 
   zpet() {
     const { historie, pr, budoucnost } = get();
     if (!historie.length) return;
     const predchozi = historie[historie.length - 1];
-    set({ pr: predchozi, historie: historie.slice(0, -1), budoucnost: [pr, ...budoucnost].slice(0, 50), vyber: null });
+    set({ pr: predchozi, historie: historie.slice(0, -1), budoucnost: [pr, ...budoucnost].slice(0, 40) });
     uloz(predchozi);
   },
 
@@ -177,5 +151,4 @@ export const useStore = create<Stav>((set, get) => ({
   setKamera: (k) => set({ kamera: { ...get().kamera, ...k } }),
 }));
 
-export const useRostlina = (kod?: string | null) =>
-  useStore((s) => (kod ? s.db.find((r) => r.kod === kod) : undefined));
+export type { P };
