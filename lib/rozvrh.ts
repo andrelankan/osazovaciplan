@@ -69,6 +69,70 @@ export function vytvorBubliny(z: Zahon, db: Map<string, Rostlina>): Bublina[] {
   return semena.map((s) => ({ x: s.x, y: s.y, kod: osazeni[s.rostlina].kod, vaha: s.vaha }));
 }
 
+/**
+ * Doplni bubliny pro nove pridane druhy a zahodi ty odebrane, aniz by sahla
+ * na rucni doladeni. Stavajici bubliny si drzi svoji dosavadni plochu jako cil,
+ * nove dostanou plochu podle sveho podilu - a vsechny cile se prepocitaji tak,
+ * aby dohromady davaly plochu zahonu.
+ */
+export function dopocitejBubliny(z: Zahon, db: Map<string, Rostlina>): Bublina[] {
+  const obrys = zjednodus(naBody(z.obrys, 0.02), 0.01);
+  const plochaZahonu = obrys.length >= 3 ? plochaBodu(obrys) : 0;
+  const osazeni = z.osazeni.filter((x) => db.has(x.kod));
+  if (plochaZahonu < 0.05 || !osazeni.length) return [];
+  if (!z.bubliny?.length) return vytvorBubliny(z, db);
+
+  const zustavaji = z.bubliny.filter((b) => osazeni.some((o) => o.kod === b.kod));
+  if (!zustavaji.length) return vytvorBubliny(z, db);
+
+  // dosavadni plochy jsou cilem, aby doladeni zustalo zachovane
+  const stare: Semeno[] = zustavaji.map((b) => ({ rostlina: -1, x: b.x, y: b.y, vaha: b.vaha, cil: 0 }));
+  mocninneBunky(obrys, stare).forEach((p, i) => { stare[i].cil = p.length >= 3 ? plochaBodu(p) : 0.1; });
+
+  const soucetPodilu = osazeni.reduce((a, x) => a + Math.max(0.01, x.podil), 0);
+  const noveKody = osazeni.filter((o) => !zustavaji.some((b) => b.kod === o.kod));
+  const nova: { semeno: Semeno; kod: string }[] = [];
+
+  for (const o of noveKody) {
+    const podil = Math.max(0.01, o.podil) / soucetPodilu;
+    const pocet = Math.max(1, Math.min(8, o.skupin ?? autoSkupin(podil, plochaZahonu)));
+    const cil = (podil * plochaZahonu) / pocet;
+    for (let i = 0; i < pocet; i++) {
+      const kde = najdiVolneMisto(obrys, [...stare, ...nova.map((n) => n.semeno)]);
+      nova.push({ semeno: { rostlina: -1, x: kde.x, y: kde.y, vaha: 0, cil }, kod: o.kod });
+    }
+  }
+  if (!nova.length) {
+    return zustavaji.map((b, i) => ({ ...b, vaha: stare[i].vaha }));
+  }
+
+  const vsechna = [...stare, ...nova.map((n) => n.semeno)];
+  const kody = [...zustavaji.map((b) => b.kod), ...nova.map((n) => n.kod)];
+
+  // cile se srovnaji na celkovou plochu zahonu
+  const soucetCilu = vsechna.reduce((a, s) => a + s.cil, 0) || 1;
+  for (const s of vsechna) s.cil = (s.cil / soucetCilu) * plochaZahonu;
+
+  doladVahy(obrys, vsechna);
+  return vsechna.map((s, i) => ({ x: s.x, y: s.y, kod: kody[i], vaha: s.vaha }));
+}
+
+/** Misto v zahonu, ktere je nejdal od vsech dosavadnich semen. */
+function najdiVolneMisto(obrys: P[], semena: Semeno[]): P {
+  const o = obalka(obrys);
+  const krok = Math.max(0.1, Math.min(o.w, o.h) / 24);
+  let nej = { x: (o.x0 + o.x1) / 2, y: (o.y0 + o.y1) / 2 }, nejD = -1;
+  for (let y = o.y0 + krok / 2; y < o.y1; y += krok) {
+    for (let x = o.x0 + krok / 2; x < o.x1; x += krok) {
+      if (!bodVPolygonu({ x, y }, obrys)) continue;
+      let d = Infinity;
+      for (const s of semena) d = Math.min(d, (s.x - x) ** 2 + (s.y - y) ** 2);
+      if (d > nejD) { nejD = d; nej = { x, y }; }
+    }
+  }
+  return nej;
+}
+
 export function rozvrhni(z: Zahon, db: Map<string, Rostlina>): Rozvrh {
   const obrys = zjednodus(naBody(z.obrys, 0.02), 0.01);
   if (obrys.length < 3) return PRAZDNY;

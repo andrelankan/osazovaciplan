@@ -5,8 +5,8 @@
  * a ze pomer ploch odpovida zadanym podilum.
  */
 import { P, bodVPolygonu, bulgeZBodu, naBody, vzdalUsecka } from '../lib/geom';
-import { Rostlina, Zahon } from '../lib/model';
-import { rozvrhni } from '../lib/rozvrh';
+import { Rostlina, Zahon, jakPrepocitat } from '../lib/model';
+import { dopocitejBubliny, rozvrhni, vytvorBubliny } from '../lib/rozvrh';
 
 const R = (kod: string, vyska: number, hustota: number): Rostlina => ({
   kod, latin: kod, cesky: kod, kat: 'T', kategorie: 'trvalka', svetlo: ['slunce'],
@@ -154,6 +154,45 @@ const maxPresah = (body: P[], polygon: P[]) => body.reduce((a, p) => Math.max(a,
   for (const kod of ['Aaa', 'Bbb', 'Ccc']) {
     zkontroluj(r.casti.some((c) => c.kod === kod), `${kod} se do záhonu dostala`);
   }
+}
+
+// ------------------------- 6. pridani druhu nesmi zahodit rucni doladeni
+{
+  console.log('\nPřidání druhu k ručně doladěným bublinám');
+  const z: Zahon = {
+    id: 'z6', nazev: 'doladeny', obrys: obdelnik(9, 6), vysky: [], semeno: 5,
+    osazeni: [{ kod: 'Aaa', podil: 1 }, { kod: 'Bbb', podil: 1 }],
+  };
+  z.bubliny = vytvorBubliny(z, db);
+  z.zadano = z.osazeni.map((o) => ({ ...o }));
+  z.semenoPouzite = z.semeno;
+
+  // rucni zasah: prvni bublinu zvetsime a posuneme
+  z.bubliny[0].vaha += 3;
+  z.bubliny[0].x += 0.4;
+  const predloha = z.bubliny.map((b) => ({ ...b }));
+
+  zkontroluj(jakPrepocitat(z) === 'nic', 'ruční úprava nespustí přepočet');
+
+  // pribude treti druh
+  z.osazeni.push({ kod: 'Ccc', podil: 1 });
+  zkontroluj(jakPrepocitat(z) === 'castecne', 'přidání druhu se řeší po částech');
+
+  const nove = dopocitejBubliny(z, db);
+  const zachovane = predloha.every((p) => nove.some((n) =>
+    n.kod === p.kod && Math.abs(n.x - p.x) < 1e-6 && Math.abs(n.y - p.y) < 1e-6));
+  zkontroluj(zachovane, 'původní bubliny zůstaly na svém místě');
+  zkontroluj(nove.some((b) => b.kod === 'Ccc'), 'nový druh dostal svoje bubliny');
+
+  const r = rozvrhni({ ...z, bubliny: nove }, db);
+  const soucet = r.casti.reduce((a, c) => a + c.plocha, 0);
+  zkontroluj(soucet > r.plocha * 0.98, 'záhon zůstal celý vyplněný',
+    `${((soucet / r.plocha) * 100).toFixed(1)} %`);
+
+  // a naopak: zmena podilu si vyzada uplny prepocet
+  z.zadano = z.osazeni.map((o) => ({ ...o }));
+  z.osazeni[0].podil = 3;
+  zkontroluj(jakPrepocitat(z) === 'cely', 'změna podílu spustí úplný přepočet');
 }
 
 // ------------------------------------- 5. oblouk musi projit tazenym bodem

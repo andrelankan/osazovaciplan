@@ -130,13 +130,36 @@ export type Zahon = {
   semeno: number;
   /** Zhmotnene rozvrzeni. Prazdne = spocitat znovu. */
   bubliny?: Bublina[];
-  /** Pro jake zadani byly bubliny spocitane. */
-  otisk?: string;
+  /** Zadani, pro ktere byly bubliny spocitane. */
+  zadano?: Osazeni[];
+  /** Hodnota `semeno` pouzita pri vypoctu. */
+  semenoPouzite?: number;
 };
 
-/** Otisk zadani - kdyz se zmeni, rozvrzeni se spocita znovu. */
-export function otiskZahonu(z: Zahon): string {
-  return JSON.stringify([z.osazeni, z.semeno, z.obrys, z.vysky.map((v) => v.uroven)]);
+/**
+ * Co delat, kdyz se zmenilo zadani zahonu.
+ *
+ * Rucne doladene bubliny se maji zachovat, takze uplny prepocet se dela jen
+ * tehdy, kdyz o nej uzivatel opravdu zada - zmenou podilu, poctu skupin nebo
+ * prehazenim. Pouhe pridani ci odebrani druhu se doresi po castech. Uprava
+ * obrysu zahonu neni duvod k nicemu: bubliny se orizavaji obrysem sami.
+ */
+export function jakPrepocitat(z: Zahon): 'nic' | 'cely' | 'castecne' {
+  const ted = z.osazeni;
+  const drive = z.zadano;
+  if (!z.bubliny?.length || !drive) return ted.length ? 'cely' : 'nic';
+  if (z.semeno !== z.semenoPouzite) return 'cely';
+
+  const zmenenyPodil = ted.some((t) => {
+    const d = drive.find((x) => x.kod === t.kod);
+    return d && (d.podil !== t.podil || d.skupin !== t.skupin);
+  });
+  if (zmenenyPodil) return 'cely';
+
+  const pribylo = ted.some((t) => !drive.some((d) => d.kod === t.kod));
+  const ubylo = drive.some((d) => !ted.some((t) => t.kod === d.kod));
+  const osirele = z.bubliny.some((b) => !ted.some((t) => t.kod === b.kod));
+  return pribylo || ubylo || osirele ? 'castecne' : 'nic';
 }
 
 /** Jeden ker v rade. Ma vlastni druh, takze jde menit po jednom. */

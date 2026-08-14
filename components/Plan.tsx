@@ -5,9 +5,9 @@ import {
   naBody, norm, obalka, sub, vzdalUsecka,
 } from '@/lib/geom';
 import {
-  KATEGORIE_KROKU, Rostlina, Skupina, Tecka, UROVNE, Uroven, Zahon, id, otiskZahonu, prazdnyZahon,
+  KATEGORIE_KROKU, Rostlina, Skupina, Tecka, UROVNE, Uroven, Zahon, id, jakPrepocitat, prazdnyZahon,
 } from '@/lib/model';
-import { vytvorBubliny } from '@/lib/rozvrh';
+import { dopocitejBubliny, vytvorBubliny } from '@/lib/rozvrh';
 import { useStore } from '@/lib/store';
 import { useRozvrhy } from '@/lib/useRozvrhy';
 
@@ -146,14 +146,14 @@ export default function Plan() {
   useEffect(() => {
     if (!db.length) return;
     const mapa = new Map(db.map((r) => [r.kod, r]));
-    const kPrepocitani = pr.zahony.filter((z) => z.otisk !== otiskZahonu(z));
-    if (!kPrepocitani.length) return;
+    if (!pr.zahony.some((z) => jakPrepocitat(z) !== 'nic')) return;
     st.getState().zmen((d) => {
       for (const z of d.zahony) {
-        const o = otiskZahonu(z);
-        if (z.otisk === o) continue;
-        z.bubliny = vytvorBubliny(z, mapa);
-        z.otisk = o;
+        const co = jakPrepocitat(z);
+        if (co === 'nic') continue;
+        z.bubliny = co === 'cely' ? vytvorBubliny(z, mapa) : dopocitejBubliny(z, mapa);
+        z.zadano = z.osazeni.map((o) => ({ ...o }));
+        z.semenoPouzite = z.semeno;
       }
     });
   }, [pr.zahony, db, st]);
@@ -325,14 +325,12 @@ export default function Plan() {
       if (u.typ === 'bublina') {
         const b = zh.bubliny?.[u.i];
         if (b) { b.x = p.x; b.y = p.y; }
-        zh.otisk = otiskZahonu(zh);
       } else if (u.typ === 'hranice') {
         // posun hranice o delta znamena zmenu rozdilu vah o 2*delta*vzdalenost semen
         const delta = (p.x - u.stred.x) * u.normala.x + (p.y - u.stred.y) * u.normala.y;
         const zmena = delta * u.odstup;
         const b = zh.bubliny?.[u.i], s = zh.bubliny?.[u.soused];
         if (b && s) { b.vaha = u.wi + zmena; s.vaha = u.wj - zmena; }
-        zh.otisk = otiskZahonu(zh);
       } else if (u.typ === 'vrchol') { zh.obrys[u.i].x = p.x; zh.obrys[u.i].y = p.y; }
       else {
         const a = zh.obrys[u.i], b = zh.obrys[(u.i + 1) % zh.obrys.length];

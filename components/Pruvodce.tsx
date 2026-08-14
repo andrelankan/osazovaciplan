@@ -3,7 +3,7 @@ import React, { useRef, useState } from 'react';
 import Katalog from '@/components/Katalog';
 import { dist as vzdalenost } from '@/lib/geom';
 import {
-  KATEGORIE_KROKU, Rostlina, UROVNE, Uroven, Zahon, otiskZahonu, urovenRostliny, vykaz,
+  KATEGORIE_KROKU, Rostlina, UROVNE, Uroven, Zahon, urovenRostliny, vykaz,
 } from '@/lib/model';
 import { KROKY, Krok, POSLEDNI_KROK, useStore } from '@/lib/store';
 import { useRozvrhy } from '@/lib/useRozvrhy';
@@ -342,9 +342,10 @@ function PanelRostlin() {
         const b = z?.bubliny?.[bublina.index];
         if (!b || !z) return;
         b.kod = r.kod;
-        // aby se rozvrzeni nezahodilo, otisk se posune na novy stav
+        // druh se doplni do seznamu zahonu, ale zadani se rovnou potvrdi -
+        // jinak by se pro nej pridaly dalsi bubliny navic
         if (!z.osazeni.some((o) => o.kod === r.kod)) z.osazeni.push({ kod: r.kod, podil: 1 });
-        z.otisk = otiskZahonu(z);
+        z.zadano = z.osazeni.map((o) => ({ ...o }));
       });
       return;
     }
@@ -370,7 +371,6 @@ function PanelRostlin() {
       const b = z?.bubliny?.[bublina.index];
       if (!b || !z) return;
       b.vaha += o;
-      z.otisk = otiskZahonu(z);
     });
   };
 
