@@ -32,8 +32,12 @@ type Stav = {
   prichytavat: boolean;
   /** V kroku 1: rezim mereni vzdalenosti / kalibrace meritka. */
   meri: boolean;
-  /** Vybrana skupina keru - jde u ni menit rozestup i druh. */
+  /** Vybrana skupina keru - jde u ni menit rozestup i druh cele rady. */
   vybranaSkupina: string | null;
+  /** Vybrany jeden ker v rade - meni se jen on. */
+  vybranaTecka: { skupina: string; index: number } | null;
+  /** Vybrana bublina trvalek - meni se u ni rostlina, poloha i velikost. */
+  vybranaBublina: { zahon: string; index: number } | null;
   /** Ktera cast sortimentu je v seznamu videt. */
   sortiment: 'zahon' | 'kere' | 'stromy';
   /** Rozestup pro nove kreslenou skupinu; null = vzit vychozi u rostliny. */
@@ -92,6 +96,8 @@ export const useStore = create<Stav>((set, get) => ({
   prichytavat: true,
   meri: false,
   vybranaSkupina: null,
+  vybranaTecka: null,
+  vybranaBublina: null,
   sortiment: 'zahon',
   rozestupNovy: null,
 
@@ -137,7 +143,8 @@ export const useStore = create<Stav>((set, get) => ({
     get().zmen((d) => { d.krok = k; });
     const s = get();
     set({
-      koncept: [], upravovat: false, meri: false, vybranaSkupina: null, rozestupNovy: null,
+      koncept: [], upravovat: false, meri: false, rozestupNovy: null,
+      vybranaSkupina: null, vybranaTecka: null, vybranaBublina: null,
       aktivniZahon: s.aktivniZahon ?? s.pr.zahony[0]?.id ?? null,
       aktivniKod: null,
     });

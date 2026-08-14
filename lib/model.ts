@@ -114,6 +114,12 @@ export function autoSkupin(podil: number, plochaZahonu: number): number {
   return Math.max(1, Math.min(6, Math.round(podil * celkem)));
 }
 
+/**
+ * Jedna bublina v zahonu. Vznikne z rozvrhu, ale pak uz je soucasti planu -
+ * jde u ni zmenit rostlinu, posunout ji nebo zvetsit na ukor sousedu.
+ */
+export type Bublina = { x: number; y: number; kod: string; vaha: number };
+
 export type Zahon = {
   id: string;
   nazev: string;
@@ -122,14 +128,29 @@ export type Zahon = {
   osazeni: Osazeni[];
   /** Meni rozmisteni skupin, aniz by se menilo zadani. */
   semeno: number;
+  /** Zhmotnene rozvrzeni. Prazdne = spocitat znovu. */
+  bubliny?: Bublina[];
+  /** Pro jake zadani byly bubliny spocitane. */
+  otisk?: string;
 };
+
+/** Otisk zadani - kdyz se zmeni, rozvrzeni se spocita znovu. */
+export function otiskZahonu(z: Zahon): string {
+  return JSON.stringify([z.osazeni, z.semeno, z.obrys, z.vysky.map((v) => v.uroven)]);
+}
+
+/** Jeden ker v rade. Ma vlastni druh, takze jde menit po jednom. */
+export type Tecka = { x: number; y: number; kod: string };
 
 /** Skupina keru - lomena cara s tečkami. */
 export type Skupina = {
   id: string;
+  /** Vychozi druh rady; jednotlive tecky ho mohou mit jiny. */
   kod: string;
   body: Ring;
   rozestup?: number;
+  /** Zhmotnene tecky. Prazdne = dopocitat z cary a rozestupu. */
+  tecky?: Tecka[];
   pocet?: number;
   popisek?: P;
 };

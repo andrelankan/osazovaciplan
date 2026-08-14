@@ -4,7 +4,10 @@ import {
   P, V, add, bodVPolygonu, bodyPoCare, bulgeZBodu, cesta, cestaBody, delkaHrany, dist, lerp, mul,
   naBody, obalka, sub, vzdalUsecka,
 } from '@/lib/geom';
-import { KATEGORIE_KROKU, Rostlina, UROVNE, Uroven, Zahon, id, prazdnyZahon } from '@/lib/model';
+import {
+  KATEGORIE_KROKU, Rostlina, Skupina, Tecka, UROVNE, Uroven, Zahon, id, otiskZahonu, prazdnyZahon,
+} from '@/lib/model';
+import { vytvorBubliny } from '@/lib/rozvrh';
 import { useStore } from '@/lib/store';
 import { useRozvrhy } from '@/lib/useRozvrhy';
 
@@ -15,7 +18,7 @@ export default function Plan() {
   const [rozmer, setRozmer] = useState({ w: 1200, h: 800 });
   const {
     pr, db, kategorie, kamera, koncept, podkladUrl, aktivniZahon,
-    urovenStetec, upravovat, prichytavat, meri, vybranaSkupina,
+    urovenStetec, upravovat, prichytavat, meri, vybranaSkupina, vybranaTecka, vybranaBublina,
   } = useStore();
   const st = useStore;
   const krok = pr.krok;
@@ -27,7 +30,7 @@ export default function Plan() {
   const tahRef = useRef<P[] | null>(null);
   const [tah, setTah] = useState<P[] | null>(null);
   const [presna, setPresna] = useState<{ d: string; u: string } | null>(null);
-  const uchopRef = useRef<{ zahon: string; typ: 'vrchol' | 'stred'; i: number } | null>(null);
+  const uchopRef = useRef<{ zahon: string; typ: 'vrchol' | 'stred' | 'bublina'; i: number } | null>(null);
   const panRef = useRef<{ sx: number; sy: number; kx: number; ky: number } | null>(null);
   /** Drzi aktualni "dokonci kresbu", aby ji slo zavolat i z tlacitka v lište. */
   const hotovoRef = useRef<() => void>(() => { });
@@ -132,6 +135,25 @@ export default function Plan() {
     });
   }, [st, W, H]);
 
+  /**
+   * Zhmotni rozvrzeni do planu, jakmile se zmeni zadani. Od te chvile uz
+   * bublinami hybe uzivatel a algoritmus do nich nesaha.
+   */
+  useEffect(() => {
+    if (!db.length) return;
+    const mapa = new Map(db.map((r) => [r.kod, r]));
+    const kPrepocitani = pr.zahony.filter((z) => z.otisk !== otiskZahonu(z));
+    if (!kPrepocitani.length) return;
+    st.getState().zmen((d) => {
+      for (const z of d.zahony) {
+        const o = otiskZahonu(z);
+        if (z.otisk === o) continue;
+        z.bubliny = vytvorBubliny(z, mapa);
+        z.otisk = o;
+      }
+    });
+  }, [pr.zahony, db, st]);
+
   useEffect(() => {
     const dok = () => hotovoRef.current();
     window.addEventListener('plan:dokoncit', dok);
@@ -207,25 +229,54 @@ export default function Plan() {
         return;
       }
 
-      // klik na hotovou radu ji vybere (jde pak zmenit rozestup i druh)
       if (!st.getState().koncept.length) {
         const tol = 10 / z;
+        // 1. jednotlivy ker v rade
+        for (const s of pr.skupiny) {
+          const tecky = teckySkupiny(s, db);
+          const i = tecky.findIndex((t) => dist(p, t) < Math.max(tol, 0.35));
+          if (i >= 0) {
+            st.getState().set('vybranaTecka', { skupina: s.id, index: i });
+            st.getState().set('vybranaSkupina', null);
+            st.getState().set('vybranaBublina', null);
+            return;
+          }
+        }
+        // 2. cela rada (klik na spojnici mezi teckami)
         const trefena = pr.skupiny.find((s) => {
           const body = naBody(s.body, 0.05, false);
           for (let i = 1; i < body.length; i++) if (vzdalUsecka(p, body[i - 1], body[i]) < tol) return true;
           return false;
         });
-        if (trefena) { st.getState().set('vybranaSkupina', trefena.id); return; }
+        if (trefena) {
+          st.getState().set('vybranaSkupina', trefena.id);
+          st.getState().set('vybranaTecka', null);
+          st.getState().set('vybranaBublina', null);
+          return;
+        }
       }
 
       if (kresliRadu) {
         st.getState().set('vybranaSkupina', null);
+        st.getState().set('vybranaTecka', null);
         st.getState().set('koncept', [...st.getState().koncept, snap(p, e.shiftKey)]);
         return;
       }
 
+      // 3. bublina trvalek - vybere se a da se tahnout
       const zh = zahonPod(p);
-      if (zh) st.getState().set('aktivniZahon', zh.id);
+      if (zh) {
+        st.getState().set('aktivniZahon', zh.id);
+        const cast = (rozvrhy.get(zh.id)?.casti ?? []).find((c) => bodVPolygonu(p, c.polygon));
+        if (cast) {
+          st.getState().set('vybranaBublina', { zahon: zh.id, index: cast.bublina });
+          st.getState().set('vybranaSkupina', null);
+          st.getState().set('vybranaTecka', null);
+          uchopRef.current = { zahon: zh.id, typ: 'bublina', i: cast.bublina };
+          return;
+        }
+      }
+      st.getState().set('vybranaBublina', null);
     }
   };
 
@@ -252,7 +303,10 @@ export default function Plan() {
     st.getState().zmen((d) => {
       const zh = d.zahony.find((x) => x.id === u.zahon);
       if (!zh) return;
-      if (u.typ === 'vrchol') { zh.obrys[u.i].x = p.x; zh.obrys[u.i].y = p.y; }
+      if (u.typ === 'bublina') {
+        const b = zh.bubliny?.[u.i];
+        if (b) { b.x = p.x; b.y = p.y; }
+      } else if (u.typ === 'vrchol') { zh.obrys[u.i].x = p.x; zh.obrys[u.i].y = p.y; }
       else {
         const a = zh.obrys[u.i], b = zh.obrys[(u.i + 1) % zh.obrys.length];
         zh.obrys[u.i].b = bulgeZBodu(a, b, p);
@@ -294,8 +348,9 @@ export default function Plan() {
     if (k.length < 2 || !kod) return;
     const r = st.getState().db.find((x) => x.kod === kod);
     const rozestup = st.getState().rozestupNovy ?? r?.rozestup ?? 1.2;
+    const tecky = bodyPoCare(naBody(k, 0.02, false), rozestup).map((q) => ({ x: q.x, y: q.y, kod }));
     st.getState().zmen((d) => d.skupiny.push({
-      id: id(), kod, body: k.map((p) => ({ ...p })), rozestup,
+      id: id(), kod, body: k.map((p) => ({ ...p })), rozestup, tecky,
     }));
     st.getState().set('koncept', []);
     setPresna(null);
@@ -426,6 +481,22 @@ export default function Plan() {
                   <path key={c.id} d={cestaBody(c.polygon)} fill="none" stroke="#8a8a8a"
                     strokeWidth={0.7} vectorEffect="non-scaling-stroke" />
                 ))}
+                {/* vybrana bublina a jeji tezisko */}
+                {krok === 4 && je && (zh.bubliny ?? []).map((b, i) => {
+                  const vybrana = vybranaBublina?.zahon === zh.id && vybranaBublina.index === i;
+                  const cast = r?.casti.find((c) => c.bublina === i);
+                  return (
+                    <g key={i}>
+                      {vybrana && cast && (
+                        <path d={cestaBody(cast.polygon)} fill="none" stroke="#0a7" strokeWidth={2.5}
+                          vectorEffect="non-scaling-stroke" />
+                      )}
+                      <circle cx={b.x} cy={b.y} r={vybrana ? 5 / z : 3 / z}
+                        fill={vybrana ? '#0a7' : '#fff'} stroke="#0a7" strokeWidth={1.5}
+                        vectorEffect="non-scaling-stroke" />
+                    </g>
+                  );
+                })}
                 {/* obrys zahonu */}
                 <path d={cesta(zh.obrys)} fill="none" stroke={je && krok <= 4 ? '#0a7' : '#111'}
                   strokeWidth={je && krok <= 4 ? 3 : 2} vectorEffect="non-scaling-stroke" />
@@ -463,17 +534,24 @@ export default function Plan() {
             );
           })}
 
-          {/* skupiny keru - jen spojene tecky, zadny prumer koruny */}
+          {/* skupiny keru - spojene tecky, kazda muze byt jiny druh */}
           {pr.skupiny.map((s) => {
-            const r = rostlina(s.kod);
-            const body = naBody(s.body, 0.02, false);
-            const tecky = bodyPoCare(body, s.rozestup ?? r?.rozestup ?? 1.2);
+            const tecky = teckySkupiny(s, db);
             const je = s.id === vybranaSkupina;
             return (
               <g key={s.id}>
                 <polyline points={tecky.map((q) => `${q.x},${q.y}`).join(' ')} fill="none"
                   stroke={je ? '#0a7' : '#111'} strokeWidth={je ? 2.5 : 1} vectorEffect="non-scaling-stroke" />
-                {tecky.map((q, i) => <circle key={i} cx={q.x} cy={q.y} r={0.14} fill={je ? '#0a7' : '#111'} />)}
+                {tecky.map((q, i) => {
+                  const vybrana = vybranaTecka?.skupina === s.id && vybranaTecka.index === i;
+                  return (
+                    <g key={i}>
+                      {vybrana && <circle cx={q.x} cy={q.y} r={0.34} fill="none" stroke="#0a7"
+                        strokeWidth={2} vectorEffect="non-scaling-stroke" />}
+                      <circle cx={q.x} cy={q.y} r={vybrana ? 0.19 : 0.14} fill={vybrana || je ? '#0a7' : '#111'} />
+                    </g>
+                  );
+                })}
               </g>
             );
           })}
@@ -558,27 +636,21 @@ export default function Plan() {
             const obsazeno: { x0: number; y0: number; x1: number; y1: number }[] = [];
             const volno = (b: { x0: number; y0: number; x1: number; y1: number }) =>
               !obsazeno.some((o) => b.x0 < o.x1 && b.x1 > o.x0 && b.y0 < o.y1 && b.y1 > o.y0);
-            return pr.skupiny.map((s) => {
-              const r = rostlina(s.kod);
-              const text = r?.latin ?? s.kod;
-              const body = naBody(s.body, 0.02, false);
-              const tecky = bodyPoCare(body, s.rozestup ?? r?.rozestup ?? 1.2);
-              const sirka = text.length * 4.6 + 8;
-              return (
-                <g key={s.id}>
-                  {tecky.map((q, i) => {
-                    const c = naObraz(q);
-                    const ram = { x0: c.x + 4, y0: c.y - 14, x1: c.x + 4 + sirka, y1: c.y - 2 };
-                    if (!volno(ram)) return null;
-                    obsazeno.push(ram);
-                    return (
-                      <text key={i} x={c.x + 5} y={c.y - 4} fontSize={9.5} fontStyle="italic" fill="#111"
-                        stroke="#fff" strokeWidth={2.5} paintOrder="stroke">{text}</text>
-                    );
-                  })}
-                </g>
-              );
-            });
+            return pr.skupiny.map((s) => (
+              <g key={s.id}>
+                {teckySkupiny(s, db).map((q, i) => {
+                  const text = rostlina(q.kod)?.latin ?? q.kod;
+                  const c = naObraz(q);
+                  const ram = { x0: c.x + 4, y0: c.y - 14, x1: c.x + 4 + text.length * 4.6 + 8, y1: c.y - 2 };
+                  if (!volno(ram)) return null;
+                  obsazeno.push(ram);
+                  return (
+                    <text key={i} x={c.x + 5} y={c.y - 4} fontSize={9.5} fontStyle="italic" fill="#111"
+                      stroke="#fff" strokeWidth={2.5} paintOrder="stroke">{text}</text>
+                  );
+                })}
+              </g>
+            ));
           })()}
 
           {pr.solitery.map((s) => {
@@ -638,6 +710,14 @@ export default function Plan() {
       </div>
     </div>
   );
+}
+
+/** Tecky rady - ulozene, nebo dopocitane z cary a rozestupu. */
+export function teckySkupiny(s: Skupina, db: Rostlina[]): Tecka[] {
+  if (s.tecky?.length) return s.tecky;
+  const r = db.find((x) => x.kod === s.kod);
+  const body = naBody(s.body, 0.02, false);
+  return bodyPoCare(body, s.rozestup ?? r?.rozestup ?? 1.2).map((q) => ({ x: q.x, y: q.y, kod: s.kod }));
 }
 
 function stredHrany(a: V, b: V): P {

@@ -14,10 +14,14 @@
 import {
   P, bodProPopisek, bodVPolygonu, naBody, obalka, plochaBodu, vzdalUsecka, zjednodus,
 } from './geom';
-import { Osazeni, PORADI_UROVNI, Rostlina, Uroven, Zahon, autoSkupin, urovenRostliny } from './model';
+import {
+  Bublina, Osazeni, PORADI_UROVNI, Rostlina, Uroven, Zahon, autoSkupin, urovenRostliny,
+} from './model';
 
 export type Cast = {
   id: string;
+  /** Poradi bubliny v zahonu - podle nej se edituje. */
+  bublina: number;
   kod?: string;
   uroven?: Uroven;
   polygon: P[];
@@ -48,30 +52,44 @@ function nahoda(semeno: number) {
 
 type Semeno = { rostlina: number; x: number; y: number; vaha: number; cil: number };
 
+/**
+ * Spocita rozvrzeni a vrati ho jako seznam bublin, ktere se ulozi do planu.
+ * Od te chvile uz s nimi hybe uzivatel, ne algoritmus.
+ */
+export function vytvorBubliny(z: Zahon, db: Map<string, Rostlina>): Bublina[] {
+  const obrys = zjednodus(naBody(z.obrys, 0.02), 0.01);
+  if (obrys.length < 3) return [];
+  const plochaZahonu = plochaBodu(obrys);
+  const osazeni = z.osazeni.filter((x) => db.has(x.kod));
+  if (plochaZahonu < 0.05 || !osazeni.length) return [];
+
+  const semena = rozsejSemena(z, obrys, plochaZahonu, osazeni, db);
+  if (!semena.length) return [];
+  doladVahy(obrys, semena);
+  return semena.map((s) => ({ x: s.x, y: s.y, kod: osazeni[s.rostlina].kod, vaha: s.vaha }));
+}
+
 export function rozvrhni(z: Zahon, db: Map<string, Rostlina>): Rozvrh {
   const obrys = zjednodus(naBody(z.obrys, 0.02), 0.01);
   if (obrys.length < 3) return PRAZDNY;
   const plochaZahonu = plochaBodu(obrys);
   if (plochaZahonu < 0.05) return PRAZDNY;
 
-  const osazeni = z.osazeni.filter((x) => db.has(x.kod));
-  if (!osazeni.length) return { casti: [], plocha: plochaZahonu, nevyuzito: plochaZahonu };
+  // kresli se z ulozenych bublin; kdyz jeste nejsou, spocitaji se nanecisto
+  const bubliny = z.bubliny?.length ? z.bubliny : vytvorBubliny(z, db);
+  if (!bubliny.length) return { casti: [], plocha: plochaZahonu, nevyuzito: plochaZahonu };
 
-  const semena = rozsejSemena(z, obrys, plochaZahonu, osazeni, db);
-  if (!semena.length) return { casti: [], plocha: plochaZahonu, nevyuzito: plochaZahonu };
-
-  doladVahy(obrys, semena);
-
+  const semena: Semeno[] = bubliny.map((b) => ({ rostlina: 0, x: b.x, y: b.y, vaha: b.vaha, cil: 0 }));
   const casti: Cast[] = [];
-  const polygony = mocninneBunky(obrys, semena);
-  polygony.forEach((polygon, i) => {
+  mocninneBunky(obrys, semena).forEach((polygon, i) => {
     if (polygon.length < 3) return;
     const plocha = plochaBodu(polygon);
     if (plocha < 0.05) return;
-    const { kod } = osazeni[semena[i].rostlina];
+    const kod = bubliny[i].kod;
     const r = db.get(kod);
     casti.push({
-      id: `${z.id}-${kod}-${i}`,
+      id: `${z.id}-b${i}`,
+      bublina: i,
       kod,
       uroven: r ? urovenRostliny(r.vyska) : undefined,
       polygon,

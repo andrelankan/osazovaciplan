@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
-import { P, bodyPoCare, cesta, cestaBody, delkaHrany, lerp, naBody, obalka } from '@/lib/geom';
+import { P, cesta, cestaBody, delkaHrany, lerp, naBody, obalka } from '@/lib/geom';
+import { teckySkupiny } from '@/components/Plan';
 import { Databaze, KatInfo, Projekt, Rostlina, vykaz } from '@/lib/model';
 import { Rozvrh } from '@/lib/rozvrh';
 import { rozvrhyProjektu } from '@/lib/useRozvrhy';
@@ -130,9 +131,7 @@ export default function Tisk() {
 
           {/* keře jako spojené tečky */}
           {pr.skupiny.map((s) => {
-            const r = rost(s.kod);
-            const b = naBody(s.body, 0.02, false);
-            const tecky = bodyPoCare(b, s.rozestup ?? r?.rozestup ?? 1.2);
+            const tecky = teckySkupiny(s, db);
             return (
               <g key={s.id}>
                 <polyline points={tecky.map((q) => `${q.x},${q.y}`).join(' ')} fill="none" stroke="#111" strokeWidth={0.25 * tl} />
@@ -174,16 +173,24 @@ export default function Tisk() {
             </text>
           )))}
 
-          {pr.skupiny.map((s) => {
-            const r = rost(s.kod);
-            const b = naBody(s.body, 0.02, false);
-            const tecky = bodyPoCare(b, s.rozestup ?? r?.rozestup ?? 1.2);
-            const q = tecky[Math.floor(tecky.length / 2)];
-            return (
-              <text key={s.id} x={q.x + 1.4 * tl} y={q.y - 1.2 * tl} fontSize={2.4 * tl} fontStyle="italic"
-                fill="#111" stroke="#fff" strokeWidth={0.7 * tl} paintOrder="stroke">{r?.latin ?? s.kod}</text>
-            );
-          })}
+          {/* nazev u kazde tecky, kolidujici popisky se vynechavaji */}
+          {(() => {
+            const obsazeno: { x0: number; y0: number; x1: number; y1: number }[] = [];
+            return pr.skupiny.map((s) => (
+              <g key={s.id}>
+                {teckySkupiny(s, db).map((q, i) => {
+                  const text = rost(q.kod)?.latin ?? q.kod;
+                  const ram = { x0: q.x + tl, y0: q.y - 4 * tl, x1: q.x + tl + text.length * 1.25 * tl, y1: q.y - tl };
+                  if (obsazeno.some((o) => ram.x0 < o.x1 && ram.x1 > o.x0 && ram.y0 < o.y1 && ram.y1 > o.y0)) return null;
+                  obsazeno.push(ram);
+                  return (
+                    <text key={i} x={q.x + 1.4 * tl} y={q.y - 1.2 * tl} fontSize={2.2 * tl} fontStyle="italic"
+                      fill="#111" stroke="#fff" strokeWidth={0.7 * tl} paintOrder="stroke">{text}</text>
+                  );
+                })}
+              </g>
+            ));
+          })()}
 
           {pr.solitery.map((s) => {
             const r = rost(s.kod);

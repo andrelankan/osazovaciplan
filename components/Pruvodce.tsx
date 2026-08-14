@@ -3,7 +3,7 @@ import React, { useRef, useState } from 'react';
 import Katalog from '@/components/Katalog';
 import { dist as vzdalenost } from '@/lib/geom';
 import {
-  KATEGORIE_KROKU, Rostlina, UROVNE, Uroven, Zahon, urovenRostliny, vykaz,
+  KATEGORIE_KROKU, Rostlina, UROVNE, Uroven, Zahon, otiskZahonu, urovenRostliny, vykaz,
 } from '@/lib/model';
 import { KROKY, Krok, POSLEDNI_KROK, useStore } from '@/lib/store';
 import { useRozvrhy } from '@/lib/useRozvrhy';
@@ -288,21 +288,67 @@ const OBAL = 'flex h-full w-[350px] shrink-0 flex-col border-l border-gray-200 b
 
 /** Krok 4 - vsechen rostlinny material na jednom miste. */
 function PanelRostlin() {
-  const { pr, db, aktivniZahon, aktivniKod, sortiment, vybranaSkupina, rozestupNovy } = useStore();
+  const {
+    pr, db, aktivniZahon, aktivniKod, sortiment, vybranaSkupina, vybranaTecka, vybranaBublina,
+    rozestupNovy,
+  } = useStore();
   const st = useStore;
   const rozvrhy = useRozvrhy();
   const zahon = pr.zahony.find((z) => z.id === aktivniZahon) ?? pr.zahony[0];
   const rozvrh = zahon ? rozvrhy.get(zahon.id) : undefined;
   const skupina = pr.skupiny.find((s) => s.id === vybranaSkupina);
+  const tecka = vybranaTecka;
+  const bublina = vybranaBublina;
+  const teckaKod = tecka
+    ? pr.skupiny.find((s) => s.id === tecka.skupina)?.tecky?.[tecka.index]?.kod
+    : undefined;
+  const bublinaObj = bublina
+    ? pr.zahony.find((z) => z.id === bublina.zahon)?.bubliny?.[bublina.index]
+    : undefined;
 
   const uprav = (fn: (z: Zahon) => void) => {
     if (!zahon) return;
     st.getState().zmen((d) => { const x = d.zahony.find((y) => y.id === zahon.id); if (x) fn(x); });
   };
 
-  /** Klik v seznamu: trvalky do zahonu, dreviny se nastavi ke kresleni. */
+  /** Klik v seznamu. Kdyz je neco vybrane, meni se to; jinak se pridava. */
   const vyber = (r: Rostlina) => {
-    if ((KATEGORIE_KROKU.zahon as readonly string[]).includes(r.kat)) {
+    const jeKer = (KATEGORIE_KROKU.kere as readonly string[]).includes(r.kat);
+    const jeTrvalka = (KATEGORIE_KROKU.zahon as readonly string[]).includes(r.kat);
+
+    // jeden ker v rade
+    if (tecka && jeKer) {
+      st.getState().zmen((d) => {
+        const s = d.skupiny.find((x) => x.id === tecka.skupina);
+        if (s?.tecky?.[tecka.index]) s.tecky[tecka.index].kod = r.kod;
+      });
+      return;
+    }
+    // cela rada
+    if (skupina && jeKer) {
+      st.getState().zmen((d) => {
+        const s = d.skupiny.find((x) => x.id === skupina.id);
+        if (!s) return;
+        s.kod = r.kod;
+        s.tecky?.forEach((t) => { t.kod = r.kod; });
+      });
+      return;
+    }
+    // jedna bublina trvalek
+    if (bublina && jeTrvalka) {
+      st.getState().zmen((d) => {
+        const z = d.zahony.find((x) => x.id === bublina.zahon);
+        const b = z?.bubliny?.[bublina.index];
+        if (!b || !z) return;
+        b.kod = r.kod;
+        // aby se rozvrzeni nezahodilo, otisk se posune na novy stav
+        if (!z.osazeni.some((o) => o.kod === r.kod)) z.osazeni.push({ kod: r.kod, podil: 1 });
+        z.otisk = otiskZahonu(z);
+      });
+      return;
+    }
+
+    if (jeTrvalka) {
       if (!zahon) { alert('Nejdřív nakresli záhon (krok 2).'); return; }
       uprav((z) => {
         const i = z.osazeni.findIndex((o) => o.kod === r.kod);
@@ -311,16 +357,20 @@ function PanelRostlin() {
       });
       return;
     }
-    // vybrana rada keru se prepne na jiny druh
-    if (skupina && (KATEGORIE_KROKU.kere as readonly string[]).includes(r.kat)) {
-      st.getState().zmen((d) => {
-        const x = d.skupiny.find((s) => s.id === skupina.id);
-        if (x) { x.kod = r.kod; x.rozestup = r.rozestup; }
-      });
-      return;
-    }
     st.getState().set('aktivniKod', r.kod);
     st.getState().set('rozestupNovy', null);
+  };
+
+  /** Zvetsi nebo zmensi vybranou bublinu na ukor sousedu. */
+  const zmenVelikost = (o: number) => {
+    if (!bublina) return;
+    st.getState().zmen((d) => {
+      const z = d.zahony.find((x) => x.id === bublina.zahon);
+      const b = z?.bubliny?.[bublina.index];
+      if (!b || !z) return;
+      b.vaha += o;
+      z.otisk = otiskZahonu(z);
+    });
   };
 
   const soucet = zahon?.osazeni.reduce((a, x) => a + Math.max(0.01, x.podil), 0) || 1;
@@ -406,8 +456,43 @@ function PanelRostlin() {
         </div>
       )}
 
+      {/* co je prave vybrane a co s tim jde delat */}
+      {(tecka || bublina) && (
+        <div className="border-b border-emerald-300 bg-emerald-50 px-3 py-2 text-xs">
+          {tecka && (
+            <>
+              <div className="font-medium">Vybraný jeden keř</div>
+              <div className="mt-0.5 italic">{db.find((r) => r.kod === teckaKod)?.latin ?? teckaKod}</div>
+              <p className="mt-1 text-[11px] text-gray-600">
+                Klikni na keř v seznamu — změní se jen tenhle kus, ne celá řada.
+              </p>
+            </>
+          )}
+          {bublina && (
+            <>
+              <div className="font-medium">Vybraná bublina</div>
+              <div className="mt-0.5 italic">{db.find((r) => r.kod === bublinaObj?.kod)?.latin ?? bublinaObj?.kod}</div>
+              <div className="mt-1 flex items-center gap-2">
+                <span className="text-gray-600">velikost</span>
+                <button onClick={() => zmenVelikost(-0.35)} className="rounded border border-gray-300 bg-white px-2 py-0.5">−</button>
+                <button onClick={() => zmenVelikost(0.35)} className="rounded border border-gray-300 bg-white px-2 py-0.5">+</button>
+                <span className="text-[11px] text-gray-500">
+                  {(rozvrh?.casti.find((c) => c.bublina === bublina.index)?.plocha ?? 0).toFixed(1)} m²
+                </span>
+              </div>
+              <p className="mt-1 text-[11px] text-gray-600">
+                Klikni na trvalku v seznamu, změní se jen tahle bublina. Hranice posuneš tažením
+                zeleného bodu uprostřed.
+              </p>
+            </>
+          )}
+          <button onClick={() => { st.getState().set('vybranaTecka', null); st.getState().set('vybranaBublina', null); }}
+            className="mt-1 text-[11px] text-gray-500 underline">zrušit výběr</button>
+        </div>
+      )}
+
       {/* rozestup rady keru */}
-      {(sortiment === 'kere' || skupina) && (
+      {(sortiment === 'kere' || skupina) && !tecka && (
         <div className="border-b border-gray-200 bg-gray-50 px-3 py-1.5 text-xs">
           <div className="flex items-center gap-2">
             <span className="text-gray-600">

@@ -12,7 +12,7 @@ import { useStore } from './store';
 const cache = new Map<string, Rozvrh>();
 
 function otisk(z: Zahon, verzeDb: number): string {
-  return JSON.stringify([z.obrys, z.vysky, z.osazeni, z.semeno, verzeDb]);
+  return JSON.stringify([z.obrys, z.vysky, z.osazeni, z.semeno, z.bubliny, verzeDb]);
 }
 
 export function rozvrhZahonu(z: Zahon, db: Map<string, Rostlina>, verzeDb: number): Rozvrh {
