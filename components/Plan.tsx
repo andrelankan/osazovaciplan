@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   P, V, add, bodVPolygonu, bodyPoCare, bulgeZBodu, cesta, cestaBody, delkaHrany, dist, lerp, mul,
-  naBody, obalka, sub, vzdalUsecka,
+  naBody, norm, obalka, sub, vzdalUsecka,
 } from '@/lib/geom';
 import {
   KATEGORIE_KROKU, Rostlina, Skupina, Tecka, UROVNE, Uroven, Zahon, id, otiskZahonu, prazdnyZahon,
@@ -30,7 +30,11 @@ export default function Plan() {
   const tahRef = useRef<P[] | null>(null);
   const [tah, setTah] = useState<P[] | null>(null);
   const [presna, setPresna] = useState<{ d: string; u: string } | null>(null);
-  const uchopRef = useRef<{ zahon: string; typ: 'vrchol' | 'stred' | 'bublina'; i: number } | null>(null);
+  type Uchop =
+    | { zahon: string; typ: 'vrchol' | 'stred' | 'bublina'; i: number }
+    /** Tazeni hranice mezi dvema bublinami - meni jejich vzajemnou vahu. */
+    | { zahon: string; typ: 'hranice'; i: number; soused: number; stred: P; normala: P; wi: number; wj: number; odstup: number };
+  const uchopRef = useRef<Uchop | null>(null);
   const panRef = useRef<{ sx: number; sy: number; kx: number; ky: number } | null>(null);
   /** Drzi aktualni "dokonci kresbu", aby ji slo zavolat i z tlacitka v lište. */
   const hotovoRef = useRef<() => void>(() => { });
@@ -263,7 +267,23 @@ export default function Plan() {
         return;
       }
 
-      // 3. bublina trvalek - vybere se a da se tahnout
+      // 3. tahla uz vybrane bubliny - stred posouva celou, hranice jen ji samotnou
+      const vb = st.getState().vybranaBublina;
+      if (vb) {
+        const zh = pr.zahony.find((x) => x.id === vb.zahon);
+        const b = zh?.bubliny?.[vb.index];
+        if (zh && b) {
+          const tol = 11 / z;
+          if (dist(p, b) < tol) {
+            uchopRef.current = { zahon: zh.id, typ: 'bublina', i: vb.index };
+            return;
+          }
+          const uchop = najdiHranici(zh, vb.index, p, tol, rozvrhy.get(zh.id)?.casti ?? []);
+          if (uchop) { uchopRef.current = uchop; return; }
+        }
+      }
+
+      // 4. vyber bubliny - jen oznaceni, nic se nehne
       const zh = zahonPod(p);
       if (zh) {
         st.getState().set('aktivniZahon', zh.id);
@@ -272,7 +292,6 @@ export default function Plan() {
           st.getState().set('vybranaBublina', { zahon: zh.id, index: cast.bublina });
           st.getState().set('vybranaSkupina', null);
           st.getState().set('vybranaTecka', null);
-          uchopRef.current = { zahon: zh.id, typ: 'bublina', i: cast.bublina };
           return;
         }
       }
@@ -306,6 +325,14 @@ export default function Plan() {
       if (u.typ === 'bublina') {
         const b = zh.bubliny?.[u.i];
         if (b) { b.x = p.x; b.y = p.y; }
+        zh.otisk = otiskZahonu(zh);
+      } else if (u.typ === 'hranice') {
+        // posun hranice o delta znamena zmenu rozdilu vah o 2*delta*vzdalenost semen
+        const delta = (p.x - u.stred.x) * u.normala.x + (p.y - u.stred.y) * u.normala.y;
+        const zmena = delta * u.odstup;
+        const b = zh.bubliny?.[u.i], s = zh.bubliny?.[u.soused];
+        if (b && s) { b.vaha = u.wi + zmena; s.vaha = u.wj - zmena; }
+        zh.otisk = otiskZahonu(zh);
       } else if (u.typ === 'vrchol') { zh.obrys[u.i].x = p.x; zh.obrys[u.i].y = p.y; }
       else {
         const a = zh.obrys[u.i], b = zh.obrys[(u.i + 1) % zh.obrys.length];
@@ -481,22 +508,29 @@ export default function Plan() {
                   <path key={c.id} d={cestaBody(c.polygon)} fill="none" stroke="#8a8a8a"
                     strokeWidth={0.7} vectorEffect="non-scaling-stroke" />
                 ))}
-                {/* vybrana bublina a jeji tezisko */}
-                {krok === 4 && je && (zh.bubliny ?? []).map((b, i) => {
-                  const vybrana = vybranaBublina?.zahon === zh.id && vybranaBublina.index === i;
-                  const cast = r?.casti.find((c) => c.bublina === i);
+                {/* vybrana bublina: obtazeni, stred na posun a tahla na hranicich */}
+                {krok === 4 && je && vybranaBublina?.zahon === zh.id && (() => {
+                  const b = zh.bubliny?.[vybranaBublina.index];
+                  const cast = r?.casti.find((c) => c.bublina === vybranaBublina.index);
+                  if (!b || !cast) return null;
                   return (
-                    <g key={i}>
-                      {vybrana && cast && (
-                        <path d={cestaBody(cast.polygon)} fill="none" stroke="#0a7" strokeWidth={2.5}
-                          vectorEffect="non-scaling-stroke" />
-                      )}
-                      <circle cx={b.x} cy={b.y} r={vybrana ? 5 / z : 3 / z}
-                        fill={vybrana ? '#0a7' : '#fff'} stroke="#0a7" strokeWidth={1.5}
+                    <g>
+                      <path d={cestaBody(cast.polygon)} fill="none" stroke="#0a7" strokeWidth={2.5}
+                        vectorEffect="non-scaling-stroke" />
+                      {cast.polygon.map((a, e) => {
+                        const c = cast.polygon[(e + 1) % cast.polygon.length];
+                        if (dist(a, c) < 12 / z) return null;
+                        const s = lerp(a, c, 0.5);
+                        return (
+                          <rect key={e} x={s.x - 4.5 / z} y={s.y - 4.5 / z} width={9 / z} height={9 / z}
+                            fill="#fff" stroke="#0a7" strokeWidth={2} vectorEffect="non-scaling-stroke" />
+                        );
+                      })}
+                      <circle cx={b.x} cy={b.y} r={6 / z} fill="#0a7" stroke="#fff" strokeWidth={2}
                         vectorEffect="non-scaling-stroke" />
                     </g>
                   );
-                })}
+                })()}
                 {/* obrys zahonu */}
                 <path d={cesta(zh.obrys)} fill="none" stroke={je && krok <= 4 ? '#0a7' : '#111'}
                   strokeWidth={je && krok <= 4 ? 3 : 2} vectorEffect="non-scaling-stroke" />
@@ -710,6 +744,44 @@ export default function Plan() {
       </div>
     </div>
   );
+}
+
+/**
+ * Najde tahlo na hranici vybrane bubliny. Hranice je vzdycky spolecna se
+ * sousedni bublinou - tazenim se meni jejich vzajemna vaha, takze se posune
+ * prave tahle cara a zbytek zahonu zustane vyplneny.
+ */
+function najdiHranici(
+  zh: Zahon, index: number, p: P, tol: number, casti: { bublina: number; polygon: P[] }[],
+): { zahon: string; typ: 'hranice'; i: number; soused: number; stred: P; normala: P; wi: number; wj: number; odstup: number } | null {
+  const bubliny = zh.bubliny ?? [];
+  const b = bubliny[index];
+  const polygon = casti.find((c) => c.bublina === index)?.polygon;
+  if (!b || !polygon) return null;
+
+  for (let e = 0; e < polygon.length; e++) {
+    const a = polygon[e], c = polygon[(e + 1) % polygon.length];
+    const stred = lerp(a, c, 0.5);
+    if (dist(p, stred) > tol) continue;
+
+    // soused je bublina, ke ktere je stred hrany v mocninne metrice nejbliz
+    let soused = -1, nej = Infinity;
+    for (let j = 0; j < bubliny.length; j++) {
+      if (j === index) continue;
+      const q = bubliny[j];
+      const d = (stred.x - q.x) ** 2 + (stred.y - q.y) ** 2 - q.vaha;
+      if (d < nej) { nej = d; soused = j; }
+    }
+    if (soused < 0) return null;
+
+    const s = bubliny[soused];
+    const normala = norm({ x: s.x - b.x, y: s.y - b.y });
+    return {
+      zahon: zh.id, typ: 'hranice', i: index, soused, stred, normala,
+      wi: b.vaha, wj: s.vaha, odstup: dist(b, s),
+    };
+  }
+  return null;
 }
 
 /** Tecky rady - ulozene, nebo dopocitane z cary a rozestupu. */

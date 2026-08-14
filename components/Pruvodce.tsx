@@ -294,6 +294,7 @@ function PanelRostlin() {
   } = useStore();
   const st = useStore;
   const rozvrhy = useRozvrhy();
+  const [sbaleno, setSbaleno] = useState(false);
   const zahon = pr.zahony.find((z) => z.id === aktivniZahon) ?? pr.zahony[0];
   const rozvrh = zahon ? rozvrhy.get(zahon.id) : undefined;
   const skupina = pr.skupiny.find((s) => s.id === vybranaSkupina);
@@ -387,11 +388,16 @@ function PanelRostlin() {
 
   return (
     <div className={OBAL}>
-      {/* co uz je v zahonu */}
+      {/* co uz je v zahonu - vlastni rolovani, at katalog nikdy nezmizi */}
       {zahon && (
-        <div className="max-h-[45%] overflow-auto border-b border-gray-200 p-2">
+        <div className="shrink-0 overflow-auto border-b border-gray-200 p-2"
+          style={{ maxHeight: sbaleno ? undefined : '38vh' }}>
           <div className="mb-1 flex items-center justify-between">
-            <span className="text-sm font-medium">{zahon.nazev}</span>
+            <button onClick={() => setSbaleno(!sbaleno)} className="flex items-center gap-1 text-sm font-medium">
+              <span className="text-gray-400">{sbaleno ? '▸' : '▾'}</span>
+              {zahon.nazev}
+              {sbaleno && <span className="text-xs font-normal text-gray-500">({zahon.osazeni.length} druhů)</span>}
+            </button>
             <span className="text-xs text-gray-500">{rozvrh?.plocha.toFixed(1)} m²</span>
           </div>
           {pr.zahony.length > 1 && (
@@ -405,11 +411,11 @@ function PanelRostlin() {
             </div>
           )}
 
-          {!zahon.osazeni.length && (
+          {!zahon.osazeni.length && !sbaleno && (
             <p className="py-2 text-xs text-gray-500">Zatím prázdný — klikni na trvalku v seznamu dole.</p>
           )}
 
-          {zahon.osazeni.map((o) => {
+          {!sbaleno && zahon.osazeni.map((o) => {
             const r = db.find((x) => x.kod === o.kod);
             const kusu = (rozvrh?.casti ?? []).filter((c) => c.kod === o.kod).reduce((a, c) => a + c.kusu, 0);
             const u = r ? urovenRostliny(r.vyska) : null;
@@ -447,7 +453,7 @@ function PanelRostlin() {
             );
           })}
 
-          {zahon.osazeni.length > 0 && (
+          {zahon.osazeni.length > 0 && !sbaleno && (
             <button onClick={() => uprav((z) => { z.semeno = Math.floor(Math.random() * 100000); })}
               className="mt-1 w-full rounded border border-gray-300 py-1 text-xs hover:bg-gray-50">
               Přeházet rozmístění
@@ -481,8 +487,8 @@ function PanelRostlin() {
                 </span>
               </div>
               <p className="mt-1 text-[11px] text-gray-600">
-                Klikni na trvalku v seznamu, změní se jen tahle bublina. Hranice posuneš tažením
-                zeleného bodu uprostřed.
+                Klikni na trvalku v seznamu, změní se jen tahle bublina. <b>Bílými čtverečky na hranách</b>
+                {' '}posuneš jednotlivé hranice, zeleným bodem uprostřed celou bublinu.
               </p>
             </>
           )}
