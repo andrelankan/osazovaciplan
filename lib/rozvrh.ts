@@ -15,7 +15,7 @@ import {
   P, bodProPopisek, bodVPolygonu, naBody, obalka, plochaBodu, vzdalUsecka, zjednodus,
 } from './geom';
 import {
-  Bublina, Osazeni, PORADI_UROVNI, Rostlina, Uroven, Zahon, autoSkupin, urovenRostliny,
+  Bublina, Osazeni, Rostlina, Uroven, Zahon, autoSkupin, urovenRostliny,
 } from './model';
 
 export type Cast = {
@@ -209,30 +209,43 @@ function rozsejSemena(
   }
 
   const urovenCile = osazeni.map((x) => urovenRostliny(db.get(x.kod)!.vyska));
-  /** Cim dal je bunka od "sve" oblasti, tim mene je pro semeno vhodna. */
-  const vhodnost = (k: number, s: number) => {
-    const u = kandidati[k].uroven;
-    if (!u) return 1;
-    const rozdil = Math.abs(PORADI_UROVNI.indexOf(u) - PORADI_UROVNI.indexOf(urovenCile[semena[s].rostlina]));
-    return 1 / (1 + rozdil * 2.5);
+
+  /**
+   * Kandidati rozdeleni podle vyskove oblasti. Semeno se sadi primo do te sve -
+   * drive byla vyska jen slabou vahou proti rozprostreni semen a to ji preblo,
+   * takze vysoke rostliny koncily v oblasti pro nizke.
+   */
+  const podleUrovne = new Map<Uroven, number[]>();
+  kandidati.forEach((k, i) => {
+    if (!k.uroven) return;
+    const s = podleUrovne.get(k.uroven);
+    if (s) s.push(i); else podleUrovne.set(k.uroven, [i]);
+  });
+  const vsichni = kandidati.map((_, i) => i);
+
+  // vzdalenost kazdeho kandidata k nejblizsimu uz posazenemu semenu
+  const vzdal = new Float64Array(kandidati.length).fill(Infinity);
+  const zapocti = (x: number, y: number) => {
+    for (let i = 0; i < kandidati.length; i++) {
+      const d = (kandidati[i].x - x) ** 2 + (kandidati[i].y - y) ** 2;
+      if (d < vzdal[i]) vzdal[i] = d;
+    }
   };
 
-  const vzdal = new Float64Array(kandidati.length).fill(Infinity);
   for (let s = 0; s < semena.length; s++) {
-    let nejI = 0, nejS = -1;
-    for (let k = 0; k < kandidati.length; k++) {
-      if (s > 0) {
-        const p = kandidati[k], q = semena[s - 1];
-        const d = (p.x - q.x) ** 2 + (p.y - q.y) ** 2;
-        if (d < vzdal[k]) vzdal[k] = d;
-      }
-      const zaklad = s === 0 ? 1 : vzdal[k];
-      const skore = zaklad * vhodnost(k, s) * (0.85 + rnd() * 0.3);
-      if (skore > nejS) { nejS = skore; nejI = k; }
+    const chci = urovenCile[semena[s].rostlina];
+    const vlastni = podleUrovne.get(chci);
+    // kdyz pro danou vysku zadna oblast neni, bere se cely zahon
+    const mnozina = vlastni && vlastni.length ? vlastni : vsichni;
+
+    let nejI = mnozina[0], nejD = -1;
+    for (const i of mnozina) {
+      const skore = (s === 0 ? 1 : vzdal[i]) * (0.85 + rnd() * 0.3);
+      if (skore > nejD) { nejD = skore; nejI = i; }
     }
     semena[s].x = kandidati[nejI].x;
     semena[s].y = kandidati[nejI].y;
-    vzdal[nejI] = 0;
+    zapocti(semena[s].x, semena[s].y);
   }
   return semena;
 }

@@ -18,6 +18,8 @@ const db = new Map<string, Rostlina>([
   ['Aaa', R('Aaa', 0.2, 9)],
   ['Bbb', R('Bbb', 0.5, 5)],
   ['Ccc', R('Ccc', 1.2, 3)],
+  ['Ddd', R('Ddd', 0.25, 8)],
+  ['Eee', R('Eee', 1.8, 3)],
 ]);
 
 const obdelnik = (w: number, h: number) => [
@@ -154,6 +156,55 @@ const maxPresah = (body: P[], polygon: P[]) => body.reduce((a, p) => Math.max(a,
   for (const kod of ['Aaa', 'Bbb', 'Ccc']) {
     zkontroluj(r.casti.some((c) => c.kod === kod), `${kod} se do záhonu dostala`);
   }
+}
+
+// ------------- 7. kazda rostlina musi skoncit ve sve vyskove oblasti
+{
+  console.log('\nVíc druhů, vysoké vpravo nahoře a nízké dole');
+  const z: Zahon = {
+    id: 'z7', nazev: 'vysky', obrys: obdelnik(12, 9), semeno: 11,
+    vysky: [
+      { id: 'v', uroven: 'vysoke', body: [{ x: 7, y: 1 }, { x: 11, y: 1.5 }, { x: 11.5, y: 3 }] },
+      { id: 'n', uroven: 'nizke', body: [{ x: 1, y: 8 }, { x: 6, y: 8.2 }, { x: 10, y: 7.6 }] },
+    ],
+    osazeni: [
+      { kod: 'Aaa', podil: 1 },   // 0,2 m - nizke
+      { kod: 'Ddd', podil: 1 },   // 0,25 m - nizke
+      { kod: 'Ccc', podil: 1 },   // 1,2 m - vysoke
+      { kod: 'Eee', podil: 1 },   // 1,8 m - vysoke
+    ],
+  };
+  z.bubliny = vytvorBubliny(z, db);
+  const r = rozvrhni(z, db);
+
+  /** Vzdalenost bodu od nacrtnuteho tahu. */
+  const kTahu = (p: P, body: P[]) => {
+    let nej = Infinity;
+    for (let i = 1; i < body.length; i++) nej = Math.min(nej, vzdalUsecka(p, body[i - 1], body[i]));
+    return nej;
+  };
+  const tahVysoke = z.vysky[0].body, tahNizke = z.vysky[1].body;
+  const sedi = (p: P, ma: 'nizke' | 'vysoke') =>
+    ma === 'vysoke' ? kTahu(p, tahVysoke) < kTahu(p, tahNizke) : kTahu(p, tahNizke) < kTahu(p, tahVysoke);
+
+  const pary = [['Aaa', 'nizke'], ['Ddd', 'nizke'], ['Ccc', 'vysoke'], ['Eee', 'vysoke']] as const;
+
+  // semena musi sedet vzdycky - to je to, co rozvrh opravdu ridi
+  for (const [kod, ma] of pary) {
+    const b = z.bubliny.filter((x) => x.kod === kod);
+    const spravne = b.filter((x) => sedi(x, ma)).length;
+    zkontroluj(b.length > 0 && spravne === b.length,
+      `${kod} (${ma}) má těžiště ve své oblasti`, `${spravne} z ${b.length}`);
+  }
+
+  // Plochy uz mohou pretect: kdyz maji vysoke rostliny dostat vic plochy, nez
+  // kolik zvyraznena oblast zabira, nema to kam jinam jit. Vetsina ale musi sedet.
+  const vsechny = pary.flatMap(([kod, ma]) => r.casti.filter((c) => c.kod === kod).map((c) => sedi(c.popisek, ma)));
+  const podil = vsechny.filter(Boolean).length / vsechny.length;
+  zkontroluj(podil >= 0.75, 'většina ploch leží ve své oblasti', `${(podil * 100).toFixed(0)} %`);
+
+  const soucet = r.casti.reduce((a, c) => a + c.plocha, 0);
+  zkontroluj(soucet > r.plocha * 0.98, 'záhon zůstal vyplněný', `${((soucet / r.plocha) * 100).toFixed(1)} %`);
 }
 
 // ------------------------- 6. pridani druhu nesmi zahodit rucni doladeni
