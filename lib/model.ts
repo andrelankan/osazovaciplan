@@ -83,6 +83,16 @@ export function sedneVyska(r: Rostlina, u?: Uroven): boolean {
 /** Zhruba nacrtnuty tah, ktery rekne "tady chci nizke rostliny". */
 export type TahVysky = { id: string; uroven: Uroven; body: P[] };
 
+/** Stanoviste - druha vrstva zvyrazneni, nezavisla na vyskach. */
+export type DruhStanoviste = 'slunce' | 'polostin' | 'stin';
+export type TahStanoviste = { id: string; druh: DruhStanoviste; body: P[] };
+
+export const STANOVISTE: Record<DruhStanoviste, { nazev: string; barva: string }> = {
+  slunce: { nazev: 'slunce', barva: '#f2c94c' },
+  polostin: { nazev: 'polostín', barva: '#bdb76b' },
+  stin: { nazev: 'stín', barva: '#9aa0a6' },
+};
+
 /**
  * Rostlina vybrana do zahonu. Vybira se na cely zahon; kam presne prijde,
  * rozhodne rozvrh - vyskove oblasti bere jen jako voditko.
@@ -125,6 +135,8 @@ export type Zahon = {
   nazev: string;
   obrys: Ring;
   vysky: TahVysky[];
+  /** Vyznacene stanoviste; muze se s vyskami libovolne prekryvat. */
+  stanoviste?: TahStanoviste[];
   osazeni: Osazeni[];
   /** Meni rozmisteni skupin, aniz by se menilo zadani. */
   semeno: number;
@@ -165,7 +177,16 @@ export function jakPrepocitat(z: Zahon): 'nic' | 'cely' | 'castecne' {
 /** Jeden ker v rade. Ma vlastni druh, takze jde menit po jednom. */
 export type Tecka = { x: number; y: number; kod: string };
 
-/** Skupina keru - lomena cara s tečkami. */
+/** Jak je popisek umisteny vuci svemu bodu. */
+export type Popisek = {
+  /** Posun od vychoziho mista. */
+  posun?: P;
+  /** Otoceni ve stupnich. */
+  otoceni?: number;
+  zarovnani?: 'start' | 'middle' | 'end';
+};
+
+/** Skupina keru - lomena cara s tečkami, nebo jediny kus. */
 export type Skupina = {
   id: string;
   /** Vychozi druh rady; jednotlive tecky ho mohou mit jiny. */
@@ -174,8 +195,10 @@ export type Skupina = {
   rozestup?: number;
   /** Zhmotnene tecky. Prazdne = dopocitat z cary a rozestupu. */
   tecky?: Tecka[];
+  /** Kresli se pod keri podrost (trvalky), nebo stoji v mulci samostatne. */
+  podrost?: boolean;
   pocet?: number;
-  popisek?: P;
+  popisek?: Popisek;
 };
 
 /** Strom nebo solitérní vícekmen. */
@@ -185,8 +208,11 @@ export type Solitera = {
   pos: P;
   koruna?: number;
   vicekmen?: boolean;
-  popisek?: P;
+  popisek?: Popisek;
 };
+
+/** Prumery znacek v metrech - kresli se v meritku jako vse ostatni. */
+export const ZNACKA = { ker: 0.05, strom: 0.1 };
 
 export type Podklad = {
   nazev: string;
@@ -218,6 +244,8 @@ export type Projekt = {
   ukazPlochy: boolean;
   /** Ukázat zvýrazňovač výškových oblastí — jen pomůcka, do výkresu nepatří. */
   ukazVysky: boolean;
+  /** Totéž pro vyznačené stanoviště. */
+  ukazStanoviste: boolean;
   /** Metrová síť přes plán — pomůcka na ověření měřítka podkladu. */
   ukazSit: boolean;
   krok: number;
@@ -228,7 +256,7 @@ export function prazdnyProjekt(nazev = 'Nový osazovací plán'): Projekt {
     verze: 5, nazev,
     zahony: [], skupiny: [], solitery: [],
     meritkoTisk: 100, ukazDelky: false, ukazPlochy: false, ukazVysky: true,
-    ukazSit: false, krok: 1,
+    ukazStanoviste: true, ukazSit: false, krok: 1,
   };
 }
 

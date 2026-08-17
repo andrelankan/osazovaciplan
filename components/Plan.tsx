@@ -5,7 +5,8 @@ import {
   naBody, norm, obalka, sub, vzdalUsecka,
 } from '@/lib/geom';
 import {
-  KATEGORIE_KROKU, Rostlina, Skupina, Tecka, UROVNE, Uroven, Zahon, id, jakPrepocitat, prazdnyZahon,
+  DruhStanoviste, KATEGORIE_KROKU, Rostlina, STANOVISTE, Skupina, Tecka, UROVNE, Uroven, ZNACKA,
+  Zahon, id, jakPrepocitat, prazdnyZahon,
 } from '@/lib/model';
 import { dopocitejBubliny, vytvorBubliny } from '@/lib/rozvrh';
 import { useStore } from '@/lib/store';
@@ -19,6 +20,7 @@ export default function Plan() {
   const {
     pr, db, kategorie, kamera, koncept, podkladUrl, aktivniZahon,
     urovenStetec, upravovat, prichytavat, meri, vybranaSkupina, vybranaTecka, vybranaBublina,
+    stetec, druhStanoviste,
   } = useStore();
   const st = useStore;
   const krok = pr.krok;
@@ -31,6 +33,7 @@ export default function Plan() {
   const [tah, setTah] = useState<P[] | null>(null);
   const [presna, setPresna] = useState<{ d: string; u: string } | null>(null);
   type Uchop =
+    | { zahon: string; typ: 'popisekSkupiny' | 'popisekStromu'; id: string }
     | { zahon: string; typ: 'vrchol' | 'stred' | 'bublina'; i: number }
     /** Tazeni hranice mezi dvema bublinami - meni jejich vzajemnou vahu. */
     | { zahon: string; typ: 'hranice'; i: number; soused: number; stred: P; normala: P; wi: number; wj: number; odstup: number };
@@ -107,17 +110,18 @@ export default function Plan() {
   const onWheel = (e: React.WheelEvent) => {
     const r = box.current!.getBoundingClientRect();
     const sx = e.clientX - r.left, sy = e.clientY - r.top;
-    if (e.ctrlKey || e.metaKey) {
-      const pred = naSvet(sx, sy);
-      const novy = Math.max(2, Math.min(600, z * Math.pow(1.0022, -e.deltaY)));
-      st.getState().setKamera({
-        z: novy,
-        x: kamera.x + pred.x - ((sx - W / 2) / novy + kamera.x),
-        y: kamera.y + pred.y - ((sy - H / 2) / novy + kamera.y),
-      });
-    } else {
-      st.getState().setKamera({ x: kamera.x + e.deltaX / z, y: kamera.y + e.deltaY / z });
+    // kolecko priblizuje k mistu pod kurzorem, Shift posouva do stran
+    if (e.shiftKey) {
+      st.getState().setKamera({ x: kamera.x + (e.deltaY || e.deltaX) / z });
+      return;
     }
+    const pred = naSvet(sx, sy);
+    const novy = Math.max(2, Math.min(600, z * Math.pow(1.0022, -e.deltaY)));
+    st.getState().setKamera({
+      z: novy,
+      x: kamera.x + pred.x - ((sx - W / 2) / novy + kamera.x),
+      y: kamera.y + pred.y - ((sy - H / 2) / novy + kamera.y),
+    });
   };
 
   /** Srovna pohled tak, aby se vesel cely plan. */
@@ -235,6 +239,28 @@ export default function Plan() {
 
       if (!st.getState().koncept.length) {
         const tol = 10 / z;
+
+        // 0. popisky - tazenim se posouvaji (u keru cela skupina naraz)
+        for (const s of pr.solitery) {
+          const c = add(s.pos, s.popisek?.posun ?? { x: 0, y: -1.4 });
+          if (Math.abs(p.x - c.x) < 44 / z && Math.abs(p.y - c.y) < 9 / z) {
+            uchopRef.current = { zahon: '', typ: 'popisekStromu', id: s.id };
+            return;
+          }
+        }
+        for (const s of pr.skupiny) {
+          const posun = s.popisek?.posun ?? { x: 0.2, y: -0.2 };
+          const trefeny = teckySkupiny(s, db).some((q) => {
+            const c = add(q, posun);
+            return Math.abs(p.x - c.x) < 40 / z && Math.abs(p.y - c.y) < 8 / z;
+          });
+          if (trefeny) {
+            uchopRef.current = { zahon: '', typ: 'popisekSkupiny', id: s.id };
+            st.getState().set('vybranaSkupina', s.id);
+            return;
+          }
+        }
+
         // 1. jednotlivy ker v rade
         for (const s of pr.skupiny) {
           const tecky = teckySkupiny(s, db);
@@ -263,6 +289,15 @@ export default function Plan() {
       if (kresliRadu) {
         st.getState().set('vybranaSkupina', null);
         st.getState().set('vybranaTecka', null);
+        // jednotlivy ker se posadi jednim klikem, rada se naklikava
+        if (st.getState().kereJednotlive) {
+          const kde = snap(p, e.shiftKey);
+          st.getState().zmen((d) => d.skupiny.push({
+            id: id(), kod: r.kod, body: [{ ...kde }], rozestup: r.rozestup,
+            tecky: [{ x: kde.x, y: kde.y, kod: r.kod }],
+          }));
+          return;
+        }
         st.getState().set('koncept', [...st.getState().koncept, snap(p, e.shiftKey)]);
         return;
       }
@@ -319,6 +354,21 @@ export default function Plan() {
 
     const u = uchopRef.current;
     if (!u || e.buttons !== 1) return;
+
+    if (u.typ === 'popisekStromu' || u.typ === 'popisekSkupiny') {
+      st.getState().zmen((d) => {
+        if (u.typ === 'popisekStromu') {
+          const s = d.solitery.find((x) => x.id === u.id);
+          if (s) s.popisek = { ...s.popisek, posun: sub(p, s.pos) };
+        } else {
+          const s = d.skupiny.find((x) => x.id === u.id);
+          const prvni = s && teckySkupiny(s, db)[0];
+          if (s && prvni) s.popisek = { ...s.popisek, posun: sub(p, prvni) };
+        }
+      });
+      return;
+    }
+
     st.getState().zmen((d) => {
       const zh = d.zahony.find((x) => x.id === u.zahon);
       if (!zh) return;
@@ -332,7 +382,7 @@ export default function Plan() {
         const b = zh.bubliny?.[u.i], s = zh.bubliny?.[u.soused];
         if (b && s) { b.vaha = u.wi + zmena; s.vaha = u.wj - zmena; }
       } else if (u.typ === 'vrchol') { zh.obrys[u.i].x = p.x; zh.obrys[u.i].y = p.y; }
-      else {
+      else if (u.typ === 'stred') {
         const a = zh.obrys[u.i], b = zh.obrys[(u.i + 1) % zh.obrys.length];
         zh.obrys[u.i].b = bulgeZBodu(a, b, p);
       }
@@ -346,9 +396,16 @@ export default function Plan() {
     if (nakresleno && nakresleno.length >= 1 && st.getState().pr.krok === 3) {
       const cil = st.getState().aktivniZahon ?? pr.zahony[0]?.id;
       if (cil) {
+        const s = st.getState();
         st.getState().zmen((d) => {
           const zh = d.zahony.find((x) => x.id === cil);
-          if (zh) zh.vysky.push({ id: id(), uroven: st.getState().urovenStetec, body: nakresleno.map((q) => ({ ...q })) });
+          if (!zh) return;
+          const body = nakresleno.map((q) => ({ ...q }));
+          if (s.stetec === 'stanoviste') {
+            zh.stanoviste = [...(zh.stanoviste ?? []), { id: id(), druh: s.druhStanoviste, body }];
+          } else {
+            zh.vysky.push({ id: id(), uroven: s.urovenStetec, body });
+          }
         });
       }
     }
@@ -470,6 +527,20 @@ export default function Plan() {
 
       {/* 3 — cary a popisky, nad rastrem */}
       <svg className="absolute inset-0 pointer-events-none" width={W} height={H}>
+        {/* Vysky se rozlisuji srafou, ne barvou - at je poznat i tam, kde se
+            prekryvaji s barevne vyznacenym stanovistem. */}
+        <defs>
+          <pattern id="sr-nizke" width="6" height="6" patternUnits="userSpaceOnUse">
+            <path d="M0,6 L6,0" stroke="#2f8fe0" strokeWidth="1.6" />
+          </pattern>
+          <pattern id="sr-stredni" width="6" height="6" patternUnits="userSpaceOnUse">
+            <path d="M0,0 L6,6" stroke="#1f9e5a" strokeWidth="1.6" />
+            <path d="M0,6 L6,0" stroke="#1f9e5a" strokeWidth="1.6" />
+          </pattern>
+          <pattern id="sr-vysoke" width="7" height="7" patternUnits="userSpaceOnUse">
+            <path d="M3.5,0 L3.5,7 M0,3.5 L7,3.5" stroke="#e07a1f" strokeWidth="1.6" />
+          </pattern>
+        </defs>
         <g transform={gt}>
           {/* metrova sit - na overeni, ze meritko podkladu sedi */}
           {pr.ukazSit && z >= 4 && (() => {
@@ -552,35 +623,58 @@ export default function Plan() {
           {/* Zvyraznovac vyskovych oblasti - jen pomucka, do vykresu nepatri.
               Kryti sedi na skupine, ne na jednotlivych tazich; jinak by se
               prekryvajici tahy scitaly do tmavsich fleku. */}
-          {ukazVysky && (Object.keys(UROVNE) as Uroven[]).map((u) => {
-            const hotove = pr.zahony.flatMap((zh) => zh.vysky.filter((t) => t.uroven === u).map((t) => t.body));
-            const kresli = tah && urovenStetec === u ? [...hotove, tah] : hotove;
+          {/* stanoviste - barevne, aby se dalo odlisit od srafovanych vysek */}
+          {pr.ukazStanoviste && (Object.keys(STANOVISTE) as DruhStanoviste[]).map((s) => {
+            const hotove = pr.zahony.flatMap((zh) => (zh.stanoviste ?? []).filter((t) => t.druh === s).map((t) => t.body));
+            const kresli = tah && stetec === 'stanoviste' && druhStanoviste === s ? [...hotove, tah] : hotove;
             if (!kresli.length) return null;
             return (
-              <g key={u} opacity={silaVysek}>
+              <g key={s} opacity={krok === 3 ? 0.4 : 0.22}>
                 {kresli.map((body, i) => (
                   <polyline key={i} points={body.map((q) => `${q.x},${q.y}`).join(' ')} fill="none"
-                    stroke={UROVNE[u].barva} strokeWidth={0.9} strokeLinecap="round" strokeLinejoin="round" />
+                    stroke={STANOVISTE[s].barva} strokeWidth={1.1} strokeLinecap="round" strokeLinejoin="round" />
                 ))}
               </g>
             );
           })}
 
-          {/* skupiny keru - spojene tecky, kazda muze byt jiny druh */}
+          {ukazVysky && (Object.keys(UROVNE) as Uroven[]).map((u) => {
+            const hotove = pr.zahony.flatMap((zh) => zh.vysky.filter((t) => t.uroven === u).map((t) => t.body));
+            const kresli = tah && stetec === 'vysky' && urovenStetec === u ? [...hotove, tah] : hotove;
+            if (!kresli.length) return null;
+            return (
+              <g key={u} opacity={silaVysek}>
+                {kresli.map((body, i) => (
+                  <polyline key={i} points={body.map((q) => `${q.x},${q.y}`).join(' ')} fill="none"
+                    stroke={`url(#sr-${u})`} strokeWidth={0.9} strokeLinecap="round" strokeLinejoin="round" />
+                ))}
+              </g>
+            );
+          })}
+
+          {/* skupiny keru - spojene tecky v meritku (prumer 5 cm) */}
           {pr.skupiny.map((s) => {
             const tecky = teckySkupiny(s, db);
             const je = s.id === vybranaSkupina;
             return (
               <g key={s.id}>
-                <polyline points={tecky.map((q) => `${q.x},${q.y}`).join(' ')} fill="none"
-                  stroke={je ? '#0a7' : '#111'} strokeWidth={je ? 2.5 : 1} vectorEffect="non-scaling-stroke" />
+                {/* bez podrostu stoji ker v mulci - kresli se jeho koruna */}
+                {s.podrost === false && tecky.map((q, i) => (
+                  <circle key={'k' + i} cx={q.x} cy={q.y} r={(rostlina(q.kod)?.koruna ?? 1.2) / 2}
+                    fill="none" stroke="#999" strokeWidth={0.8} strokeDasharray="4 3"
+                    vectorEffect="non-scaling-stroke" />
+                ))}
+                {tecky.length > 1 && (
+                  <polyline points={tecky.map((q) => `${q.x},${q.y}`).join(' ')} fill="none"
+                    stroke={je ? '#0a7' : '#111'} strokeWidth={je ? 2.5 : 1} vectorEffect="non-scaling-stroke" />
+                )}
                 {tecky.map((q, i) => {
                   const vybrana = vybranaTecka?.skupina === s.id && vybranaTecka.index === i;
                   return (
                     <g key={i}>
-                      {vybrana && <circle cx={q.x} cy={q.y} r={0.34} fill="none" stroke="#0a7"
+                      {vybrana && <circle cx={q.x} cy={q.y} r={0.3} fill="none" stroke="#0a7"
                         strokeWidth={2} vectorEffect="non-scaling-stroke" />}
-                      <circle cx={q.x} cy={q.y} r={vybrana ? 0.19 : 0.14} fill={vybrana || je ? '#0a7' : '#111'} />
+                      <circle cx={q.x} cy={q.y} r={ZNACKA.ker / 2} fill={vybrana || je ? '#0a7' : '#111'} />
                     </g>
                   );
                 })}
@@ -588,7 +682,7 @@ export default function Plan() {
             );
           })}
 
-          {/* stromy */}
+          {/* stromy - dute kolecko o prumeru 10 cm plus koruna */}
           {pr.solitery.map((s) => {
             const r = rostlina(s.kod);
             const kr = (s.koruna ?? r?.koruna ?? 4) / 2;
@@ -596,9 +690,10 @@ export default function Plan() {
               <g key={s.id}>
                 <circle cx={s.pos.x} cy={s.pos.y} r={kr} fill="none" stroke="#111"
                   strokeWidth={1} vectorEffect="non-scaling-stroke" />
-                <circle cx={s.pos.x} cy={s.pos.y} r={0.28} fill="#111" />
-                {s.vicekmen && <circle cx={s.pos.x} cy={s.pos.y} r={0.55} fill="none" stroke="#111"
-                  strokeWidth={2.5} vectorEffect="non-scaling-stroke" />}
+                <circle cx={s.pos.x} cy={s.pos.y} r={ZNACKA.strom / 2} fill="#fff" stroke="#111"
+                  strokeWidth={1.6} vectorEffect="non-scaling-stroke" />
+                {s.vicekmen && <circle cx={s.pos.x} cy={s.pos.y} r={ZNACKA.strom} fill="none" stroke="#111"
+                  strokeWidth={1.6} vectorEffect="non-scaling-stroke" />}
               </g>
             );
           })}
@@ -662,38 +757,53 @@ export default function Plan() {
             );
           })}
 
-          {/* Nazev keře u tecek. Popisky, ktere by se prekryly, se vynechavaji -
-              u husté rady by se jinak slily do necitelne kase. */}
+          {/* Nazev keře u tecek. Posun, otoceni i zarovnani plati pro celou
+              skupinu naráz, takze se nemusi tahat kazdy popisek zvlast.
+              Popisky, ktere by se prekryly, se vynechavaji. */}
           {(() => {
             const obsazeno: { x0: number; y0: number; x1: number; y1: number }[] = [];
             const volno = (b: { x0: number; y0: number; x1: number; y1: number }) =>
               !obsazeno.some((o) => b.x0 < o.x1 && b.x1 > o.x0 && b.y0 < o.y1 && b.y1 > o.y0);
-            return pr.skupiny.map((s) => (
-              <g key={s.id}>
-                {teckySkupiny(s, db).map((q, i) => {
-                  const text = rostlina(q.kod)?.latin ?? q.kod;
-                  const c = naObraz(q);
-                  const ram = { x0: c.x + 4, y0: c.y - 14, x1: c.x + 4 + text.length * 4.6 + 8, y1: c.y - 2 };
-                  if (!volno(ram)) return null;
-                  obsazeno.push(ram);
-                  return (
-                    <text key={i} x={c.x + 5} y={c.y - 4} fontSize={9.5} fontStyle="italic" fill="#111"
-                      stroke="#fff" strokeWidth={2.5} paintOrder="stroke">{text}</text>
-                  );
-                })}
-              </g>
-            ));
+            return pr.skupiny.map((s) => {
+              const pop = s.popisek ?? {};
+              const posun = pop.posun ?? { x: 0.2, y: -0.2 };
+              const kotva = pop.zarovnani ?? 'start';
+              return (
+                <g key={s.id}>
+                  {teckySkupiny(s, db).map((q, i) => {
+                    const text = rostlina(q.kod)?.latin ?? q.kod;
+                    const c = naObraz(add(q, posun));
+                    const sirka = text.length * 4.6 + 8;
+                    const x0 = kotva === 'end' ? c.x - sirka : kotva === 'middle' ? c.x - sirka / 2 : c.x;
+                    const ram = { x0, y0: c.y - 11, x1: x0 + sirka, y1: c.y + 3 };
+                    if (!volno(ram)) return null;
+                    obsazeno.push(ram);
+                    return (
+                      <text key={i} x={c.x} y={c.y} fontSize={9.5} fontStyle="italic" fill="#111"
+                        textAnchor={kotva} stroke="#fff" strokeWidth={2.5} paintOrder="stroke"
+                        transform={pop.otoceni ? `rotate(${pop.otoceni} ${c.x} ${c.y})` : undefined}>
+                        {text}
+                      </text>
+                    );
+                  })}
+                </g>
+              );
+            });
           })()}
 
           {pr.solitery.map((s) => {
             const r = rostlina(s.kod);
-            const c = naObraz(add(s.pos, s.popisek ?? { x: 0, y: -1.4 }));
+            const pop = s.popisek ?? {};
+            const c = naObraz(add(s.pos, pop.posun ?? { x: 0, y: -1.4 }));
             const k = naObraz(s.pos);
             return (
               <g key={s.id}>
                 <line x1={c.x} y1={c.y + 4} x2={k.x} y2={k.y} stroke="#111" strokeWidth={0.6} opacity={0.6} />
-                <text x={c.x} y={c.y} textAnchor="middle" fontSize={11.5} fontStyle="italic" fontWeight={500}
-                  fill="#111" stroke="#fff" strokeWidth={3} paintOrder="stroke">{r?.latin ?? s.kod}</text>
+                <text x={c.x} y={c.y} textAnchor={pop.zarovnani ?? 'middle'} fontSize={11.5} fontStyle="italic"
+                  fontWeight={500} fill="#111" stroke="#fff" strokeWidth={3} paintOrder="stroke"
+                  transform={pop.otoceni ? `rotate(${pop.otoceni} ${c.x} ${c.y})` : undefined}>
+                  {r?.latin ?? s.kod}
+                </text>
               </g>
             );
           })}

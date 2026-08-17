@@ -134,7 +134,8 @@ function najdiVolneMisto(obrys: P[], semena: Semeno[]): P {
 }
 
 export function rozvrhni(z: Zahon, db: Map<string, Rostlina>): Rozvrh {
-  const obrys = zjednodus(naBody(z.obrys, 0.02), 0.01);
+  // stejna jemnost jako pri vykreslovani obrysu, jinak plochy o kousek vyckuhuji ven
+  const obrys = zjednodus(naBody(z.obrys, 0.004), 0.002);
   if (obrys.length < 3) return PRAZDNY;
   const plochaZahonu = plochaBodu(obrys);
   if (plochaZahonu < 0.05) return PRAZDNY;

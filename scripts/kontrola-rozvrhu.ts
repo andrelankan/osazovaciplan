@@ -69,10 +69,10 @@ const maxPresah = (body: P[], polygon: P[]) => body.reduce((a, p) => Math.max(a,
       `podíl ${kod} odpovídá zadání`, `${((p / soucet) * 100).toFixed(1)} % místo ${cil * 100} %`);
   }
 
-  // zadny bod plochy nesmi lezet mimo zahon
-  const obrys = naBody(z.obrys, 0.02);
+  // zadny bod plochy nesmi lezet mimo zahon, ani o par milimetru
+  const obrys = naBody(z.obrys, 0.004);
   const ven = maxPresah(r.casti.flatMap((c) => c.polygon), obrys);
-  zkontroluj(ven < 0.02, 'žádná plocha nepřesahuje ven ze záhonu', `max ${(ven * 1000).toFixed(0)} mm`);
+  zkontroluj(ven < 0.002, 'žádná plocha nepřesahuje ven ze záhonu', `max ${(ven * 1000).toFixed(1)} mm`);
 
   // popisek musi byt uvnitr sve plochy
   const spatnyPopisek = r.casti.filter((c) => !bodVPolygonu(c.popisek, c.polygon)).length;
@@ -124,9 +124,9 @@ const maxPresah = (body: P[], polygon: P[]) => body.reduce((a, p) => Math.max(a,
   console.log(`  ploch: ${r.casti.length}, součet ${soucet.toFixed(2)} m² z ${r.plocha.toFixed(2)} m²`);
   zkontroluj(Math.abs(r.plocha - 36) < 0.2, 'plocha L tvaru je spočítaná správně', `${r.plocha.toFixed(2)} m²`);
   zkontroluj(soucet > r.plocha * 0.9, 'plochy vyplní i nekonvexní tvar', `${((soucet / r.plocha) * 100).toFixed(1)} %`);
-  const obrys = naBody(z.obrys, 0.02);
+  const obrys = naBody(z.obrys, 0.004);
   const ven = maxPresah(r.casti.flatMap((c) => c.polygon), obrys);
-  zkontroluj(ven < 0.02, 'nic nepřeteklo do výřezu tvaru L', `max ${(ven * 1000).toFixed(0)} mm`);
+  zkontroluj(ven < 0.002, 'nic nepřeteklo do výřezu tvaru L', `max ${(ven * 1000).toFixed(1)} mm`);
 }
 
 // ------------------------------- 4. rucne nacmarane tahy pres cely zahon

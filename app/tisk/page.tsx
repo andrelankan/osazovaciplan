@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { P, cesta, cestaBody, delkaHrany, lerp, naBody, obalka } from '@/lib/geom';
 import { teckySkupiny } from '@/components/Plan';
-import { Databaze, KatInfo, Projekt, Rostlina, vykaz } from '@/lib/model';
+import { Databaze, KatInfo, Projekt, Rostlina, ZNACKA, vykaz } from '@/lib/model';
 import { Rozvrh } from '@/lib/rozvrh';
 import { rozvrhyProjektu } from '@/lib/useRozvrhy';
 import { nactiUlozeny } from '@/lib/store';
@@ -129,24 +129,30 @@ export default function Tisk() {
             </g>
           ))}
 
-          {/* keře jako spojené tečky */}
+          {/* keře - spojené tečky o průměru 5 cm ve skutečném měřítku */}
           {pr.skupiny.map((s) => {
             const tecky = teckySkupiny(s, db);
             return (
               <g key={s.id}>
-                <polyline points={tecky.map((q) => `${q.x},${q.y}`).join(' ')} fill="none" stroke="#111" strokeWidth={0.25 * tl} />
-                {tecky.map((q, i) => <circle key={i} cx={q.x} cy={q.y} r={0.7 * tl} fill="#111" />)}
+                {s.podrost === false && tecky.map((q, i) => (
+                  <circle key={'k' + i} cx={q.x} cy={q.y} r={(rost(q.kod)?.koruna ?? 1.2) / 2}
+                    fill="none" stroke="#999" strokeWidth={0.15 * tl} strokeDasharray={`${tl} ${0.7 * tl}`} />
+                ))}
+                {tecky.length > 1 && (
+                  <polyline points={tecky.map((q) => `${q.x},${q.y}`).join(' ')} fill="none" stroke="#111" strokeWidth={0.25 * tl} />
+                )}
+                {tecky.map((q, i) => <circle key={i} cx={q.x} cy={q.y} r={ZNACKA.ker / 2} fill="#111" />)}
               </g>
             );
           })}
 
-          {/* stromy */}
+          {/* stromy - duté kolečko o průměru 10 cm */}
           {pr.solitery.map((s) => {
             const r = rost(s.kod);
             return (
               <g key={s.id}>
                 <circle cx={s.pos.x} cy={s.pos.y} r={(s.koruna ?? r?.koruna ?? 4) / 2} fill="none" stroke="#111" strokeWidth={0.25 * tl} />
-                <circle cx={s.pos.x} cy={s.pos.y} r={1.2 * tl} fill="#111" />
+                <circle cx={s.pos.x} cy={s.pos.y} r={ZNACKA.strom / 2} fill="#fff" stroke="#111" strokeWidth={0.3 * tl} />
               </g>
             );
           })}
@@ -176,27 +182,39 @@ export default function Tisk() {
           {/* nazev u kazde tecky, kolidujici popisky se vynechavaji */}
           {(() => {
             const obsazeno: { x0: number; y0: number; x1: number; y1: number }[] = [];
-            return pr.skupiny.map((s) => (
-              <g key={s.id}>
-                {teckySkupiny(s, db).map((q, i) => {
-                  const text = rost(q.kod)?.latin ?? q.kod;
-                  const ram = { x0: q.x + tl, y0: q.y - 4 * tl, x1: q.x + tl + text.length * 1.25 * tl, y1: q.y - tl };
-                  if (obsazeno.some((o) => ram.x0 < o.x1 && ram.x1 > o.x0 && ram.y0 < o.y1 && ram.y1 > o.y0)) return null;
-                  obsazeno.push(ram);
-                  return (
-                    <text key={i} x={q.x + 1.4 * tl} y={q.y - 1.2 * tl} fontSize={2.2 * tl} fontStyle="italic"
-                      fill="#111" stroke="#fff" strokeWidth={0.7 * tl} paintOrder="stroke">{text}</text>
-                  );
-                })}
-              </g>
-            ));
+            return pr.skupiny.map((s) => {
+              const pop = s.popisek ?? {};
+              const posun = pop.posun ?? { x: 0.2, y: -0.2 };
+              const kotva = pop.zarovnani ?? 'start';
+              return (
+                <g key={s.id}>
+                  {teckySkupiny(s, db).map((q, i) => {
+                    const text = rost(q.kod)?.latin ?? q.kod;
+                    const x = q.x + posun.x, y = q.y + posun.y;
+                    const sirka = text.length * 1.25 * tl;
+                    const x0 = kotva === 'end' ? x - sirka : kotva === 'middle' ? x - sirka / 2 : x;
+                    const ram = { x0, y0: y - 2.4 * tl, x1: x0 + sirka, y1: y + 0.6 * tl };
+                    if (obsazeno.some((o) => ram.x0 < o.x1 && ram.x1 > o.x0 && ram.y0 < o.y1 && ram.y1 > o.y0)) return null;
+                    obsazeno.push(ram);
+                    return (
+                      <text key={i} x={x} y={y} fontSize={2.2 * tl} fontStyle="italic" textAnchor={kotva}
+                        fill="#111" stroke="#fff" strokeWidth={0.7 * tl} paintOrder="stroke"
+                        transform={pop.otoceni ? `rotate(${pop.otoceni} ${x} ${y})` : undefined}>{text}</text>
+                    );
+                  })}
+                </g>
+              );
+            });
           })()}
 
           {pr.solitery.map((s) => {
             const r = rost(s.kod);
+            const pop = s.popisek ?? {};
+            const x = s.pos.x + (pop.posun?.x ?? 0), y = s.pos.y + (pop.posun?.y ?? -1.4);
             return (
-              <text key={s.id} x={s.pos.x} y={s.pos.y - 1.6 * tl} textAnchor="middle" fontSize={2.8 * tl}
-                fontStyle="italic" fill="#111" stroke="#fff" strokeWidth={0.7 * tl} paintOrder="stroke">
+              <text key={s.id} x={x} y={y} textAnchor={pop.zarovnani ?? 'middle'} fontSize={2.8 * tl}
+                fontStyle="italic" fill="#111" stroke="#fff" strokeWidth={0.7 * tl} paintOrder="stroke"
+                transform={pop.otoceni ? `rotate(${pop.otoceni} ${x} ${y})` : undefined}>
                 {r?.latin ?? s.kod}
               </text>
             );

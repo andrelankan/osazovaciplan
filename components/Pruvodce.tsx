@@ -3,7 +3,7 @@ import React, { useRef, useState } from 'react';
 import Katalog from '@/components/Katalog';
 import { dist as vzdalenost } from '@/lib/geom';
 import {
-  KATEGORIE_KROKU, Rostlina, UROVNE, Uroven, Zahon, urovenRostliny, vykaz,
+  DruhStanoviste, KATEGORIE_KROKU, Rostlina, STANOVISTE, UROVNE, Uroven, Zahon, urovenRostliny, vykaz,
 } from '@/lib/model';
 import { KROKY, Krok, POSLEDNI_KROK, useStore } from '@/lib/store';
 import { useRozvrhy } from '@/lib/useRozvrhy';
@@ -88,6 +88,7 @@ function Navigace() {
 function KrokAkce() {
   const {
     pr, aktivniZahon, aktivniKod, db, urovenStetec, upravovat, prichytavat, meri, koncept, kamera,
+    stetec, druhStanoviste, kereJednotlive,
   } = useStore();
   const st = useStore;
   const krok = pr.krok as Krok;
@@ -205,22 +206,44 @@ function KrokAkce() {
   }
 
   if (krok === 3) {
+    const naStanoviste = stetec === 'stanoviste';
     return (
       <div className="flex items-center gap-2 border-l border-gray-200 pl-2">
-        {(Object.keys(UROVNE) as Uroven[]).map((u) => (
+        <div className="flex overflow-hidden rounded-lg border border-gray-300 text-sm">
+          <button onClick={() => st.getState().set('stetec', 'vysky')}
+            className={`px-2.5 py-1.5 ${!naStanoviste ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
+            Výšky
+          </button>
+          <button onClick={() => st.getState().set('stetec', 'stanoviste')}
+            className={`px-2.5 py-1.5 ${naStanoviste ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
+            Stanoviště
+          </button>
+        </div>
+
+        {!naStanoviste && (Object.keys(UROVNE) as Uroven[]).map((u) => (
           <button key={u} onClick={() => st.getState().set('urovenStetec', u)}
-            className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm ${urovenStetec === u ? 'text-white' : 'text-gray-600 hover:bg-gray-100'}`}
-            style={urovenStetec === u ? { background: UROVNE[u].barva } : undefined}>
-            <span className="h-2.5 w-2.5 rounded-full" style={{ background: urovenStetec === u ? '#fff' : UROVNE[u].barva }} />
+            className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm ${urovenStetec === u ? 'bg-gray-800 text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
+            <span className="h-3 w-3 rounded-sm border border-gray-400" style={{ background: UROVNE[u].barva }} />
             {UROVNE[u].kratce}
           </button>
         ))}
-        {zahon && zahon.vysky.length > 0 && (
+
+        {naStanoviste && (Object.keys(STANOVISTE) as DruhStanoviste[]).map((s) => (
+          <button key={s} onClick={() => st.getState().set('druhStanoviste', s)}
+            className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm ${druhStanoviste === s ? 'bg-gray-800 text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
+            <span className="h-3 w-3 rounded-full" style={{ background: STANOVISTE[s].barva }} />
+            {STANOVISTE[s].nazev}
+          </button>
+        ))}
+
+        {zahon && (
           <button onClick={() => st.getState().zmen((d) => {
             const x = d.zahony.find((y) => y.id === zahon.id);
-            if (x) x.vysky.pop();
+            if (!x) return;
+            if (naStanoviste) x.stanoviste = (x.stanoviste ?? []).slice(0, -1);
+            else x.vysky.pop();
           })} className="rounded-lg px-2 py-1.5 text-sm text-gray-500 hover:bg-gray-100">
-            Zpět tah ({zahon.vysky.length})
+            Zpět tah ({naStanoviste ? (zahon.stanoviste ?? []).length : zahon.vysky.length})
           </button>
         )}
       </div>
@@ -234,7 +257,19 @@ function KrokAkce() {
         {aktivni
           ? <span className="text-sm text-gray-600">kreslí se <b className="italic">{aktivni.latin}</b></span>
           : <span className="text-sm text-gray-500">vyber rostlinu vpravo</span>}
-        {kresliRadu && koncept.length >= 2 && (
+        {kresliRadu && (
+          <div className="flex overflow-hidden rounded-lg border border-gray-300 text-sm">
+            <button onClick={() => st.getState().set('kereJednotlive', false)}
+              className={`px-2 py-1.5 ${!kereJednotlive ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
+              řada
+            </button>
+            <button onClick={() => { st.getState().set('kereJednotlive', true); st.getState().set('koncept', []); }}
+              className={`px-2 py-1.5 ${kereJednotlive ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
+              jeden kus
+            </button>
+          </div>
+        )}
+        {kresliRadu && !kereJednotlive && koncept.length >= 2 && (
           <button onClick={() => window.dispatchEvent(new CustomEvent('plan:dokoncit'))}
             className="rounded-lg bg-emerald-600 px-3 py-1.5 text-sm text-white">Dokončit řadu</button>
         )}
@@ -243,7 +278,10 @@ function KrokAkce() {
             className="rounded-lg px-2 py-1.5 text-sm text-gray-500 hover:bg-gray-100">Zrušit</button>
         )}
         <Prepinac zapnuto={pr.ukazVysky} onClick={() => st.getState().zmen((d) => { d.ukazVysky = !d.ukazVysky; })}>
-          Výškové oblasti
+          Výšky
+        </Prepinac>
+        <Prepinac zapnuto={pr.ukazStanoviste} onClick={() => st.getState().zmen((d) => { d.ukazStanoviste = !d.ukazStanoviste; })}>
+          Stanoviště
         </Prepinac>
       </div>
     );
@@ -258,7 +296,10 @@ function KrokAkce() {
         Výměry m²
       </Prepinac>
       <Prepinac zapnuto={pr.ukazVysky} onClick={() => st.getState().zmen((d) => { d.ukazVysky = !d.ukazVysky; })}>
-        Zvýraznění výšek
+        Výšky
+      </Prepinac>
+      <Prepinac zapnuto={pr.ukazStanoviste} onClick={() => st.getState().zmen((d) => { d.ukazStanoviste = !d.ukazStanoviste; })}>
+        Stanoviště
       </Prepinac>
       <button onClick={() => window.open('/tisk', '_blank')}
         className="rounded-lg bg-emerald-600 px-3 py-1.5 text-sm text-white">Tisk / PDF</button>
@@ -362,6 +403,9 @@ function PanelRostlin() {
     st.getState().set('aktivniKod', r.kod);
     st.getState().set('rozestupNovy', null);
   };
+
+  const upravSkupinu = (id: string, fn: (s: NonNullable<typeof skupina>) => void) =>
+    st.getState().zmen((d) => { const s = d.skupiny.find((x) => x.id === id); if (s) fn(s); });
 
   /** Zvetsi nebo zmensi vybranou bublinu na ukor sousedu. */
   const zmenVelikost = (o: number) => {
@@ -517,7 +561,37 @@ function PanelRostlin() {
                 className="ml-auto text-gray-500 underline">zrušit výběr</button>
             )}
           </div>
-          {skupina && <p className="mt-0.5 text-[11px] text-gray-500">Klikem na keř v seznamu změníš druh celé řady.</p>}
+
+          {skupina && (
+            <>
+              <label className="mt-1 flex items-center gap-1.5">
+                <input type="checkbox" checked={skupina.podrost !== false}
+                  onChange={(e) => upravSkupinu(skupina.id, (s) => { s.podrost = e.target.checked; })} />
+                s podrostem
+                <span className="text-[11px] text-gray-500">
+                  (bez podrostu se kolem keřů vykreslí jejich koruna)
+                </span>
+              </label>
+
+              <div className="mt-1 flex items-center gap-1">
+                <span className="text-gray-600">popisky řady</span>
+                {([['start', 'vlevo'], ['middle', 'na střed'], ['end', 'vpravo']] as const).map(([z2, n]) => (
+                  <button key={z2} onClick={() => upravSkupinu(skupina.id, (s) => { s.popisek = { ...s.popisek, zarovnani: z2 }; })}
+                    className={`rounded px-1.5 py-0.5 ${(skupina.popisek?.zarovnani ?? 'start') === z2 ? 'bg-gray-900 text-white' : 'hover:bg-gray-200'}`}>
+                    {n}
+                  </button>
+                ))}
+                <span className="ml-1 text-gray-600">otočit</span>
+                <input type="number" step={15} value={skupina.popisek?.otoceni ?? 0} className="w-14 rounded border px-1 py-0.5"
+                  onChange={(e) => upravSkupinu(skupina.id, (s) => { s.popisek = { ...s.popisek, otoceni: +e.target.value }; })} />
+                <span>°</span>
+              </div>
+              <p className="mt-0.5 text-[11px] text-gray-500">
+                Tažením kteréhokoli názvu posuneš všechny popisky řady najednou. Klikem na keř
+                v seznamu změníš druh celé řady.
+              </p>
+            </>
+          )}
         </div>
       )}
 

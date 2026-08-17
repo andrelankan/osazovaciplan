@@ -1,7 +1,7 @@
 'use client';
 import { create } from 'zustand';
 import { P, V } from './geom';
-import { Databaze, KatInfo, Projekt, Rostlina, Uroven, prazdnyProjekt } from './model';
+import { Databaze, DruhStanoviste, KatInfo, Projekt, Rostlina, Uroven, prazdnyProjekt } from './model';
 
 /** Krok pruvodce urcuje, co jde v danou chvili delat - jine ovladani neni videt. */
 export type Krok = 1 | 2 | 3 | 4 | 5;
@@ -36,6 +36,11 @@ type Stav = {
   vybranaSkupina: string | null;
   /** Vybrany jeden ker v rade - meni se jen on. */
   vybranaTecka: { skupina: string; index: number } | null;
+  /** Cim se v kroku 3 kresli. */
+  stetec: 'vysky' | 'stanoviste';
+  druhStanoviste: DruhStanoviste;
+  /** Kere se kresli jako rada, nebo po jednom kuse. */
+  kereJednotlive: boolean;
   /** Vybrana bublina trvalek - meni se u ni rostlina, poloha i velikost. */
   vybranaBublina: { zahon: string; index: number } | null;
   /** Ktera cast sortimentu je v seznamu videt. */
@@ -98,6 +103,9 @@ export const useStore = create<Stav>((set, get) => ({
   vybranaSkupina: null,
   vybranaTecka: null,
   vybranaBublina: null,
+  stetec: 'vysky',
+  druhStanoviste: 'slunce',
+  kereJednotlive: false,
   sortiment: 'zahon',
   rozestupNovy: null,
 
